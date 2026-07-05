@@ -1,0 +1,32 @@
+# Node / NestJS
+node_modules/
+dist/
+build/
+coverage/
+*.log
+.env
+.env.*
+!.env.example
+
+# Rust
+target/
+**/*.rs.bk
+Cargo.lock
+
+# Solidity / Hardhat / Foundry
+artifacts/
+cache/
+out/
+typechain-types/
+
+# PostgreSQL / local data
+*.sqlite
+*.db
+pgdata/
+
+# OS / editor
+.DS_Store
+Thumbs.db
+.idea/
+.vscode/
+*.swp
