@@ -1,0 +1,23 @@
+name: Canon gate
+
+# Enforces the AST canon on every pull request and every push to main:
+# no firewall terms (AFC / ALB / LacMusa / Anchor) and no forbidden
+# vocabulary (reward / incentive / stimulus) in the canon content.
+
+on:
+  pull_request:
+  push:
+    branches: [main]
+
+permissions:
+  contents: read
+
+jobs:
+  canon-gate:
+    name: firewall + vocabulary
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+      - name: Run canon gate
+        run: bash .github/scripts/canon-gate.sh
