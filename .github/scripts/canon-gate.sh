@@ -1,0 +1,52 @@
+#!/usr/bin/env bash
+# AST canon gate.
+# The AST canon forbids two things from appearing anywhere in the canon content:
+#   1. Firewall terms — AFC / ALB / LacMusa / Fiat Anchor / Crypto Anchor / ...
+#   2. Forbidden vocabulary — reward / incentive / stimulus (AST has only PAYMENT
+#      for PoT-confirmed work).
+# Meta documents that legitimately discuss these removed concepts (the review,
+# the plan, the top-level README) are excluded from the scan.
+set -uo pipefail
+
+EXCLUDES=(
+  --exclude-dir=.git
+  --exclude-dir=.github
+  --exclude-dir=node_modules
+  --exclude=README.md
+  --exclude=PROJECT_STATUS.md
+  --exclude=MIGRATION_REVIEW.md
+  --exclude=package-lock.json
+  --exclude=yarn.lock
+  --exclude=pnpm-lock.yaml
+  '--exclude=*.lock'
+)
+
+# Case-sensitive: "ALB" matches only the literal epoch acronym, never words like "totalBurned".
+FIREWALL='AFC|Aros Financial Core|LacMusa|Fiat Anchor|Crypto Anchor|Aros Logic Bridge|Illumination Banking|\bALB\b'
+VOCAB='reward|incentive|stimulus'
+
+fail=0
+
+fw="$(grep -RInE "$FIREWALL" . "${EXCLUDES[@]}" 2>/dev/null || true)"
+if [ -n "$fw" ]; then
+  echo "::error::Firewall breach — the AST canon forbids AFC / ALB / LacMusa / Anchor references. The reserve is AST's own."
+  echo "$fw"
+  fail=1
+else
+  echo "Firewall gate: clean (no AFC / ALB / LacMusa / Anchor)."
+fi
+
+vb="$(grep -RIniE "$VOCAB" . "${EXCLUDES[@]}" 2>/dev/null || true)"
+if [ -n "$vb" ]; then
+  echo "::error::Forbidden vocabulary — AST has only payment for confirmed work; no reward / incentive / stimulus."
+  echo "$vb"
+  fail=1
+else
+  echo "Vocabulary gate: clean (no reward / incentive / stimulus)."
+fi
+
+if [ "$fail" -ne 0 ]; then
+  echo ""
+  echo "Canon gate FAILED. See the AST invariants in README.md / 01_coin_engine/README.md."
+fi
+exit "$fail"
