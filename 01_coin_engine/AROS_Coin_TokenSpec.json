@@ -1,0 +1,81 @@
+{
+  "token": {
+    "name": "ArosCoin",
+    "symbol": "ARO",
+    "decimals": 9,
+    "baseUnit": "arx",
+    "unitRatio": "1 ARO = 10^9 arx",
+    "totalSupply": "dynamic",
+    "supplyMechanism": {
+      "type": "process-confirmed emission",
+      "initialSupply": 0,
+      "preMine": false,
+      "maxSupply": null,
+      "mintOn": "pot_verdict_verified",
+      "mintCause": "A PoT verdict verified===1 for one specific process is the ONLY cause of a mint (I1).",
+      "burnOn": "process_completion",
+      "burnRule": "The process part minted for a process is burned atomically on completion of that same process (I2); net process supply change per cycle = 0.",
+      "lastingSupply": "Only the earned/retained commission persists (I3); totalSupply converges to earnedRetained."
+    }
+  },
+  "commission": {
+    "rate": 0.005,
+    "rateBounds": [0.0, 0.01],
+    "charged": "A × rate on each confirmed process (the earned part, I3)",
+    "split": {
+      "nodePayment": 0.75,
+      "reserveAccrual": 0.25
+    },
+    "splitDestinations": {
+      "nodePayment": "SYSTEM_NODE_POOL — payment to nodes for confirmed work (I3), retained",
+      "reserveAccrual": "SYSTEM_RESERVE — AST's own reserve (I4), recorded as reserve.accrual"
+    }
+  },
+  "reserve": {
+    "owner": "AST",
+    "external": false,
+    "index": "reserveIndex = log10(1 + totalProcessVolume)",
+    "indexInput": "confirmed process volume only (I-RS-1)",
+    "indexAuthority": "computed, never set (I-RS-2)",
+    "indexMonotonicity": "non-decreasing in volume (I-RS-4)"
+  },
+  "governance": {
+    "issuer": "AST Core Protocol (no privileged issuer of units; only PoT verdicts cause mints — I1)",
+    "model": "role-based committee, decisions recorded in NodeChain before effect (I8)",
+    "byTokenHolding": false,
+    "modificationRules": {
+      "changeDecimals": false,
+      "changeSymbol": false,
+      "changeSupplyMechanism": false,
+      "changeCommissionRate": "within rateBounds only, role-based, on-chain (README §5)"
+    }
+  },
+  "invariants": {
+    "I1": "PoT-gated origin — a unit exists only as the consequence of a confirmed process.",
+    "I2": "Born-and-burned — the process part is minted then burned atomically; net-zero per cycle.",
+    "I3": "Payment for confirmed work — nodes are paid post-factum for confirmed work; the earned part is retained.",
+    "I4": "Reserve is AST's own — reserve share accrues to AST; index derived from confirmed volume only.",
+    "I5": "Determinism — every movement is reproducible from canonical inputs in NodeChain.",
+    "I6": "No speculative surface — no cap, no held speculation, no staking-for-yield, no governance-by-holding, no volatility control.",
+    "I7": "All-Seeing Eye — observes and can veto; never initiates a mint, burn, or payment.",
+    "I8": "Append-only causality — every cause is recorded before its effect is acknowledged."
+  },
+  "compatibility": {
+    "ledger": "AST_NodeChain",
+    "external": false,
+    "bridgeable": false,
+    "note": "No external chain, wallet-bridge, or cross-chain wrapper. ARO exists only within AST (I1, I6)."
+  },
+  "security": {
+    "auditTrail": true,
+    "signedPayloads": true,
+    "immutability": true,
+    "killSwitch": "read-only halt; in-flight process parts resolved to satisfy I2; engaged by Eye veto or role committee, never a single authority"
+  },
+  "metadata": {
+    "version": "2.0.0",
+    "layer": "01_coin_engine",
+    "canonical": true,
+    "supersedes": "1.0.0 (removed the non-canonical external reserve split, the governance-triggered burn, and external bridgeability as canon violations)"
+  }
+}
