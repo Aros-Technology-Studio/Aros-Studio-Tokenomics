@@ -1,2 +1,0 @@
-# Python tooling
-black==24.8.0
