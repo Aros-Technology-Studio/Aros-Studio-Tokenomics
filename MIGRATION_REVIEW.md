@@ -1104,7 +1104,7 @@ _11 files — KEEP 10 · CUT 0 · REVIEW 1_
 | `workflows/ci.yml` | KEEP | CI pipeline | none | none |
 | `workflows/codeql.yml` | KEEP | Security scanning | none | none |
 | `workflows/copilot-setup-steps.yml` | KEEP | CI setup | none | none |
-| `workflows/nightly-audit.yml` | REVIEW-KETEVAN | Hard firewall term: audits "архитектурные инварианты AFC" | AFC@43, Role@45 | Strip/rename L43 "инварианты AFC"→AST Model-1 invariants; reframe L44-46 non-custodial/rol… |
+| `workflows/nightly-audit.yml` | REVIEW-KETEVAN | Hard firewall term: audits the "architectural invariants of AFC" (quoted from source, in Russian) | AFC@43, Role@45 | Strip/rename L43 "AFC invariants"→AST Model-1 invariants; reframe L44-46 non-custodial/rol… |
 
 ### `ci_logs/`
 _10 files — KEEP 0 · CUT 10 · REVIEW 0_
