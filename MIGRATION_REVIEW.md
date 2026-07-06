@@ -5,10 +5,10 @@
 
 - Source repo: `aros-technology-studio/ast-aros-financial-paradigm` @ `cdc33cd`
 - Files reviewed: **483** (every tracked file, read by 13 directory-scoped classifiers, then an 8-agent adversarial re-audit of the 110 KEEP docs)
-- **KEEP** (firewall-clean core, staged): **182**
+- **KEEP** (firewall-clean core, staged): **179**
 - **CUT** (ALB epoch / debris / generated): **122**
-- **REVIEW-KETEVAN** (a fork, a canon contradiction, or a load-bearing firewall term — you decide): **179**
-- The re-audit pulled **43** files back out of KEEP (staking / deposits / token-weighted governance / treasury-held supply / Eye-no-veto) — see section M below.
+- **REVIEW-KETEVAN** (a fork, a canon contradiction, or a load-bearing firewall term — you decide): **182**
+- Re-audit + Ketevan's forbidden-vocabulary rule pulled **46** files back out of KEEP — 43 for staking / deposits / token-weighted governance / treasury-held supply / Eye-no-veto (section **M**), and 3 for 'reward'/'incentive' framing (section **N**).
 
 Cleaned KEEP candidates are in **`review-staging/`** (paths preserved). Firewall gate over that folder is CLEAN: `grep -RInE 'AFC|Aros Financial Core|LacMusa|Fiat Anchor|Crypto Anchor'` returns nothing (the one `AFC` in `package-lock.json` is a base64 hash substring, not a reference).
 
@@ -271,6 +271,15 @@ These 43 files were classified KEEP by the first pass (no firewall term) but the
 - `docs/testing/Test_Strategy.md` — The canonical E2E tokenization flow is '/kyc/submit -> /bridge/tokenize -> /account/balance -> Verify balance has increased' — a mint-on-deposit crypto/fiat bridge as the load-bearing user flow, contradicting canon (no external ingestion, emission only via PoT).
 - `reference/ast-core/README.md` — The All-Seeing Eye entity is described as 'passive oversight: observe->log->compare->signal' — strictly passive, signal-only, with no veto or enforcement. This contradicts the canon in which the All-Seeing Eye can veto (observes + can veto, does not initiate).
 
+### N. Forbidden vocabulary — 'reward' / 'incentive' used as the payment mechanism's basis (canon: only PoT-confirmed payment, never reward/incentive)
+_3 file(s)_
+
+- `02_nodechain_engine/nodechain_overview.md` — Forbidden vocabulary as the mechanism's basis: L14 names PoT the 'non-mining, **work-based incentive** mechanism'. Canon: AST has no incentive — only payment for PoT-confirmed work. Reframe, do not migrate as-is.
+- `docs/adr/ADR-001-Network_Consensus_Model.md` — Forbidden vocabulary: L29 'aligning **incentives** with network work.' Canon uses payment-for-executed-work, not incentive framing. Surface for reword.
+- `scripts/simulate_flow.ts` — Forbidden vocabulary: L9 comment 'Fee Distribution: Trigger Epoch to distribute **rewards**.' Payment is not a reward. Reframe comment.
+
+_Surfaced but kept (the word is canon-**affirming** here — a negation or the enforcement ban itself, not the mechanism's basis):_ `src/nodes/nodes.service.ts` ('does not reward or punish'), `tools/spec_rules.json` + `tools/ast_logic_guard.py` (the guard's forbidden-term list), `docs/specs/AST_PoT_AGENT_EN.md` (contrasts PoW/PoS 'reward' with PoT 'pays', concludes no reward). Say the word and I'll move any of these to REVIEW too.
+
 ---
 
 ## CUT — will NOT migrate
@@ -348,7 +357,7 @@ These 43 files were classified KEEP by the first pass (no firewall term) but the
 
 ## KEEP — staged in `review-staging/` (cleaned, firewall-gate passed)
 
-_182 files. Grouped by area. Files edited to remove AFC/ALB lines are marked ✂._
+_179 files. Grouped by area. Files edited to remove AFC/ALB lines are marked ✂._
 
 ### (root files)  (19)
 - `.editorconfig`
@@ -387,14 +396,13 @@ _182 files. Grouped by area. Files edited to remove AFC/ALB lines are marked ✂
 - `01_coin_engine/README.md` ✂
 - `01_coin_engine/node_participation_payments.md`
 
-### 02_nodechain_engine  (11)
+### 02_nodechain_engine  (10)
 - `02_nodechain_engine/Cargo.toml`
 - `02_nodechain_engine/README.md`
 - `02_nodechain_engine/encryption_protocol.md`
 - `02_nodechain_engine/network_consensus_model.md`
 - `02_nodechain_engine/node_payment_allocation.md`
 - `02_nodechain_engine/nodechain_fault_tolerance.md`
-- `02_nodechain_engine/nodechain_overview.md`
 - `02_nodechain_engine/shard_quorum_protocol.md`
 - `02_nodechain_engine/shard_signature_model.md`
 - `02_nodechain_engine/shard_validation_protocol.md`
@@ -454,8 +462,7 @@ _182 files. Grouped by area. Files edited to remove AFC/ALB lines are marked ✂
 - `14_decentralized_tx_encoding/README.md`
 - `14_decentralized_tx_encoding/dte_testing_benchmarking.md`
 
-### docs  (21)
-- `docs/adr/ADR-001-Network_Consensus_Model.md`
+### docs  (20)
 - `docs/adr/ADR-002-AI_Supervisory_Framework.md`
 - `docs/adr/ADR-004-Network-Sharding-Strategy.md`
 - `docs/api/module_12_ai_agents.md`
@@ -495,13 +502,12 @@ _182 files. Grouped by area. Files edited to remove AFC/ALB lines are marked ✂
 - `reference/ast-core/src/util.ts`
 - `reference/ast-core/tsconfig.json`
 
-### scripts  (7)
+### scripts  (6)
 - `scripts/agents-status.ts`
 - `scripts/check-prohibitions.sh`
 - `scripts/fix-angular-devkit.js`
 - `scripts/fix-ci.ts`
 - `scripts/nightly-audit.ts`
-- `scripts/simulate_flow.ts`
 - `scripts/test_governance.ts`
 
 ### smart_contracts  (4)
