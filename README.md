@@ -15,7 +15,7 @@ This repository holds the **canonical** specification of AST, rewritten from scr
 - **I7 — All-Seeing Eye.** Observes every step and can veto; never initiates a mint, burn, or payment.
 - **I8 — Append-only causality.** Every cause is recorded before its effect is acknowledged.
 
-## Layers
+## Layers (target structure — transferred per the plan in `PROJECT_STATUS.md`)
 
 | Layer | Purpose |
 |---|---|
@@ -32,7 +32,9 @@ This repository holds the **canonical** specification of AST, rewritten from scr
 
 ## Project status
 
-- **`PROJECT_STATUS.md`** — what has been transferred into this repository, what is still pending, and the sequence of next steps.
+The canonical layers above are written and ready in the source repository; their transfer into this repository is **planned, phase by phase, and not yet executed** — see the plan below.
+
+- **`PROJECT_STATUS.md`** — the build-out plan: the sequence of actions, the document-transfer plan, what is transferred / pending / excluded, and the sign-off checkpoints.
 - **`MIGRATION_REVIEW.md`** — the full per-file review of the source repository (KEEP / CUT / REVIEW).
 
 Constants: `SYMBOL=ARO`, `DECIMALS=9` (`1 ARO = 10^9 arx`), `COMMISSION_RATE=0.005`, `NODE_SHARE=0.75`, `RESERVE_SHARE=0.25`.
