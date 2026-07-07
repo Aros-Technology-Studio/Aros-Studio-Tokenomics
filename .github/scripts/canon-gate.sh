@@ -47,6 +47,6 @@ fi
 
 if [ "$fail" -ne 0 ]; then
   echo ""
-  echo "Canon gate FAILED. See the AST invariants in README.md / 01_coin_engine/README.md."
+  echo "Canon gate FAILED. See the AST invariants in CANON.md (the invariant spine I1-I8)."
 fi
 exit "$fail"
