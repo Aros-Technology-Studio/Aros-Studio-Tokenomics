@@ -1,20 +1,13 @@
 #!/usr/bin/env bash
-# AST canon gate.
-# The AST canon forbids two things from appearing anywhere in the canon content:
+# Optional grep firewall for legacy / banned terms in repo content.
 #   1. Firewall terms — AFC / ALB / LacMusa / Fiat Anchor / Crypto Anchor / ...
-#   2. Forbidden vocabulary — reward / incentive / stimulus (AST has only PAYMENT
-#      for PoT-confirmed work).
-# Meta documents that legitimately discuss these removed concepts (the review,
-# the plan, the top-level README) are excluded from the scan.
+#   2. Vocabulary — reward / incentive / stimulus
 set -uo pipefail
 
 EXCLUDES=(
   --exclude-dir=.git
   --exclude-dir=.github
   --exclude-dir=node_modules
-  --exclude=README.md
-  --exclude=PROJECT_STATUS.md
-  --exclude=MIGRATION_REVIEW.md
   --exclude=package-lock.json
   --exclude=yarn.lock
   --exclude=pnpm-lock.yaml
