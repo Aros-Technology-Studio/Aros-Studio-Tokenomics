@@ -33,12 +33,12 @@ Registry of canonical components, their documentation packs, and target code pat
 
 Unit of documentation = **runtime component**. Layer folders (`02_…`, `10_…`) from migration plans may map later; they are not required to create a pack.
 
-| Priority | Component | Docs pack | Target code | Notes |
-|----------|-----------|-----------|-------------|--------|
-| P0 | `invariants` | `components/invariants/` | `src/invariants/` | System-wide truths; links CANON §12 |
-| P0 | `pot` | `components/pot/` | `src/pot/` | Sole cause of emission / confirmation |
-| P0 | `aroscoin` | `components/aroscoin/` | `src/aroscoin/` | Mint / burn / bound claim |
-| P0 | `reserve` | `components/reserve/` | `src/reserve/` | 1:1 binding under ArosCoin |
+| Priority | Component | Docs pack | Pack status | Target code | Notes |
+|----------|-----------|-----------|-------------|-------------|--------|
+| P0 | `invariants` | `components/invariants/` | **ready** | `src/invariants/` | I1–I9; assert+checkAll+InvariantBroken |
+| P0 | `pot` | `components/pot/` | **ready** | `src/pot/` | Sole gate for value; M-of-N; no amount math |
+| P0 | `aroscoin` | `components/aroscoin/` | **ready** | `src/aroscoin/` | ARO/9; emission-after-PoT only |
+| P0 | `reserve` | `components/reserve/` | **ready** | `src/reserve/` | Own funds; bag accounting; reserveIndex |
 | P1 | `nodechain` | `components/nodechain/` | `src/nodechain/` | Process graph / ledger |
 | P1 | `nodes` | `components/nodes/` | `src/nodes/` | Register / auth |
 | P1 | `emission` | `components/emission/` | `src/emission/` | PoT formula `T_E = α·TV + β·U + γ` |
@@ -50,7 +50,7 @@ Unit of documentation = **runtime component**. Layer folders (`02_…`, `10_…`
 | P3 | `common` | `components/common/` | `src/common/` | Shared utilities |
 
 Pack status values: `missing` | `draft` | `ready` | `implemented`.  
-At ratification of this map, all packs are **missing** except `_template/`.
+P0 packs are **ready** (owner answers canonical, 16 July 2026 Core Canon). P1–P3 remain **missing**.
 
 ---
 
