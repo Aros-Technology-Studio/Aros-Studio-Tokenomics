@@ -33,3 +33,5 @@ Thumbs.db
 
 # TypeScript incremental build
 *.tsbuildinfo
+migration/reports/*
+!migration/reports/.gitkeep
