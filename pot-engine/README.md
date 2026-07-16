@@ -1,7 +1,8 @@
-# PoT engine (layout alias)
+# PoT engine layout alias
 
-**Status:** scaffold  
 **Canonical docs:** `docs/components/pot/`  
+**Core Canon:** `docs/AST-CORE-CANON.md` §4.2 (including P1–P4)  
 **Implementation target:** `src/pot/`  
 
-PoT Criteria **P1–P4** are defined in `CANON.md` §4.2. Default confirmation timeout: **15 minutes**. Verdict `verified = 1` only when all criteria pass under M-of-N quorum.
+Binary `verified` 0|1; all criteria P1–P4; NodeChain write-ahead before emission.  
+Build schedule **Phase 1** owns this module.

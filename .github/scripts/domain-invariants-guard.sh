@@ -17,8 +17,8 @@ for needle in \
   "release.threshold" \
   "UTC only"
 do
-  if ! grep -qF "$needle" CANON.md; then
-    echo "::error::domain-invariants-guard: CANON.md missing default/anchor: $needle"
+  if ! grep -qF "$needle" docs/AST-CORE-CANON.md; then
+    echo "::error::domain-invariants-guard: docs/AST-CORE-CANON.md missing default/anchor: $needle"
     fail=1
   fi
 done
@@ -71,7 +71,7 @@ if [ -n "$hits" ]; then
 fi
 
 # 7) Kill switch must be planned (config key presence in docs or env example)
-if ! grep -RInE 'KILL_SWITCH|killSwitch|read-?only mode' CANON.md docs .env.example 2>/dev/null | head -1 >/dev/null; then
+if ! grep -RInE 'KILL_SWITCH|killSwitch|read-?only mode' docs/AST-CORE-CANON.md docs .env.example 2>/dev/null | head -1 >/dev/null; then
   echo "::error::domain-invariants-guard: kill switch / read-only must be documented (P4)"
   fail=1
 fi

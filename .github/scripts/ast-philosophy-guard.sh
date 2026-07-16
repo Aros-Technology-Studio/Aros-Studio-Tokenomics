@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 # ast-philosophy-guard — main defender of AST Core Canon principles.
-# Fails if repository content introduces hard-forbidden mechanics (CANON.md §X, §III).
+# Fails if repository content introduces hard-forbidden mechanics (docs/AST-CORE-CANON.md §X, §III).
 set -uo pipefail
 
 ROOT="$(cd "$(dirname "$0")/../.." && pwd)"
@@ -18,21 +18,23 @@ EXCLUDES=(
 
 # These scripts and this workflow set may mention forbidden concepts as *negations*.
 # Scan product content only (not the guard machinery).
-# Product / derived docs and code only. CANON.md is checked for anchors, not for ban lists.
+# Product / derived docs and code only. docs/AST-CORE-CANON.md is checked for anchors, not for ban lists.
 SCAN_PATHS=(src docs AGENTS.md package.json)
 for d in smart-contracts reference frontend contracts; do
   [ -d "$d" ] && SCAN_PATHS+=("$d")
 done
 # Migration process docs describe gate rules; candidates live under migration/inbox
+# Core Canon ban list must not false-positive product scans
 EXCLUDES+=(
   --exclude=MIGRATION_GATE.md
+  --exclude=AST-CORE-CANON.md
   --exclude-dir=migration
 )
 
 fail=0
 
-if [ ! -f CANON.md ]; then
-  echo "::error::CANON.md missing — AST Core Canon is required as source of truth."
+if [ ! -f docs/AST-CORE-CANON.md ]; then
+  echo "::error::docs/AST-CORE-CANON.md missing — AST Core Canon is required as source of truth."
   exit 1
 fi
 
@@ -53,13 +55,13 @@ for needle in \
   "**I9.**" \
   "## XIII. Closing"
 do
-  if ! grep -qF "$needle" CANON.md; then
-    echo "::error::CANON.md is missing required anchor: $needle"
+  if ! grep -qF "$needle" docs/AST-CORE-CANON.md; then
+    echo "::error::docs/AST-CORE-CANON.md is missing required anchor: $needle"
     fail=1
   fi
 done
 
-# Live-mechanic patterns in product content (not the ban list inside CANON.md).
+# Live-mechanic patterns in product content (not the ban list inside docs/AST-CORE-CANON.md).
 
 check_pattern() {
   local name="$1"
@@ -72,7 +74,7 @@ check_pattern() {
       'forbidden|prohibit|must not|do not|don'\''t|never |hard ban|§X|hard prohibition|without veto|no veto|not have veto|does \*\*not\*\* have|out of scope|not started|not a |is \*\*not\*\*|are forbidden|is forbidden|blocks? |avoid |negation|questionnaire|`A:`|staking-for-yield,|caps, staking' \
       || true)"
     if [ -n "$filtered" ]; then
-      echo "::error::Philosophy breach [$name] — conflicts with CANON.md hard principles."
+      echo "::error::Philosophy breach [$name] — conflicts with docs/AST-CORE-CANON.md hard principles."
       echo "$filtered"
       fail=1
     fi
@@ -99,7 +101,7 @@ check_pattern "speculative-surface" '\bprice[- ]?floor\b|\bbuyback\b|\bvolatilit
 
 if [ "$fail" -ne 0 ]; then
   echo ""
-  echo "ast-philosophy-guard FAILED. See CANON.md §§III, X, XI."
+  echo "ast-philosophy-guard FAILED. See docs/AST-CORE-CANON.md §§III, X, XI."
   exit 1
 fi
 

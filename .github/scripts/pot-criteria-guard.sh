@@ -5,8 +5,8 @@ ROOT="$(cd "$(dirname "$0")/../.." && pwd)"
 cd "$ROOT"
 fail=0
 
-if [ ! -f CANON.md ]; then
-  echo "::error::CANON.md missing"
+if [ ! -f docs/AST-CORE-CANON.md ]; then
+  echo "::error::docs/AST-CORE-CANON.md missing"
   exit 1
 fi
 
@@ -19,14 +19,14 @@ for needle in \
   "criteriaResult" \
   "verified = 1"
 do
-  if ! grep -qF "$needle" CANON.md; then
-    echo "::error::pot-criteria-guard: CANON.md missing required PoT anchor: $needle"
+  if ! grep -qF "$needle" docs/AST-CORE-CANON.md; then
+    echo "::error::pot-criteria-guard: docs/AST-CORE-CANON.md missing required PoT anchor: $needle"
     fail=1
   fi
 done
 
 # Criteria must say all four apply / fail any → verified 0
-if ! grep -qE 'all four|All four' CANON.md; then
+if ! grep -qE 'all four|All four' docs/AST-CORE-CANON.md; then
   echo "::error::pot-criteria-guard: CANON must require all four criteria in v1"
   fail=1
 fi

@@ -30,8 +30,8 @@ for pattern in "${PATTERNS[@]}"; do
 done
 
 # CANON must still forbid Eye veto/rollback
-if ! grep -qF 'does **not** have veto or rollback' CANON.md && ! grep -qi 'not have veto or rollback' CANON.md; then
-  echo "::error::no-eye-executive-guard: CANON.md must state Eye has no veto/rollback"
+if ! grep -qF 'does **not** have veto or rollback' docs/AST-CORE-CANON.md && ! grep -qi 'not have veto or rollback' docs/AST-CORE-CANON.md; then
+  echo "::error::no-eye-executive-guard: docs/AST-CORE-CANON.md must state Eye has no veto/rollback"
   fail=1
 fi
 

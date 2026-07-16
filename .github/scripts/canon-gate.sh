@@ -19,6 +19,8 @@ EXCLUDES=(
   # Questionnaire may cite historical external URLs; guards live under .github
   --exclude=COMPONENT_CLARIFICATIONS.md
   --exclude=MIGRATION_GATE.md
+  --exclude=AST-CORE-CANON.md
+  --exclude=rules.md
 )
 
 # Case-sensitive: "ALB" matches only the literal epoch acronym, never words like "totalBurned".

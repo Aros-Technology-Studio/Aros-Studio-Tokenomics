@@ -1,67 +1,28 @@
 # AST Documentation
 
-**Status:** Structure ratified (2026-07-14); Core Canon v1.0 Final (2026-07-16)  
-**Language:** English (repository language)  
-**Source of truth:** root `CANON.md` (AST Core Canon). Derived order: `CANON.md` → `docs/` → `src/`
+**Source of truth:** [`AST-CORE-CANON.md`](./AST-CORE-CANON.md)  
+**Build order:** [`BUILD_SCHEDULE.md`](./BUILD_SCHEDULE.md)  
+**Decisions:** [`P0-P4-TECHNICAL-DECISIONS.md`](./P0-P4-TECHNICAL-DECISIONS.md)
 
-This directory holds architecture and per-component specifications for **Aros Studio Tokenomics (AST)**. It is intentionally lean: clarity without bureaucracy.
+## Map
 
----
+| Path | Role |
+|------|------|
+| `AST-CORE-CANON.md` | Full Core Canon |
+| `P0-P4-TECHNICAL-DECISIONS.md` | Ratified P0–P4 decisions |
+| `BUILD_SCHEDULE.md` | Phases 0–5 |
+| `ARCHITECTURE.md` | System architecture |
+| `PORTAL.md` | Institutional portal architecture |
+| `ROADMAP.md` | High-level roadmap |
+| `DOC_MAP.md` | Component ↔ pack ↔ code |
+| `WORKFLOWS.md` | CI + runtime flows |
+| `MIGRATION_GATE.md` | Legacy doc intake |
+| `components/` | Four-file packs per component |
+| `processes/` | Business process docs |
+| `architecture/` | Extra architecture notes |
+| `principles/` | e.g. ANTI_POLICE |
+| `migration/` | Human review checklist |
 
-## Layout
+## Language
 
-```
-docs/
-├── README.md                 # this file
-├── DOC_MAP.md                # component ↔ docs ↔ code registry
-├── ARCHITECTURE.md           # end-to-end system view
-├── principles/
-│   └── ANTI_POLICE.md        # design & process rule: avoid policing
-└── components/
-    ├── _template/            # copy this pack for each component
-    │   ├── PURPOSE.md
-    │   ├── MODEL.md
-    │   ├── CONTRACT.md
-    │   └── ACCEPTANCE.md
-    └── <component>/          # one folder per canonical component
-```
-
----
-
-## Per-component pack (4 files only)
-
-| File | Deliverable |
-|------|-------------|
-| `PURPOSE.md` | Why it exists; responsibility boundary; what it does **not** do |
-| `MODEL.md` | Entities, states, lifecycle, invariants (linked to CANON) |
-| `CONTRACT.md` | Inputs / outputs / events / dependencies |
-| `ACCEPTANCE.md` | Done criteria for docs and for later code — not a compliance checklist |
-
-No extra gates, audit trails-as-threat, or “review police” files unless the product owner explicitly requests them.
-
----
-
-## Principles
-
-See [`principles/ANTI_POLICE.md`](./principles/ANTI_POLICE.md).
-
----
-
-## Workflow
-
-1. Extend or create a component pack under `components/<name>/` from `_template/`.
-2. Align every claim with `CANON.md`. Closed questions stay closed (cite CANON section).
-3. Code lands in `src/<name>/` only after the pack is useful enough to implement against — no ceremonial multi-stage approval theater.
-
----
-
-## Related root documents
-
-| Document | Role |
-|----------|------|
-| `/CANON.md` | Ratified canon and technical spine |
-| `/docs/ARCHITECTURE.md` | Cross-component flows |
-| `/docs/WORKFLOWS.md` | GitHub Actions + runtime process workflows |
-| `/docs/MIGRATION_GATE.md` | Pre-migration / during-migration doc checks vs canon |
-| `/docs/migration/REVIEW_CHECKLIST.md` | Human semantic review per candidate doc |
-| `/docs/DOC_MAP.md` | Registry and priorities |
+English in repository files. Product owner chat: Russian.

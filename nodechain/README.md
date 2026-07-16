@@ -1,7 +1,9 @@
-# NodeChain engine (layout alias)
+# NodeChain layout alias
 
-**Status:** scaffold  
 **Canonical docs:** `docs/components/nodechain/`  
-**Implementation target:** `src/nodechain/` (NestJS) with **RocksDB** primary ledger store + Postgres index mirror.
+**Core Canon:** `docs/AST-CORE-CANON.md` §4.1  
+**Implementation target:** `src/nodechain/`  
 
-This directory is the **layout alias** for `nodechain_engine` + `ledger` store (**one binary**). Product code and package boundaries should remain aligned with `CANON.md` §4.1 and the nodechain pack.
+Append-only ledger (ExecutionSnapshot / state entry — not “blocks”).  
+Primary storage target: RocksDB; Postgres = index mirror only.  
+Build schedule **Phase 1** owns this module.
