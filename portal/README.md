@@ -1,7 +1,38 @@
-# Portal (institutional + holder UI)
+# Institutional Portal
 
-**Status:** scaffold (v1 in this repository per owner P4)  
-**Stack (planned):** React (see Core Canon / prior architecture notes)  
-**Role:** Institutional and holder entry surfaces (e.g. partial-release requests, document package submission). All economic cycles still enter through **Orchestrator** APIs — portal does not bypass PoT/NodeChain.
+**Status:** Scaffold + architecture  
+**Docs:** `docs/architecture/INSTITUTIONAL_PORTAL.md`  
+**OpenAPI:** `portal/openapi/openapi.yaml`
 
-Implementation lives under this tree as the product UI is built.
+Human-facing entry for institutional participants. Economic work always goes through **core Orchestrator** (PoT → NodeChain → Emission → Settlement). Portal never appraises assets and never bypasses PoT/NodeChain.
+
+## Layout
+
+```
+portal/
+├── frontend/     # Next.js 15 (App Router) + TypeScript + Tailwind
+├── backend/      # NestJS Portal API (/v1)
+├── shared/       # Shared TypeScript types
+├── openapi/      # OpenAPI 3.1
+└── README.md
+```
+
+## Principles
+
+1. **КЭП / qualified e-signature** required on document upload.  
+2. **Institutional valuation** supplied by participant — not computed by AST.  
+3. **processId** = `AST-{INST}-{YYYYMMDD}-` + UUIDv7.  
+4. **idempotencyKey** required on `POST /tokenization/start`.  
+5. Minimal UI; own-data scoping only.
+
+## Local (later)
+
+```bash
+# backend
+cd portal/backend && npm install && npm run dev
+
+# frontend
+cd portal/frontend && npm install && npm run dev
+```
+
+Core AST Nest app remains at repository root `src/` (engines). Portal backend is a **separate edge service** under `portal/backend`.

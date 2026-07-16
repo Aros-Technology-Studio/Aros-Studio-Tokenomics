@@ -54,6 +54,7 @@ Unit of documentation = **runtime component**. Layer folders (`02_…`, `10_…`
 | P4 | `node-reputation` | `components/node-reputation/` | **ready** | `src/node-reputation/` | Real v1; no slashing |
 | P4 | `oracle-gateway` | `components/oracle-gateway/` | **ready** | `src/oracle-gateway/` | Multi-oracle + signatures; fail-closed |
 | later | `resource_monitor` | — | stub | — | Deferred |
+| edge | Institutional Portal | `docs/architecture/INSTITUTIONAL_PORTAL.md` | scaffold | `portal/` | Next.js + Nest edge; OpenAPI under `portal/openapi/` |
 
 Pack status values: `missing` | `draft` | `ready` | `implemented`.  
 **P0–P4 documentation complete.** Implementation status remains open.  
