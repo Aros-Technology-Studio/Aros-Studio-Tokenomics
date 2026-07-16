@@ -50,7 +50,10 @@ Main structure: **linear log**. Internal DAG only as representation within a sin
 
 | Store | Role |
 |-------|------|
-| RocksDB or BadgerDB | **Primary** append-only ledger |
-| Postgres | **Secondary** indexes / search only |
+| `LedgerStore` primary | **SoT** append-only ledger |
+| `LEDGER_BACKEND=memory` | tests / default local |
+| `LEDGER_BACKEND=file` | durable primary (JSONL under `LEDGER_PATH`) |
+| `LEDGER_BACKEND=rocksdb` | RocksDB-oriented primary (native if installed; else file at same path) |
+| Postgres | **Secondary index mirror only** (`DATABASE_URL` / `DB_*`) — never SoT |
 
-Encryption at rest: **required** for sensitive fields in v1.
+Encryption at rest: **required** for sensitive fields in v1 (`sensitive: true` on append).

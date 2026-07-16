@@ -45,8 +45,8 @@ All work must follow the sequence below. Deviations require a formal canon/sched
 
 **Order of work:**
 
-1. [x] `nodechain` core (append-only ledger, ExecutionSnapshot, content hashing) — **done this batch**  
-2. [ ] Storage layer (RocksDB primary + Postgres mirror)  
+1. [x] `nodechain` core (append-only ledger, ExecutionSnapshot, content hashing)  
+2. [x] Storage layer (durable primary via LedgerStore: file/rocksdb-oriented + Postgres **index mirror only**)  
 3. [ ] `pot-engine` (P1–P4 criteria, quorum, binary verdict) — harden vs draft  
 4. [ ] Integration: PoT → NodeChain write-ahead  
 5. [ ] Basic invariants + CI tests (align with Phase 1)  
@@ -102,7 +102,7 @@ Create process → pass PoT → write immutable snapshot to NodeChain.
 
 ## 5. Current Priority
 
-**Active:** Phase 1, step 1 complete → **next owner go:** Phase 1 step 2 (storage RocksDB + Postgres mirror) **or** continue 1.3 pot-engine harden.
+**Active:** Phase 1 steps 1–2 complete → **next:** Phase 1 step 3 (`pot-engine` harden).
 
 Do not start Phase 2–5 until Phase 1 exit criteria are met.
 

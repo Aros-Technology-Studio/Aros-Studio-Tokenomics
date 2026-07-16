@@ -22,8 +22,9 @@
 - [x] Integrity verification (fail closed on break)  
 - [x] Single-shard only  
 - [x] Tests: immutability, unauthorized append, scoped read, sensitive encrypt  
-- [ ] Primary store RocksDB (Phase 1.2)  
-- [ ] Postgres index mirror (Phase 1.2)  
+- [x] Durable primary via `LedgerStore` (`file` / `rocksdb` backend; memory for tests) — Phase 1.2  
+- [x] Postgres **index mirror only** (optional; never SoT) — Phase 1.2  
+- [ ] Native RocksDB package in production deploy (optional install; file fallback until then)  
 - [ ] Lint/CI forbid `block`/`blocks` in public API surface (ongoing guards)  
 
 ---
