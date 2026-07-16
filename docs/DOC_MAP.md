@@ -39,15 +39,15 @@ Unit of documentation = **runtime component**. Layer folders (`02_…`, `10_…`
 | P0 | `pot` | `components/pot/` | **ready** | `src/pot/` | Sole gate for value; M-of-N; no amount math |
 | P0 | `aroscoin` | `components/aroscoin/` | **ready** | `src/aroscoin/` | ARO/9; emission-after-PoT only |
 | P0 | `reserve` | `components/reserve/` | **ready** | `src/reserve/` | Own funds; bag accounting; reserveIndex |
-| P1 | `nodechain` | `components/nodechain/` | `src/nodechain/` | Process graph / ledger |
-| P1 | `nodes` | `components/nodes/` | `src/nodes/` | Register / auth |
-| P1 | `emission` | `components/emission/` | `src/emission/` | PoT formula `T_E = α·TV + β·U + γ` |
-| P1 | `commission` | `components/commission/` | `src/commission/` | Commission model (e.g. 75/25 when canon applies) |
-| P1 | `all-seeing-eye` | `components/all-seeing-eye/` | `src/all-seeing-eye/` | Observe / notify only — no veto, no rollback |
-| P2 | `orchestrator` | `components/orchestrator/` | `src/orchestrator/` | Process orchestration |
-| P2 | `state-recording` | `components/state-recording/` | `src/state-recording/` | State recording |
-| P2 | `release` | `components/release/` | `src/release/` | Release / return path |
-| P3 | `common` | `components/common/` | `src/common/` | Shared utilities |
+| P1 | `nodechain` | `components/nodechain/` | missing | `src/nodechain/` | Process graph / sole SoT ledger |
+| P1 | `nodes` | `components/nodes/` | missing | `src/nodes/` | Register / auth / validators |
+| P1 | `emission` | `components/emission/` | missing | `src/emission/` | Amounts from institutional valuation + ΔValue |
+| P1 | `commission` | `components/commission/` | missing | `src/commission/` | Post-factum fee / settlement |
+| P1 | `all-seeing-eye` | `components/all-seeing-eye/` | missing | `src/all-seeing-eye/` | Observe / notify only — no veto, no rollback |
+| P2 | `orchestrator` | `components/orchestrator/` | missing | `src/orchestrator/` | Coordinates only (not PoT quorum) |
+| P2 | `state-recording` | `components/state-recording/` | missing | `src/state-recording/` | State recording |
+| P2 | `release` | `components/release/` | missing | `src/release/` | Release Phase + release paths |
+| P3 | `common` | `components/common/` | missing | `src/common/` | Shared utilities |
 
 Pack status values: `missing` | `draft` | `ready` | `implemented`.  
 P0 packs are **ready** (owner answers canonical, 16 July 2026 Core Canon). P1–P3 remain **missing**.
