@@ -15,7 +15,9 @@
     "format:fix": "prettier -w .",
     "test": "jest",
     "check:canon": "bash .github/scripts/run-all-guards.sh",
-    "check:migration": "bash .github/scripts/migration-doc-gate.sh migration/inbox"
+    "check:migration": "bash .github/scripts/migration-doc-gate.sh migration/inbox",
+    "cli": "tsx scripts/ast-cli.ts",
+    "cli:tokenize": "tsx scripts/ast-cli.ts tokenize"
   },
   "dependencies": {
     "@nestjs/common": "^10.4.22",

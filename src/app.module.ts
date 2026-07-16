@@ -8,6 +8,7 @@ import { CommissionModule } from './commission/commission.module';
 import { CommonModule } from './common/common.module';
 import { CoreApiModule } from './core-api/core-api.module';
 import { EmissionModule } from './emission/emission.module';
+import { GovernanceModule } from './governance/governance.module';
 import { InvariantsModule } from './invariants/invariants.module';
 import { NodeReputationModule } from './node-reputation/node-reputation.module';
 import { NodechainModule } from './nodechain/nodechain.module';
@@ -19,6 +20,7 @@ import { PotModule } from './pot/pot.module';
 import { ReleaseDaemonModule } from './release-daemon/release-daemon.module';
 import { ReleaseModule } from './release/release.module';
 import { ReserveModule } from './reserve/reserve.module';
+import { StateRecordingModule } from './state-recording/state-recording.module';
 import { VelocityTrackerModule } from './velocity-tracker/velocity-tracker.module';
 
 @Module({
@@ -39,6 +41,8 @@ import { VelocityTrackerModule } from './velocity-tracker/velocity-tracker.modul
     ReleaseModule,
     ReleaseDaemonModule,
     OracleGatewayModule,
+    StateRecordingModule,
+    GovernanceModule,
     OrchestratorModule,
     PartialReleaseModule,
     CoreApiModule,
@@ -47,3 +51,4 @@ import { VelocityTrackerModule } from './velocity-tracker/velocity-tracker.modul
   providers: [],
 })
 export class AppModule {}
+

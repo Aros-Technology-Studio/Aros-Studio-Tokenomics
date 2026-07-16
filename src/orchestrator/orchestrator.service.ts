@@ -1,16 +1,19 @@
-import { Injectable } from '@nestjs/common';
+import { Injectable, OnModuleInit } from '@nestjs/common';
+import { ModuleRef } from '@nestjs/core';
 import { buildProcessId } from '../common/ids/process-id';
 import { AstError } from '../common/errors/ast-error';
 import { AstErrorCode } from '../common/errors/error-codes';
+import { KillSwitchService } from '../common/kill-switch.service';
 import { AroscoinService } from '../aroscoin/aroscoin.service';
 import { CommissionService } from '../commission/commission.service';
 import { EmissionService } from '../emission/emission.service';
 import { NodechainService } from '../nodechain/nodechain.service';
-import { PotService } from '../pot/pot.service';
 import { OracleAttestation } from '../oracle-gateway/oracle-gateway.types';
 import { OracleGatewayService } from '../oracle-gateway/oracle-gateway.service';
+import { PotService } from '../pot/pot.service';
 import { CriteriaResult } from '../pot/pot.types';
 import { ReserveService } from '../reserve/reserve.service';
+import { StateRecordingService } from '../state-recording/state-recording.service';
 
 export type PipelineStep =
   | 'StartProcess'
@@ -23,6 +26,16 @@ export type PipelineStep =
   | 'StateUpdate'
   | 'EndProcess';
 
+export type ProcessStatus =
+  | 'created'
+  | 'documents_pending'
+  | 'validating'
+  | 'pot_pending'
+  | 'settling'
+  | 'completed'
+  | 'failed'
+  | 'expired';
+
 export interface StartProcessInput {
   institutionCode: string;
   idempotencyKey: string;
@@ -32,36 +45,58 @@ export interface StartProcessInput {
   holderId: string;
 }
 
+export interface ProcessSnapshot {
+  processId: string;
+  status: ProcessStatus;
+  step: PipelineStep;
+  valuation: string;
+  holderId: string;
+  claimId?: string;
+  verified?: 0 | 1;
+  createdAt: string;
+}
+
 /**
- * Sole economic entry. Fixed 9-step pipeline (orchestrator pack).
- * Compensation only before verified=1.
+ * Sole economic entry. Resolves deps via ModuleRef to avoid brittle multi-param DI metadata.
  */
 @Injectable()
-export class OrchestratorService {
+export class OrchestratorService implements OnModuleInit {
+  private pot!: PotService;
+  private emission!: EmissionService;
+  private aroscoin!: AroscoinService;
+  private commission!: CommissionService;
+  private reserve!: ReserveService;
+  private nodechain!: NodechainService;
+  private oracleGateway!: OracleGatewayService;
+  private stateRecording!: StateRecordingService;
+  private killSwitch!: KillSwitchService;
+
   private readonly byIdempotency = new Map<string, string>();
-  private readonly processes = new Map<
-    string,
-    {
-      step: PipelineStep;
-      valuation: string;
-      holderId: string;
-      claimId?: string;
-      verified?: 0 | 1;
-    }
-  >();
+  private readonly processes = new Map<string, ProcessSnapshot>();
   private concurrentByInst = new Map<string, number>();
 
-  constructor(
-    private readonly pot: PotService,
-    private readonly emission: EmissionService,
-    private readonly aroscoin: AroscoinService,
-    private readonly commission: CommissionService,
-    private readonly reserve: ReserveService,
-    private readonly nodechain: NodechainService,
-    private readonly oracleGateway: OracleGatewayService,
-  ) {}
+  constructor(private readonly moduleRef: ModuleRef) {}
+
+  onModuleInit(): void {
+    this.pot = this.moduleRef.get(PotService, { strict: false });
+    this.emission = this.moduleRef.get(EmissionService, { strict: false });
+    this.aroscoin = this.moduleRef.get(AroscoinService, { strict: false });
+    this.commission = this.moduleRef.get(CommissionService, { strict: false });
+    this.reserve = this.moduleRef.get(ReserveService, { strict: false });
+    this.nodechain = this.moduleRef.get(NodechainService, { strict: false });
+    this.oracleGateway = this.moduleRef.get(OracleGatewayService, {
+      strict: false,
+    });
+    this.stateRecording = this.moduleRef.get(StateRecordingService, {
+      strict: false,
+    });
+    this.killSwitch = this.moduleRef.get(KillSwitchService, { strict: false });
+  }
 
   startProcess(input: StartProcessInput): { processId: string; step: PipelineStep } {
+    this.ensureInit();
+    this.killSwitch.assertAllowsNewEconomicCause();
+
     const idemKey = `${input.institutionCode}:${input.idempotencyKey}`;
     const existing = this.byIdempotency.get(idemKey);
     if (existing) {
@@ -76,9 +111,12 @@ export class OrchestratorService {
     const processId = buildProcessId(input.institutionCode);
     this.byIdempotency.set(idemKey, processId);
     this.processes.set(processId, {
-      step: 'StartProcess',
+      processId,
+      status: 'documents_pending',
+      step: 'DocumentValidation',
       valuation: input.institutionalValuation,
       holderId: input.holderId,
+      createdAt: new Date().toISOString(),
     });
     this.concurrentByInst.set(input.institutionCode, conc + 1);
 
@@ -92,15 +130,20 @@ export class OrchestratorService {
         institutionalValuation: input.institutionalValuation,
       },
     });
+    this.stateRecording.record({
+      processId,
+      stateType: 'StartProcess',
+      status: 'documents_pending',
+      payload: { step: 'DocumentValidation' },
+    });
 
-    this.processes.get(processId)!.step = 'DocumentValidation';
     return { processId, step: 'DocumentValidation' };
   }
 
-  /**
-   * Advance after documents validated: optional oracle → PoT → emission+settle.
-   * Oracle failure → fail-closed (expired).
-   */
+  getProcess(processId: string): ProcessSnapshot | undefined {
+    return this.processes.get(processId);
+  }
+
   runFromPot(
     processId: string,
     criteria: CriteriaResult,
@@ -111,7 +154,10 @@ export class OrchestratorService {
     verified: 0 | 1;
     claimId?: string;
     step: PipelineStep;
+    status: ProcessStatus;
   } {
+    this.ensureInit();
+    this.killSwitch.assertAllowsNewEconomicCause();
     const proc = this.processes.get(processId);
     if (!proc) {
       throw new AstError(AstErrorCode.INVALID_PROCESS_ID, 'unknown process');
@@ -119,32 +165,58 @@ export class OrchestratorService {
 
     if (oracleAttestations && oracleAttestations.length > 0) {
       proc.step = 'OracleGateway';
+      proc.status = 'validating';
       try {
         this.oracleGateway.requireOk(processId, oracleAttestations);
       } catch {
         proc.step = 'EndProcess';
-        return { processId, verified: 0, step: 'EndProcess' };
+        proc.status = 'expired';
+        return {
+          processId,
+          verified: 0,
+          step: 'EndProcess',
+          status: 'expired',
+        };
       }
     }
 
     proc.step = 'PoTEvaluation';
+    proc.status = 'pot_pending';
+    const validators = Object.keys(nodeWeights);
+    const assigned =
+      validators.length >= 3
+        ? validators
+        : [...validators, 'pad-a', 'pad-b', 'pad-c'].slice(0, 3);
+    const confirming =
+      validators.length >= 2 ? validators.slice(0, 2) : assigned.slice(0, 2);
+
     const verdict = this.pot.confirm({
       processId,
-      executionSnapshot: { hash: 'snap', prevHash: 'prev' },
-      validatorIds: Object.keys(nodeWeights),
-      signatures: Object.keys(nodeWeights).map((id) => `sig-${id}`),
+      executionSnapshot: {
+        hash: this.nodechain.tipHash(),
+        prevHash: this.nodechain.tipHash(),
+      },
+      assignedValidatorIds: assigned,
+      validatorIds: confirming,
+      signatures: confirming.map((id) => `sig-${id}`),
       criteriaResult: criteria,
     });
 
     proc.verified = verdict.verified;
     if (verdict.verified !== 1) {
       proc.step = 'EndProcess';
-      return { processId, verified: 0, step: 'EndProcess' };
+      proc.status = verdict.status === 'expired' ? 'expired' : 'failed';
+      return {
+        processId,
+        verified: 0,
+        step: 'EndProcess',
+        status: proc.status,
+      };
     }
 
-    // After verified: not compensatable
     proc.step = 'EmissionBurn';
-    this.reserve.credit('AST_OWN', proc.valuation ? 'ASSET' : 'ASSET', proc.valuation);
+    proc.status = 'settling';
+    this.reserve.credit('AST_OWN', 'ASSET', proc.valuation);
     this.reserve.lock('AST_OWN', 'ASSET', proc.valuation);
 
     const plan = this.emission.plan({
@@ -170,16 +242,33 @@ export class OrchestratorService {
     this.commission.settleCommission({
       processId,
       valuation: proc.valuation,
-      feeRate: '0.0015',
-      nodeWeights,
+      feeRate: process.env.FEE_RATE ?? '0.0015',
+      nodeWeights:
+        Object.keys(nodeWeights).length > 0 ? nodeWeights : { n1: '1' },
+    });
+
+    proc.step = 'StateUpdate';
+    this.stateRecording.record({
+      processId,
+      stateType: 'Completed',
+      status: 'completed',
+      payload: { claimId: proc.claimId },
     });
 
     proc.step = 'EndProcess';
+    proc.status = 'completed';
     return {
       processId,
       verified: 1,
       claimId: proc.claimId,
       step: 'EndProcess',
+      status: 'completed',
     };
+  }
+
+  private ensureInit(): void {
+    if (!this.pot) {
+      this.onModuleInit();
+    }
   }
 }

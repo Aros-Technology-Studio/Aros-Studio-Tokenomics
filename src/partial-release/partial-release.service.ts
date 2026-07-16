@@ -70,8 +70,9 @@ export class PartialReleaseService {
     const pot = this.pot.confirm({
       processId,
       executionSnapshot: { hash: 'pr-snap', prevHash: 'pr-prev' },
-      validatorIds: ['v1'],
-      signatures: ['s1'],
+      assignedValidatorIds: ['v1', 'v2', 'v3'],
+      validatorIds: ['v1', 'v2'],
+      signatures: ['s1', 's2'],
       criteriaResult: { P1: true, P2: true, P3: true, P4: true },
     });
 

@@ -1,6 +1,7 @@
-import { Injectable } from '@nestjs/common';
+import { Injectable, Optional } from '@nestjs/common';
 import { AstError } from '../common/errors/ast-error';
 import { AstErrorCode } from '../common/errors/error-codes';
+import { GovernanceService } from '../governance/governance.service';
 import { InvariantsService } from '../invariants/invariants.service';
 import { NodechainService } from '../nodechain/nodechain.service';
 
@@ -18,6 +19,7 @@ export class ReleaseService {
   constructor(
     private readonly nodechain: NodechainService,
     private readonly invariants: InvariantsService,
+    @Optional() private readonly governance?: GovernanceService,
   ) {}
 
   getState(): ReleasePhaseState {
@@ -27,6 +29,10 @@ export class ReleaseService {
   /** Governance multi-step simplified as single flag for v1 skeleton. */
   setGovernanceApproval(approved: boolean): void {
     this.governanceApproved = approved;
+    if (approved && this.governance) {
+      this.governance.open('release-phase', 1);
+      this.governance.grant('release-phase', 'system');
+    }
   }
 
   /**

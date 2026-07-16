@@ -4,6 +4,7 @@ import { AstErrorCode, PotCriteriaId } from '../common/errors/error-codes';
 import { InvariantsService } from '../invariants/invariants.service';
 import { NodechainService } from '../nodechain/nodechain.service';
 import { CriteriaResult, PotEvidence, PotVerdict } from './pot.types';
+import { quorumMet, requiredQuorum } from './quorum';
 
 /** Default PoT timeout: 15 minutes (CANON §XII). */
 export const POT_TIMEOUT_MS = 15 * 60 * 1000;
@@ -12,6 +13,8 @@ export const POT_TIMEOUT_MS = 15 * 60 * 1000;
 export class PotService {
   private readonly verifiedProcesses = new Set<string>();
   private readonly pendingSince = new Map<string, number>();
+  /** processId → NodeChain height of verdict (write-ahead proof). */
+  private readonly verdictHeights = new Map<string, number>();
 
   constructor(
     private readonly nodechain: NodechainService,
@@ -19,8 +22,8 @@ export class PotService {
   ) {}
 
   /**
-   * Submit confirmation evidence. Amounts are NOT computed here (pot pack).
-   * M-of-N and signature crypto are simplified for skeleton; criteria all-pass is hard.
+   * Confirm work. Amounts are NOT computed here.
+   * Order: criteria → quorum → NodeChain append (write-ahead) → mark verified.
    */
   confirm(evidence: PotEvidence, opts?: { now?: number }): PotVerdict {
     const now = opts?.now ?? Date.now();
@@ -40,36 +43,79 @@ export class PotService {
     const started = this.pendingSince.get(processId)!;
     if (now - started > POT_TIMEOUT_MS) {
       this.pendingSince.delete(processId);
+      return { processId, verified: 0, status: 'expired' };
+    }
+
+    const assigned =
+      evidence.assignedValidatorIds?.length > 0
+        ? evidence.assignedValidatorIds
+        : evidence.validatorIds;
+    const confirming = evidence.validatorIds;
+    const need = requiredQuorum(assigned.length);
+    const actual = new Set(confirming.filter((id) => assigned.includes(id)))
+      .size;
+
+    if (
+      evidence.signatures.length < confirming.length ||
+      confirming.some((id, i) => !evidence.signatures[i])
+    ) {
       return {
         processId,
         verified: 0,
-        status: 'expired',
+        status: 'rejected',
+        failedCriteria: ['P1'],
+        reasonCodes: { P1: 'E_P1_SIGNATURE_MISSING' },
+        quorumRequired: need,
+        quorumActual: actual,
+      };
+    }
+
+    if (!quorumMet(assigned, confirming)) {
+      return {
+        processId,
+        verified: 0,
+        status: 'rejected',
+        failedCriteria: ['P2'],
+        reasonCodes: { P2: 'E_P2_QUORUM_FAILED' },
+        quorumRequired: need,
+        quorumActual: actual,
       };
     }
 
     const failed = failedCriteria(evidence.criteriaResult);
     if (failed.length > 0) {
+      const reasonCodes: Partial<Record<PotCriteriaId, string>> = {
+        ...evidence.criteriaResult.reasonCodes,
+      };
+      for (const id of failed) {
+        reasonCodes[id] = reasonCodes[id] ?? `E_${id}_FAILED`;
+      }
       return {
         processId,
         verified: 0,
         status: 'rejected',
         failedCriteria: failed,
+        reasonCodes,
+        quorumRequired: need,
+        quorumActual: actual,
       };
     }
 
-    // All P1–P4 pass → verified = 1 (final)
+    // Write-ahead: NodeChain record BEFORE verified flag is set
     const record = this.nodechain.append({
       writerRole: 'quorum_validator',
       processId,
       recordType: 'pot_verdict',
       payload: {
-        verified: 1,
+        verified: 1 as const,
         evidence: {
           processId,
           executionSnapshot: evidence.executionSnapshot,
-          validatorIds: evidence.validatorIds,
+          assignedValidatorIds: assigned,
+          validatorIds: confirming,
           criteriaResult: evidence.criteriaResult,
         },
+        writeAhead: true,
       },
     });
 
@@ -83,6 +129,7 @@ export class PotService {
     });
 
     this.verifiedProcesses.add(processId);
+    this.verdictHeights.set(processId, record.height);
     this.pendingSince.delete(processId);
 
     return {
@@ -91,6 +138,8 @@ export class PotService {
       status: 'verified',
       ledgerHeight: record.height,
       contentHash: record.contentHash,
+      quorumRequired: need,
+      quorumActual: actual,
     };
   }
 
@@ -98,9 +147,17 @@ export class PotService {
     return this.verifiedProcesses.has(processId);
   }
 
-  /** pot does not emit amounts — only ok signal. */
+  /** Emission may proceed only if verified AND NodeChain write-ahead exists. */
   okToEmit(processId: string): boolean {
-    return this.isVerified(processId);
+    if (!this.isVerified(processId)) return false;
+    const h = this.verdictHeights.get(processId);
+    if (h === undefined) return false;
+    const rec = this.nodechain.getByHeight(h);
+    return rec?.recordType === 'pot_verdict';
+  }
+
+  verdictHeight(processId: string): number | undefined {
+    return this.verdictHeights.get(processId);
   }
 }
 

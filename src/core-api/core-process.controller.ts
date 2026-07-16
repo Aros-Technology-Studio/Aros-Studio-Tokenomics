@@ -1,4 +1,4 @@
-import { Body, Controller, Get, Param, Post } from '@nestjs/common';
+import { Body, Controller, Get, NotFoundException, Param, Post } from '@nestjs/common';
 import { IsObject, IsOptional, IsString, MinLength } from 'class-validator';
 import { OrchestratorService } from '../orchestrator/orchestrator.service';
 import { CriteriaResult } from '../pot/pot.types';
@@ -34,10 +34,6 @@ class RunPotDto {
   nodeWeights?: Record<string, string>;
 }
 
-/**
- * Core HTTP surface for Portal edge and internal clients.
- * Prefix applied in main: none here — AppModule mounts at root; portal uses /v1/core/...
- */
 @Controller('core/processes')
 export class CoreProcessController {
   constructor(private readonly orchestrator: OrchestratorService) {}
@@ -45,11 +41,12 @@ export class CoreProcessController {
   @Post('start')
   start(@Body() body: StartDto) {
     const r = this.orchestrator.startProcess(body);
+    const snap = this.orchestrator.getProcess(r.processId)!;
     return {
       processId: r.processId,
-      status: 'created',
+      status: snap.status,
       currentStep: r.step,
-      createdAt: new Date().toISOString(),
+      createdAt: snap.createdAt,
     };
   }
 
@@ -58,15 +55,14 @@ export class CoreProcessController {
     return this.orchestrator.runFromPot(
       processId,
       body.criteria,
-      body.nodeWeights ?? { default: '1' },
+      body.nodeWeights ?? { n1: '1', n2: '1' },
     );
   }
 
   @Get(':processId')
   get(@Param('processId') processId: string) {
-    return {
-      processId,
-      note: 'status snapshot — extend with process store read',
-    };
+    const snap = this.orchestrator.getProcess(processId);
+    if (!snap) throw new NotFoundException('process not found');
+    return snap;
   }
 }

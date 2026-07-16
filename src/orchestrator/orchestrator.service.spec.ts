@@ -1,19 +1,23 @@
 import { Test } from '@nestjs/testing';
 import { EventEmitterModule } from '@nestjs/event-emitter';
 import { AroscoinModule } from '../aroscoin/aroscoin.module';
+import { AroscoinService } from '../aroscoin/aroscoin.service';
+import { KillSwitchService } from '../common/kill-switch.service';
 import { CommissionModule } from '../commission/commission.module';
 import { EmissionModule } from '../emission/emission.module';
 import { InvariantsModule } from '../invariants/invariants.module';
 import { NodechainModule } from '../nodechain/nodechain.module';
+import { OracleGatewayModule } from '../oracle-gateway/oracle-gateway.module';
 import { PotModule } from '../pot/pot.module';
 import { ReserveModule } from '../reserve/reserve.module';
+import { StateRecordingModule } from '../state-recording/state-recording.module';
 import { OrchestratorModule } from './orchestrator.module';
 import { OrchestratorService } from './orchestrator.service';
-import { AroscoinService } from '../aroscoin/aroscoin.service';
 
 describe('OrchestratorService', () => {
   let orch: OrchestratorService;
   let coin: AroscoinService;
+  let kill: KillSwitchService;
 
   beforeEach(async () => {
     const moduleRef = await Test.createTestingModule({
@@ -26,11 +30,15 @@ describe('OrchestratorService', () => {
         AroscoinModule,
         ReserveModule,
         CommissionModule,
+        OracleGatewayModule,
+        StateRecordingModule,
         OrchestratorModule,
       ],
     }).compile();
     orch = moduleRef.get(OrchestratorService);
     coin = moduleRef.get(AroscoinService);
+    kill = moduleRef.get(KillSwitchService);
+    kill.setActive(false);
   });
 
   it('runs start → pot → mint → settle happy path', () => {
@@ -47,11 +55,13 @@ describe('OrchestratorService', () => {
     const result = orch.runFromPot(
       processId,
       { P1: true, P2: true, P3: true, P4: true },
-      { n1: '1' },
+      { n1: '1', n2: '1' },
     );
     expect(result.verified).toBe(1);
+    expect(result.status).toBe('completed');
     expect(result.claimId).toBeDefined();
     expect(parseFloat(coin.balanceOf('holder-1'))).toBe(100);
+    expect(orch.getProcess(processId)?.status).toBe('completed');
   });
 
   it('is idempotent on start', () => {
@@ -72,5 +82,19 @@ describe('OrchestratorService', () => {
       holderId: 'h',
     });
     expect(a.processId).toBe(b.processId);
+  });
+
+  it('blocks new processes when kill switch active', () => {
+    kill.setActive(true);
+    expect(() =>
+      orch.startProcess({
+        institutionCode: 'DEMO',
+        idempotencyKey: 'k',
+        institutionalValuation: '1',
+        currency: 'GEL',
+        assetType: 'bond',
+        holderId: 'h',
+      }),
+    ).toThrow(/kill switch/i);
   });
 });

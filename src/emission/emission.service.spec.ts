@@ -18,8 +18,9 @@ describe('EmissionService', () => {
     pot.confirm({
       processId: 'AST-DEMO-20260716-0192f3c4-8b2a-7d6e-9f01-23456789abcd',
       executionSnapshot: { hash: 'h', prevHash: 'p' },
-      validatorIds: ['v1'],
-      signatures: ['s1'],
+      assignedValidatorIds: ['v1', 'v2', 'v3'],
+      validatorIds: ['v1', 'v2'],
+      signatures: ['s1', 's2'],
       criteriaResult: { P1: true, P2: true, P3: true, P4: true },
     });
   });

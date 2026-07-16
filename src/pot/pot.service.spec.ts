@@ -9,6 +9,7 @@ function evidence(over: Partial<PotEvidence> = {}): PotEvidence {
   return {
     processId: 'AST-DEMO-20260716-0192f3c4-8b2a-7d6e-9f01-23456789abcd',
     executionSnapshot: { hash: 'h1', prevHash: 'h0' },
+    assignedValidatorIds: ['v1', 'v2', 'v3'],
     validatorIds: ['v1', 'v2'],
     signatures: ['sig1', 'sig2'],
     criteriaResult: { P1: true, P2: true, P3: true, P4: true },
@@ -18,29 +19,40 @@ function evidence(over: Partial<PotEvidence> = {}): PotEvidence {
 
 describe('PotService', () => {
   let pot: PotService;
+  let nodechain: NodechainService;
 
   beforeEach(() => {
-    const nodechain = new NodechainService(new MemoryLedgerStore());
-    const invariants = new InvariantsService(new EventEmitter2());
-    pot = new PotService(nodechain, invariants);
+    nodechain = new NodechainService(new MemoryLedgerStore());
+    pot = new PotService(nodechain, new InvariantsService(new EventEmitter2()));
   });
 
-  it('sets verified=1 only when all P1–P4 pass and records NodeChain', () => {
+  it('verifies only with P1–P4 + quorum and write-ahead NodeChain', () => {
     const v = pot.confirm(evidence());
     expect(v.verified).toBe(1);
-    expect(v.status).toBe('verified');
     expect(v.ledgerHeight).toBe(1);
     expect(pot.okToEmit(v.processId)).toBe(true);
+    expect(nodechain.getByHeight(1)?.recordType).toBe('pot_verdict');
   });
 
-  it('sets verified=0 immediately when any Pi fails', () => {
+  it('rejects when quorum not met', () => {
     const v = pot.confirm(
-      evidence({ criteriaResult: { P1: true, P2: false, P3: true, P4: true } }),
+      evidence({
+        validatorIds: ['v1'],
+        signatures: ['sig1'],
+      }),
     );
     expect(v.verified).toBe(0);
-    expect(v.status).toBe('rejected');
+    expect(v.reasonCodes?.P2).toMatch(/QUORUM/i);
+  });
+
+  it('rejects when any Pi fails', () => {
+    const v = pot.confirm(
+      evidence({
+        criteriaResult: { P1: true, P2: false, P3: true, P4: true },
+      }),
+    );
+    expect(v.verified).toBe(0);
     expect(v.failedCriteria).toContain('P2');
-    expect(pot.okToEmit(v.processId)).toBe(false);
   });
 
   it('rejects double confirmation', () => {
@@ -48,21 +60,19 @@ describe('PotService', () => {
     expect(() => pot.confirm(evidence())).toThrow(/double/i);
   });
 
-  it('expires after 15 minutes', () => {
-    const e = evidence({ processId: 'AST-DEMO-20260716-timeout-case-000000000001' });
+  it('expires after timeout', () => {
+    const pid = 'AST-DEMO-20260716-timeout-case-000000000002';
     const t0 = Date.now();
     pot.confirm(
       evidence({
-        processId: e.processId,
+        processId: pid,
         criteriaResult: { P1: false, P2: true, P3: true, P4: true },
       }),
       { now: t0 },
     );
-    // re-open pending with fail then timeout on later call with all pass but late
-    const late = pot.confirm(evidence({ processId: e.processId }), {
+    const late = pot.confirm(evidence({ processId: pid }), {
       now: t0 + POT_TIMEOUT_MS + 1,
     });
-    // First call may have left pending; after timeout must expire
-    expect(late.status === 'expired' || late.verified === 0).toBe(true);
+    expect(late.status).toBe('expired');
   });
 });

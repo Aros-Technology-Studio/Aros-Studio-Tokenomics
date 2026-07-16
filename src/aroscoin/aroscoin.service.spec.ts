@@ -19,8 +19,9 @@ describe('AroscoinService', () => {
     pot.confirm({
       processId: PID,
       executionSnapshot: { hash: 'h', prevHash: 'p' },
-      validatorIds: ['v1'],
-      signatures: ['s'],
+      assignedValidatorIds: ['v1', 'v2', 'v3'],
+      validatorIds: ['v1', 'v2'],
+      signatures: ['s1', 's2'],
       criteriaResult: { P1: true, P2: true, P3: true, P4: true },
     });
   });
