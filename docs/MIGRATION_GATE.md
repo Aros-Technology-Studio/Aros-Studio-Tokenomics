@@ -57,7 +57,7 @@ Hard fail classes (script is authoritative; names are short labels):
 | firewall | legacy multi-system product names must not define AST |
 | vocab | banned yield-style tokens (see `canon-gate.sh`) |
 | eye-executive | oversight must not veto, roll back, or initiate economic actions |
-| premine-stake | no mint-before-process / no passive yield surfaces |
+| mint-before-work | no emission without confirmed process / no passive yield surfaces |
 | bypass | no skip of PoT or NodeChain; no admin mint paths |
 | erc-sot | external token standards are adapters only, not Sole Truth |
 | custody | no holding participants’ third-party funds |

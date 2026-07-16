@@ -23,6 +23,11 @@ SCAN_PATHS=(src docs AGENTS.md package.json)
 for d in smart-contracts reference frontend contracts; do
   [ -d "$d" ] && SCAN_PATHS+=("$d")
 done
+# Migration process docs describe gate rules; candidates live under migration/inbox
+EXCLUDES+=(
+  --exclude=MIGRATION_GATE.md
+  --exclude-dir=migration
+)
 
 fail=0
 

@@ -8,12 +8,14 @@ EXCLUDES=(
   --exclude-dir=.git
   --exclude-dir=.github
   --exclude-dir=node_modules
+  --exclude-dir=migration
   --exclude=package-lock.json
   --exclude=yarn.lock
   --exclude=pnpm-lock.yaml
   '--exclude=*.lock'
   # Questionnaire may cite historical external URLs; guards live under .github
   --exclude=COMPONENT_CLARIFICATIONS.md
+  --exclude=MIGRATION_GATE.md
 )
 
 # Case-sensitive: "ALB" matches only the literal epoch acronym, never words like "totalBurned".

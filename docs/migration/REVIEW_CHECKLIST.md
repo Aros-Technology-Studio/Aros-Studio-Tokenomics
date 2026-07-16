@@ -25,7 +25,7 @@ Fill after `npm run check:migration` is green (or document is REWRITE-only).
 ## B. Hard prohibitions (CANON §X) — not as live features
 
 - [ ] No system self-appraisal of assets  
-- [ ] No mint without confirmed process / no free emission path  
+- [ ] No mint without confirmed process / no unprocess-bound emission path  
 - [ ] No passive yield surfaces without executed work  
 - [ ] No holding third-party participant funds  
 - [ ] No All-Seeing Eye veto or rollback powers  
