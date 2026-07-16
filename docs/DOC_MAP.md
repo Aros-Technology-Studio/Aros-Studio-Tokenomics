@@ -1,18 +1,39 @@
 # Document Map
 
-**Status:** Structure ratified (2026-07-14); aligned to Core Canon v1.0 Final (2026-07-16)  
+**Status:** Full docs tree live (2026-07-16) — processes + architecture + modules + component packs  
 **Principle:** [ANTI_POLICE.md](./principles/ANTI_POLICE.md)  
-**Canon:** `/CANON.md` (AST Core Canon — sole source of truth)
+**Canon:** `docs/AST-CORE-CANON.md` (root `CANON.md` is pointer only)
 
-Registry of canonical components, their documentation packs, and target code paths.
+Registry of documentation surfaces and target code paths.
+
+**Progressive fill rule:** Core Canon → decisions → module/process docs → component packs → code. Parallel work is allowed when packs do not conflict.
 
 ---
 
 ## Sources of truth
 
-1. `CANON.md` — **AST Core Canon v1.0 Final** (sole source of truth)  
-2. `docs/` — specifications derived from canon  
-3. `src/` — implementation (must conform; if code and docs diverge from canon, fix them)
+1. `docs/AST-CORE-CANON.md` — sole full source of truth  
+2. `docs/P0-P4-TECHNICAL-DECISIONS.md` — ratified decisions  
+3. `docs/modules/`, `docs/processes/`, `docs/architecture/`, `docs/components/` — derived specs  
+4. `src/` — implementation (must conform)
+
+---
+
+## Documentation surfaces
+
+| Path | Role |
+|------|------|
+| `docs/AST-CORE-CANON.md` | Sole law |
+| `docs/ARCHITECTURE.md` | High-level architecture |
+| `docs/architecture/` | system-context, data-flow, security-model, deployment, portal |
+| `docs/processes/` | End-to-end business processes |
+| `docs/modules/` | Deep module specs (README + topics + API) |
+| `docs/components/` | 4-file packs (PURPOSE/MODEL/CONTRACT/ACCEPTANCE) |
+| `docs/ROADMAP.md` / `BUILD_SCHEDULE.md` | Plan and build order |
+| `docs/README.md` | Docs entry / tree |
+
+Module deep-docs map 1:1 to the owner’s target tree under `docs/modules/*`.  
+Component packs remain the **implementation acceptance** surface.
 
 ---
 
@@ -20,12 +41,15 @@ Registry of canonical components, their documentation packs, and target code pat
 
 | Path | Status | Role |
 |------|--------|------|
-| `CANON.md` | exists | Canon spine |
+| `CANON.md` | exists | Pointer to Core Canon |
 | `docs/README.md` | exists | Docs entry |
-| `docs/ARCHITECTURE.md` | scaffold | End-to-end view |
+| `docs/ARCHITECTURE.md` | living | End-to-end view |
 | `docs/DOC_MAP.md` | exists | This registry |
 | `docs/principles/ANTI_POLICE.md` | exists | Working rule |
 | `docs/components/_template/` | exists | Pack template |
+| `docs/modules/` | exists | Module deep specs |
+| `docs/processes/` | exists | Process specs |
+| `docs/architecture/` | exists | Architecture detail |
 
 ---
 
@@ -49,15 +73,17 @@ Unit of documentation = **runtime component**. Layer folders (`02_…`, `10_…`
 | P2 | `release` | `components/release/` | **ready** | `src/release/` | Release Phase gates; split from partial-release |
 | P3 | `common` | `components/common/` | **ready** | `src/common/` | Technical utils only; barrel exports; decimal.js |
 | P4 | `partial-release` | `components/partial-release/` | **ready** | `src/partial-release/` | Split from phase; holder+institution; full process |
-| P4 | `release-daemon` | `components/release-daemon/` | **ready** | `src/release-daemon/` | Real v1; thresholds initiate |
-| P4 | `velocity-tracker` | `components/velocity-tracker/` | **ready** | `src/velocity-tracker/` | Real v1; §9.6 formula |
-| P4 | `node-reputation` | `components/node-reputation/` | **ready** | `src/node-reputation/` | Real v1; no slashing |
-| P4 | `oracle-gateway` | `components/oracle-gateway/` | **ready** | `src/oracle-gateway/` | Multi-oracle + signatures; fail-closed |
+| P4 | `release-daemon` | `components/release-daemon/` | **ready** | `src/release-daemon/` | Full pack 2026-07-16; thresholds initiate |
+| P4 | `velocity-tracker` | `components/velocity-tracker/` | **ready** | `src/velocity-tracker/` | Full pack 2026-07-16; §9.6 formula |
+| P4 | `node-reputation` | `components/node-reputation/` | **ready** | `src/node-reputation/` | Full pack 2026-07-16; no slashing |
+| P4 | `oracle-gateway` | `components/oracle-gateway/` | **ready** | `src/oracle-gateway/` | Full pack 2026-07-16; multi-oracle + signatures |
 | later | `resource_monitor` | — | stub | — | Deferred |
 | edge | Institutional Portal | `docs/architecture/INSTITUTIONAL_PORTAL.md` | scaffold | `portal/` | Next.js + Nest edge; OpenAPI under `portal/openapi/` |
 
 Pack status values: `missing` | `draft` | `ready` | `implemented`.  
-**P0–P4 documentation complete.** Implementation status remains open.  
+
+**Documentation:** P0–P4 packs exist; P4 support packs expanded to full PURPOSE/MODEL/CONTRACT/ACCEPTANCE (not stubs).  
+**Implementation:** core path present under `src/`; treat as draft until ACCEPTANCE implementation checkboxes close (durable feeds, portal polish, prod ops = Phase 5).
 
 Target layout aliases (scaffold): `/nodechain` ↔ nodechain engine+ledger; `/pot-engine` ↔ pot; `/portal` ↔ institutional UI (v1 in-repo).
 

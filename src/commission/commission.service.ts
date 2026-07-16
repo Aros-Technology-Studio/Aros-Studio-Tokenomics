@@ -1,9 +1,10 @@
-import { Injectable } from '@nestjs/common';
+import { Injectable, Optional } from '@nestjs/common';
 import Decimal from 'decimal.js';
 import { floorToArx, parseDecimal } from '../common/money/money';
 import { AstError } from '../common/errors/ast-error';
 import { AstErrorCode } from '../common/errors/error-codes';
 import { NodechainService } from '../nodechain/nodechain.service';
+import { NodeReputationService } from '../node-reputation/node-reputation.service';
 import { PotService } from '../pot/pot.service';
 import { ReserveService } from '../reserve/reserve.service';
 
@@ -32,7 +33,26 @@ export class CommissionService {
     private readonly pot: PotService,
     private readonly nodechain: NodechainService,
     private readonly reserve: ReserveService,
+    @Optional() private readonly reputation?: NodeReputationService,
   ) {}
+
+  /**
+   * Prefer explicit weights; if omitted nodeIds provided, derive from reputation.
+   */
+  resolveNodeWeights(
+    explicit: Record<string, string> | undefined,
+    nodeIds: string[],
+    uptimeByNode: Record<string, number> = {},
+  ): Record<string, string> {
+    if (explicit && Object.keys(explicit).length > 0) return explicit;
+    if (!this.reputation) {
+      throw new AstError(
+        AstErrorCode.INVALID_INPUT,
+        'nodeWeights required when reputation service unavailable',
+      );
+    }
+    return this.reputation.weightsFor(nodeIds, uptimeByNode);
+  }
 
   settleCommission(input: SettleInput): {
     feeAro: string;

@@ -15,13 +15,14 @@
 
 ## Implementation ready when
 
+- [x] settleCommission after PoT only  
+- [x] distributeNodePayment + reserve accrue  
+- [x] Every settlement on NodeChain  
+- [x] Simple full distribution engine tests  
+- [x] Node weights from reputation (`resolveNodeWeights` / `weightsFor`)  
 - [ ] Fee schedules per asset class  
-- [ ] settleCommission after PoT only  
-- [ ] distributeNodePayment + reserve accrue  
 - [ ] Waivers/tiers  
-- [ ] Every settlement on NodeChain  
-- [ ] CI vocabulary clean (`npm run check:canon`)  
-- [ ] Simple full distribution engine tests  
+- [ ] CI vocabulary clean (`npm run check:canon`) on every PR  
 
 ---
 
@@ -39,4 +40,5 @@
 |------|-------|--------|
 | Confirm default 70/30 vs other policy defaults | 70/30 ship default | **closed** |
 | Sandbox feeRate example | 0.15% | **closed** |
-| Node weight formula detail | engineering | open (canon §9.5 shape) |
+| Node weight formula | reputation §9.8 × uptime | **closed** (wired) |
+| Multi-schedule per asset class | build | open |

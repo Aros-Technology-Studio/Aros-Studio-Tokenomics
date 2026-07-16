@@ -1,6 +1,10 @@
 import { Injectable } from '@nestjs/common';
 import { OnEvent } from '@nestjs/event-emitter';
 import { INVARIANT_BROKEN_EVENT } from '../invariants/invariants.service';
+import {
+  NODE_RESTORED_EVENT,
+  NODE_SUSPENDED_EVENT,
+} from '../node-reputation/node-reputation.service';
 
 export type AlertSeverity = 'critical' | 'info';
 
@@ -70,6 +74,18 @@ export class AllSeeingEyeService {
   @OnEvent(INVARIANT_BROKEN_EVENT)
   onInvariantBroken(payload: unknown): void {
     this.notify('critical', 'E_INVARIANT_BROKEN', 'Invariant broken observed', payload);
+  }
+
+  /** Observe only — no veto on suspend (CANON §4.3). */
+  @OnEvent(NODE_SUSPENDED_EVENT)
+  onNodeSuspended(payload: unknown): void {
+    this.observe(NODE_SUSPENDED_EVENT, payload);
+    this.notify('info', 'E_NODE_SUSPENDED', 'Node suspended with grace (no slash)', payload);
+  }
+
+  @OnEvent(NODE_RESTORED_EVENT)
+  onNodeRestored(payload: unknown): void {
+    this.observe(NODE_RESTORED_EVENT, payload);
   }
 
   listAlerts(): readonly EyeAlert[] {
