@@ -7,6 +7,8 @@ import { CommissionService } from '../commission/commission.service';
 import { EmissionService } from '../emission/emission.service';
 import { NodechainService } from '../nodechain/nodechain.service';
 import { PotService } from '../pot/pot.service';
+import { OracleAttestation } from '../oracle-gateway/oracle-gateway.types';
+import { OracleGatewayService } from '../oracle-gateway/oracle-gateway.service';
 import { CriteriaResult } from '../pot/pot.types';
 import { ReserveService } from '../reserve/reserve.service';
 
@@ -56,6 +58,7 @@ export class OrchestratorService {
     private readonly commission: CommissionService,
     private readonly reserve: ReserveService,
     private readonly nodechain: NodechainService,
+    private readonly oracleGateway: OracleGatewayService,
   ) {}
 
   startProcess(input: StartProcessInput): { processId: string; step: PipelineStep } {
@@ -95,12 +98,14 @@ export class OrchestratorService {
   }
 
   /**
-   * Advance after documents validated: run PoT with provided criteria, then emission+settle.
+   * Advance after documents validated: optional oracle → PoT → emission+settle.
+   * Oracle failure → fail-closed (expired).
    */
   runFromPot(
     processId: string,
     criteria: CriteriaResult,
     nodeWeights: Record<string, string>,
+    oracleAttestations?: OracleAttestation[],
   ): {
     processId: string;
     verified: 0 | 1;
@@ -110,6 +115,16 @@ export class OrchestratorService {
     const proc = this.processes.get(processId);
     if (!proc) {
       throw new AstError(AstErrorCode.INVALID_PROCESS_ID, 'unknown process');
+    }
+
+    if (oracleAttestations && oracleAttestations.length > 0) {
+      proc.step = 'OracleGateway';
+      try {
+        this.oracleGateway.requireOk(processId, oracleAttestations);
+      } catch {
+        proc.step = 'EndProcess';
+        return { processId, verified: 0, step: 'EndProcess' };
+      }
     }
 
     proc.step = 'PoTEvaluation';

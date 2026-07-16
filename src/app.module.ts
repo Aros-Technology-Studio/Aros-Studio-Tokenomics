@@ -12,7 +12,9 @@ import { InvariantsModule } from './invariants/invariants.module';
 import { NodeReputationModule } from './node-reputation/node-reputation.module';
 import { NodechainModule } from './nodechain/nodechain.module';
 import { NodesModule } from './nodes/nodes.module';
+import { OracleGatewayModule } from './oracle-gateway/oracle-gateway.module';
 import { OrchestratorModule } from './orchestrator/orchestrator.module';
+import { PartialReleaseModule } from './partial-release/partial-release.module';
 import { PotModule } from './pot/pot.module';
 import { ReleaseDaemonModule } from './release-daemon/release-daemon.module';
 import { ReleaseModule } from './release/release.module';
@@ -36,7 +38,9 @@ import { VelocityTrackerModule } from './velocity-tracker/velocity-tracker.modul
     VelocityTrackerModule,
     ReleaseModule,
     ReleaseDaemonModule,
+    OracleGatewayModule,
     OrchestratorModule,
+    PartialReleaseModule,
     CoreApiModule,
   ],
   controllers: [AppController],
