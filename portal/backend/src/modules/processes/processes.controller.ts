@@ -1,27 +1,24 @@
-import { Controller, Get, Param, NotFoundException } from '@nestjs/common';
+import {
+  Controller,
+  Get,
+  Param,
+  NotFoundException,
+  BadRequestException,
+} from '@nestjs/common';
+import { coreGetProcess } from '../../core-client';
 
 @Controller('processes')
 export class ProcessesController {
   @Get(':processId')
-  get(@Param('processId') processId: string): {
-    processId: string;
-    status: string;
-    createdAt: string;
-    currentStep: string;
-    claimId: string | null;
-    note: string;
-  } {
+  async get(@Param('processId') processId: string): Promise<unknown> {
     if (!processId?.startsWith('AST-')) {
       throw new NotFoundException('process not found');
     }
-
-    return {
-      processId,
-      status: 'documents_pending',
-      createdAt: new Date().toISOString(),
-      currentStep: 'DocumentValidation',
-      claimId: null,
-      note: 'Stub — load from Orchestrator / state-recording (own scope only)',
-    };
+    try {
+      return await coreGetProcess(processId);
+    } catch (e) {
+      const msg = e instanceof Error ? e.message : 'core unavailable';
+      throw new BadRequestException(msg);
+    }
   }
 }

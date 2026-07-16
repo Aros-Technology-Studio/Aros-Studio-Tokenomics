@@ -174,7 +174,13 @@ components:
 
     StartTokenizationRequest:
       type: object
-      required: [assetType, institutionalValuation, currency, idempotencyKey]
+      required:
+        - assetType
+        - institutionalValuation
+        - currency
+        - idempotencyKey
+        - institutionCode
+        - holderId
       properties:
         assetType:
           type: string
@@ -189,6 +195,13 @@ components:
         idempotencyKey:
           type: string
           description: Mandatory dedupe key for StartProcess
+        institutionCode:
+          type: string
+          description: Institution code used in processId prefix AST-{INST}-…
+          example: DEMO
+        holderId:
+          type: string
+          description: Recipient holder id for minted claim
         metadata:
           type: object
           additionalProperties: true

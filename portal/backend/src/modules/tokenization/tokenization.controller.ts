@@ -1,10 +1,6 @@
-import { Body, Controller, Post } from '@nestjs/common';
+import { Body, Controller, Post, BadRequestException } from '@nestjs/common';
 import { IsIn, IsObject, IsOptional, IsString, MinLength } from 'class-validator';
-
-/**
- * Edge: validates request and will call core Orchestrator StartProcess.
- * Stub responses until Orchestrator client is wired.
- */
+import { coreStartProcess } from '../../core-client';
 
 class StartTokenizationDto {
   @IsIn(['real_estate', 'bond', 'investment_package', 'other'])
@@ -23,6 +19,14 @@ class StartTokenizationDto {
   @MinLength(8)
   idempotencyKey!: string;
 
+  @IsString()
+  @MinLength(2)
+  institutionCode!: string;
+
+  @IsString()
+  @MinLength(1)
+  holderId!: string;
+
   @IsOptional()
   @IsObject()
   metadata?: Record<string, unknown>;
@@ -31,26 +35,30 @@ class StartTokenizationDto {
 @Controller('tokenization')
 export class TokenizationController {
   @Post('start')
-  start(@Body() body: StartTokenizationDto): {
+  async start(@Body() body: StartTokenizationDto): Promise<{
     processId: string;
     status: string;
     createdAt: string;
     currentStep: string;
-    note: string;
-  } {
-    // TODO: call core Orchestrator StartProcess (sole economic entry).
-    // processId pattern: AST-{INST}-{YYYYMMDD}-<UUIDv7>
-    const day = new Date().toISOString().slice(0, 10).replace(/-/g, '');
-    const processId = `AST-PENDING-${day}-stub`;
-
-    void body;
-
-    return {
-      processId,
-      status: 'created',
-      createdAt: new Date().toISOString(),
-      currentStep: 'StartProcess',
-      note: 'Stub — wire Orchestrator client before production use',
-    };
+  }> {
+    try {
+      const r = await coreStartProcess({
+        institutionCode: body.institutionCode,
+        idempotencyKey: body.idempotencyKey,
+        institutionalValuation: body.institutionalValuation,
+        currency: body.currency,
+        assetType: body.assetType,
+        holderId: body.holderId,
+      });
+      return {
+        processId: r.processId,
+        status: r.status,
+        createdAt: r.createdAt,
+        currentStep: r.currentStep,
+      };
+    } catch (e) {
+      const msg = e instanceof Error ? e.message : 'core unavailable';
+      throw new BadRequestException(msg);
+    }
   }
 }

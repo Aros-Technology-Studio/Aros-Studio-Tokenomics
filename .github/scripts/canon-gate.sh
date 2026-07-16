@@ -9,10 +9,13 @@ EXCLUDES=(
   --exclude-dir=.github
   --exclude-dir=node_modules
   --exclude-dir=migration
+  --exclude-dir=dist
+  --exclude-dir=coverage
   --exclude=package-lock.json
   --exclude=yarn.lock
   --exclude=pnpm-lock.yaml
   '--exclude=*.lock'
+  '--exclude=*.map'
   # Questionnaire may cite historical external URLs; guards live under .github
   --exclude=COMPONENT_CLARIFICATIONS.md
   --exclude=MIGRATION_GATE.md
