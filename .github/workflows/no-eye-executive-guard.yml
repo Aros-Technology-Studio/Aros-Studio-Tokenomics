@@ -1,0 +1,20 @@
+name: No Eye executive power
+
+# All-Seeing Eye: observe / notify only — no veto, rollback, mint, burn, pay.
+
+on:
+  pull_request:
+  push:
+    branches: [main]
+
+permissions:
+  contents: read
+
+jobs:
+  no-eye-executive:
+    name: Eye observe-only
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Run no-eye-executive-guard
+        run: bash .github/scripts/no-eye-executive-guard.sh

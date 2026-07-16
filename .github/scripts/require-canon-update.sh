@@ -37,7 +37,7 @@ echo "Changed files:"
 echo "$CHANGED"
 
 # Paths that imply architectural / protocol change
-ARCH_REGEX='^(src/|docs/ARCHITECTURE\.md|docs/components/|docs/DOC_MAP\.md|docs/WORK_PLAN\.md|docs/principles/|smart-contracts/|contracts/|reference/|nodechain/|pot-engine/|aroscoin/|governance/|portal/|package\.json|tsconfig.*\.json)'
+ARCH_REGEX='^(src/|docs/ARCHITECTURE\.md|docs/components/|docs/DOC_MAP\.md|docs/WORK_PLAN\.md|docs/WORKFLOWS\.md|docs/principles/|smart-contracts/|contracts/|reference/|nodechain/|pot-engine/|portal/|aroscoin/|governance/|package\.json|tsconfig.*\.json)'
 
 arch_hits="$(echo "$CHANGED" | grep -E "$ARCH_REGEX" || true)"
 canon_hit="$(echo "$CHANGED" | grep -E '^CANON\.md$' || true)"

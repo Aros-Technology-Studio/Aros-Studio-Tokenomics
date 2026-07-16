@@ -61,4 +61,5 @@ See [`principles/ANTI_POLICE.md`](./principles/ANTI_POLICE.md).
 |----------|------|
 | `/CANON.md` | Ratified canon and technical spine |
 | `/docs/ARCHITECTURE.md` | Cross-component flows |
+| `/docs/WORKFLOWS.md` | GitHub Actions + runtime process workflows |
 | `/docs/DOC_MAP.md` | Registry and priorities |

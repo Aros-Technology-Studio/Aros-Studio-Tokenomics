@@ -39,7 +39,7 @@ for pattern in "${PATTERNS[@]}"; do
   hits="$(grep -RInE "$pattern" "${SCAN_PATHS[@]}" "${EXCLUDES[@]}" 2>/dev/null || true)"
   if [ -n "$hits" ]; then
     # Allow lines that forbid bypass
-    filtered="$(echo "$hits" | grep -viE 'must not|forbidden|prohibit|do not|never |blocks? bypass|no bypass|cannot bypass|must not bypass' || true)"
+    filtered="$(echo "$hits" | grep -viE 'must not|forbidden|prohibit|do not|never |blocks? bypass|no bypass|cannot bypass|must not bypass|no-bypass-pot|no_bypass_pot|No PoT/NodeChain' || true)"
     if [ -n "$filtered" ]; then
       echo "::error::no-bypass-pot-nodechain: possible PoT/NodeChain bypass (CANON.md §X)."
       echo "$filtered"

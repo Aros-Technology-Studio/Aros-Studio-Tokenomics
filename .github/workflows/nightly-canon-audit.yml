@@ -1,9 +1,6 @@
 name: Nightly canon audit
 
-# A daily (and on-demand) audit of the repository against the AST canon.
-# Hard-fails on firewall / vocabulary breaches (same gate as pull requests),
-# then reports forbidden-concept keywords for a human to confirm each is an
-# invariant-derived negation (a concept with no object) and not a live mechanic.
+# Daily full guard suite + soft report of forbidden-concept keywords.
 
 on:
   schedule:
@@ -20,9 +17,11 @@ jobs:
     steps:
       - name: Checkout
         uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
 
-      - name: Canon gate (hard — firewall + vocabulary)
-        run: bash .github/scripts/canon-gate.sh
+      - name: Run all hard guards
+        run: bash .github/scripts/run-all-guards.sh
 
       - name: Forbidden-concept report (soft)
         run: |
@@ -32,7 +31,7 @@ jobs:
             --exclude=README.md --exclude=PROJECT_STATUS.md --exclude=MIGRATION_REVIEW.md \
             2>/dev/null || true)"
           if [ -n "$hits" ]; then
-            echo "::warning::Forbidden-concept keywords present — confirm each is an invariant-derived negation (a concept with no object under I6), not a live mechanic:"
+            echo "::warning::Forbidden-concept keywords present — confirm each is negation-only, not a live mechanic:"
             echo "$hits"
           else
             echo "No forbidden-concept keywords found."
