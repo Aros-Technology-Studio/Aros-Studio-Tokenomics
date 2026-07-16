@@ -1,7 +1,7 @@
 # CONTRACT — `nodechain`
 
 **Status:** ready  
-**Canon refs:** `CANON.md` §4.1; clarifications P1.5
+**Canon refs:** `docs/AST-CORE-CANON.md` §4.1; P0–P4 decisions
 
 ---
 

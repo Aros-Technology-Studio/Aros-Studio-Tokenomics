@@ -1,7 +1,7 @@
 # MODEL — `nodechain`
 
 **Status:** ready  
-**Canon refs:** `CANON.md` §4.1
+**Canon refs:** `docs/AST-CORE-CANON.md` §4.1
 
 ---
 

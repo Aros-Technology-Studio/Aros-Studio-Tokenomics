@@ -15,16 +15,16 @@
 
 ## Implementation ready when
 
-- [ ] Primary append-only ledger (RocksDB or BadgerDB)  
-- [ ] Postgres index mirror (not SoT)  
-- [ ] Encryption at rest for sensitive data  
-- [ ] Append restricted to internal roles + quorum validators  
-- [ ] Institution read filtered by own processId/claimId  
-- [ ] Eye/audit full-history path  
-- [ ] Content-hash links + processId navigation  
-- [ ] Lint/CI forbid `block`/`blocks` in public API surface  
-- [ ] Single-shard only  
-- [ ] Tests: immutability, unauthorized append, mirror lag ≠ truth  
+- [x] Append-only linear ledger + ExecutionSnapshot + content hashing (**Phase 1.1**)  
+- [x] Append restricted to internal roles + quorum validators  
+- [x] Institution read by processId; eye/audit full history scope  
+- [x] Encryption at rest for sensitive payloads (AES-GCM; prod key via env)  
+- [x] Integrity verification (fail closed on break)  
+- [x] Single-shard only  
+- [x] Tests: immutability, unauthorized append, scoped read, sensitive encrypt  
+- [ ] Primary store RocksDB (Phase 1.2)  
+- [ ] Postgres index mirror (Phase 1.2)  
+- [ ] Lint/CI forbid `block`/`blocks` in public API surface (ongoing guards)  
 
 ---
 
