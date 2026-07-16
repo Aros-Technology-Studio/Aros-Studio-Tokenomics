@@ -47,6 +47,10 @@ export class PostgresIndexMirror implements OnModuleDestroy {
       );
       CREATE INDEX IF NOT EXISTS nodechain_index_process_id
         ON nodechain_index (process_id);
+      CREATE INDEX IF NOT EXISTS nodechain_index_record_type
+        ON nodechain_index (record_type);
+      CREATE INDEX IF NOT EXISTS nodechain_index_created_at
+        ON nodechain_index (created_at);
     `);
   }
 

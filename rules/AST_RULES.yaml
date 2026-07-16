@@ -1,0 +1,79 @@
+# AST machine-readable rules (v1)
+# Law: docs/AST-CORE-CANON.md — this file encodes defaults for CI and agents.
+# Changing economic ratios or invariants requires formal canon amendment.
+
+version: "1.0"
+canon_ref: docs/AST-CORE-CANON.md
+
+firewall:
+  # Do not list banned product tokens in this file (canon-gate greps the tree).
+  # Authoritative scanners: .github/scripts/canon-gate.sh and migration-doc-gate.sh
+  scanners:
+    - .github/scripts/canon-gate.sh
+    - .github/scripts/ast-philosophy-guard.sh
+
+invariants:
+  - id: I1
+    text: Value arises only when PoT verified = 1
+  - id: I2
+    text: Every emission or burn is bound to a confirmed process
+  - id: I3
+    text: Every significant event is recorded in NodeChain
+  - id: I4
+    text: Determinism — same input yields one result
+  - id: I5
+    text: What is earned is retained; speculative hold forbidden
+  - id: I6
+    text: AST holds only its own funds
+  - id: I7
+    text: Token always reflects current confirmed asset value
+  - id: I8
+    text: Until Release Phase circulation limited to internal roles
+  - id: I9
+    text: New emission always distributed pro-rata to current holders
+
+pot:
+  criteria: [P1, P2, P3, P4]
+  timeout_minutes: 15
+  quorum_default_ratio: "2/3"
+  multi_node_same_institution_votes: 1
+
+commission:
+  # I-COMM ship default (Core Canon §XII) — not 20/80
+  node_share: 0.70
+  ast_share: 0.30
+  settlement: post_factum_on_pot
+  currency: ARO
+  sandbox_fee_rate_example: 0.0015
+
+aroscoin:
+  decimals: 9
+  dust_arx: "0.000000001"
+  privileged_mint: forbidden
+
+eye:
+  veto: false
+  rollback: false
+  mint: false
+  burn: false
+  pay: false
+  role: observe_record_notify
+
+release:
+  threshold_config_key: release.threshold
+  target_config_key: release.target
+  formula: "(reserveIndex > threshold) AND (velocity > target)"
+
+custody:
+  third_party_participant_funds: forbidden
+  own_funds_only: true
+
+token_protocol:
+  sot: nodechain_and_pot
+  erc_adapters: representation_only
+
+environments: [local, test, sandbox, prod]
+clock: UTC
+ledger_primary: rocksdb_oriented
+ledger_index_mirror: postgres
+kill_switch: true

@@ -64,13 +64,19 @@ Related packs also exist for: `nodes`, `node-reputation`, `reserve`, `partial-re
 
 ---
 
+## Diagrams
+
+Each module folder includes **`DIAGRAM.md`** — Mermaid diagrams only (lifecycle, sequence, boundaries).  
+Component packs under `docs/components/*/DIAGRAM.md` mirror the same rule.
+
 ## How to use
 
 1. Read Core Canon for the rule.  
 2. Read P0–P4 decisions for the ratified default.  
 3. Read the component pack for CONTRACT/MODEL.  
 4. Use this tree for module-level narrative and API/storage shape.  
-5. Code last; on conflict, **Core Canon wins**.
+5. Open `DIAGRAM.md` for visual structure.  
+6. Code last; on conflict, **Core Canon wins**.
 
 ---
 

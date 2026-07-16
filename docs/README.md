@@ -40,6 +40,11 @@ docs/
 | `PORTAL.md` | Portal architecture (edge) |
 | `WORKFLOWS.md` | CI + runtime flows |
 | `MIGRATION_GATE.md` | Legacy doc intake gate |
+| `INTAKE.md` | Institutional intake + КЭП |
+| `LEGAL_STATUS.md` | Regulatory checklist ([NOT VERIFIED] rows) |
+| `NOTION_SYNC.md` | Deferred Notion mirror policy |
+| `db/` | Postgres index schema (not SoT) |
+| `reviews/` | Engineering reviews (e.g. Solidity custody) |
 | `processes/` | Business process specs |
 | `architecture/` | Architecture detail |
 | `modules/` | Module-level specs (README + topics + API) |

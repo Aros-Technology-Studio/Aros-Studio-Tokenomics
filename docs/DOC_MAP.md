@@ -98,9 +98,12 @@ PURPOSE.md
 MODEL.md
 CONTRACT.md
 ACCEPTANCE.md
+DIAGRAM.md   # Mermaid-only diagrams (added 2026-07-16)
 ```
 
-Copy from `components/_template/`. Do not expand the set without product-owner request.
+Copy from `components/_template/` for the four prose files. `DIAGRAM.md` is Mermaid diagrams only (flowcharts, state, sequence).
+
+Module deep-docs under `docs/modules/<name>/` also include `DIAGRAM.md` (Mermaid only).
 
 ---
 

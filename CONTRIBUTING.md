@@ -26,6 +26,8 @@ npm test
 npm run build
 ```
 
+Also see: [`SECURITY.md`](SECURITY.md), [`CHANGELOG.md`](CHANGELOG.md), [`rules/AST_RULES.yaml`](rules/AST_RULES.yaml).
+
 Architectural PRs must update `docs/AST-CORE-CANON.md` when protocol/invariants change (`require-canon-update` workflow).
 
 ## Legacy documentation
