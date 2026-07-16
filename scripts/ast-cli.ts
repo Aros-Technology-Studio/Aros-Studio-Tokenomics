@@ -84,7 +84,7 @@ async function main(): Promise<void> {
     const done = orch.runFromPot(
       start.processId,
       { P1: true, P2: true, P3: true, P4: true },
-      { n1: '1', n2: '1' },
+      { n1: '1', n2: '1', n3: '1' },
     );
     // eslint-disable-next-line no-console
     console.log(

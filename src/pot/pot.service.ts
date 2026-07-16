@@ -1,14 +1,20 @@
-import { Injectable } from '@nestjs/common';
+import { Injectable, Optional } from '@nestjs/common';
 import { AstError } from '../common/errors/ast-error';
 import { AstErrorCode, PotCriteriaId } from '../common/errors/error-codes';
 import { InvariantsService } from '../invariants/invariants.service';
 import { NodechainService } from '../nodechain/nodechain.service';
+import { NodesService } from '../nodes/nodes.service';
 import { CriteriaResult, PotEvidence, PotVerdict } from './pot.types';
 import { quorumMet, requiredQuorum } from './quorum';
 
 /** Default PoT timeout: 15 minutes (CANON §XII). */
 export const POT_TIMEOUT_MS = 15 * 60 * 1000;
 
+/**
+ * PoT sole value gate. No amount math.
+ * When NodesService has confirmers registered, assigned validators must be
+ * active confirmers (suspended excluded). No fake pad validators in core path.
+ */
 @Injectable()
 export class PotService {
   private readonly verifiedProcesses = new Set<string>();
@@ -19,11 +25,24 @@ export class PotService {
   constructor(
     private readonly nodechain: NodechainService,
     private readonly invariants: InvariantsService,
+    @Optional() private readonly nodes?: NodesService,
   ) {}
+
+  /** Start confirmation window (orchestrator StartProcess / before confirm). */
+  openPending(processId: string, now = Date.now()): void {
+    if (this.verifiedProcesses.has(processId)) {
+      throw new AstError(AstErrorCode.POT_DOUBLE_CONFIRM, 'already verified', {
+        processId,
+      });
+    }
+    if (!this.pendingSince.has(processId)) {
+      this.pendingSince.set(processId, now);
+    }
+  }
 
   /**
    * Confirm work. Amounts are NOT computed here.
-   * Order: criteria → quorum → NodeChain append (write-ahead) → mark verified.
+   * Order: eligibility → criteria → quorum → NodeChain append (write-ahead) → verified.
    */
   confirm(evidence: PotEvidence, opts?: { now?: number }): PotVerdict {
     const now = opts?.now ?? Date.now();
@@ -51,6 +70,21 @@ export class PotService {
         ? evidence.assignedValidatorIds
         : evidence.validatorIds;
     const confirming = evidence.validatorIds;
+
+    // Core integrity: when node registry is in use, only active confirmers may vote.
+    const eligibility = this.checkValidatorEligibility(assigned, confirming);
+    if (!eligibility.ok) {
+      return {
+        processId,
+        verified: 0,
+        status: 'rejected',
+        failedCriteria: ['P1'],
+        reasonCodes: { P1: eligibility.reasonCode ?? 'E_P1_VALIDATOR_NOT_ELIGIBLE' },
+        quorumRequired: requiredQuorum(assigned.length),
+        quorumActual: 0,
+      };
+    }
+
     const need = requiredQuorum(assigned.length);
     const actual = new Set(confirming.filter((id) => assigned.includes(id)))
       .size;
@@ -158,6 +192,27 @@ export class PotService {
 
   verdictHeight(processId: string): number | undefined {
     return this.verdictHeights.get(processId);
+  }
+
+  /**
+   * If any confirmer is registered in NodesService, every assigned/confirming
+   * id must be an active confirmer. Empty registry → unit-test mode (ids free).
+   */
+  private checkValidatorEligibility(
+    assigned: string[],
+    confirming: string[],
+  ): { ok: boolean; reasonCode?: string } {
+    if (!this.nodes) return { ok: true };
+    const active = this.nodes.activeConfirmers();
+    if (active.length === 0) return { ok: true };
+
+    const eligible = new Set(active.map((n) => n.nodeId));
+    for (const id of [...assigned, ...confirming]) {
+      if (!eligible.has(id)) {
+        return { ok: false, reasonCode: 'E_P1_VALIDATOR_NOT_ELIGIBLE' };
+      }
+    }
+    return { ok: true };
   }
 }
 

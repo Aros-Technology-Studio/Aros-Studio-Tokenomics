@@ -2,6 +2,7 @@ import { EventEmitter2 } from '@nestjs/event-emitter';
 import { InvariantsService } from '../invariants/invariants.service';
 import { MemoryLedgerStore } from '../nodechain/memory-ledger.store';
 import { NodechainService } from '../nodechain/nodechain.service';
+import { NodesService } from '../nodes/nodes.service';
 import { PotService, POT_TIMEOUT_MS } from './pot.service';
 import { PotEvidence } from './pot.types';
 
@@ -17,13 +18,33 @@ function evidence(over: Partial<PotEvidence> = {}): PotEvidence {
   };
 }
 
+function registerConfirmers(nodes: NodesService, ids: string[]): void {
+  for (const id of ids) {
+    nodes.register({
+      nodeId: id,
+      institutionId: `I-${id}`,
+      certificateId: `c-${id}`,
+      publicKey: `pk-${id}`,
+      roles: ['confirmer'],
+      approved: true,
+      allowlisted: true,
+    });
+  }
+}
+
 describe('PotService', () => {
   let pot: PotService;
   let nodechain: NodechainService;
+  let nodes: NodesService;
 
   beforeEach(() => {
     nodechain = new NodechainService(new MemoryLedgerStore());
-    pot = new PotService(nodechain, new InvariantsService(new EventEmitter2()));
+    nodes = new NodesService();
+    pot = new PotService(
+      nodechain,
+      new InvariantsService(new EventEmitter2()),
+      nodes,
+    );
   });
 
   it('verifies only with P1–P4 + quorum and write-ahead NodeChain', () => {
@@ -74,5 +95,19 @@ describe('PotService', () => {
       now: t0 + POT_TIMEOUT_MS + 1,
     });
     expect(late.status).toBe('expired');
+  });
+
+  it('rejects suspended validator when registry active', () => {
+    registerConfirmers(nodes, ['v1', 'v2', 'v3']);
+    nodes.suspend('v1');
+    const v = pot.confirm(evidence());
+    expect(v.verified).toBe(0);
+    expect(v.reasonCodes?.P1).toMatch(/NOT_ELIGIBLE/i);
+  });
+
+  it('accepts only active confirmers from registry', () => {
+    registerConfirmers(nodes, ['v1', 'v2', 'v3']);
+    const v = pot.confirm(evidence());
+    expect(v.verified).toBe(1);
   });
 });

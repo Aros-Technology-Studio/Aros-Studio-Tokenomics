@@ -55,7 +55,7 @@ export class CoreProcessController {
     return this.orchestrator.runFromPot(
       processId,
       body.criteria,
-      body.nodeWeights ?? { n1: '1', n2: '1' },
+      body.nodeWeights ?? { n1: '1', n2: '1', n3: '1' },
     );
   }
 

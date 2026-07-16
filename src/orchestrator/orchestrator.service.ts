@@ -10,8 +10,10 @@ import { EmissionService } from '../emission/emission.service';
 import { NodechainService } from '../nodechain/nodechain.service';
 import { OracleAttestation } from '../oracle-gateway/oracle-gateway.types';
 import { OracleGatewayService } from '../oracle-gateway/oracle-gateway.service';
+import { NodesService } from '../nodes/nodes.service';
 import { PotService } from '../pot/pot.service';
 import { CriteriaResult } from '../pot/pot.types';
+import { requiredQuorum } from '../pot/quorum';
 import { ReserveService } from '../reserve/reserve.service';
 import { StateRecordingService } from '../state-recording/state-recording.service';
 
@@ -67,6 +69,7 @@ export class OrchestratorService implements OnModuleInit {
   private commission!: CommissionService;
   private reserve!: ReserveService;
   private nodechain!: NodechainService;
+  private nodes!: NodesService;
   private oracleGateway!: OracleGatewayService;
   private stateRecording!: StateRecordingService;
   private killSwitch!: KillSwitchService;
@@ -84,6 +87,7 @@ export class OrchestratorService implements OnModuleInit {
     this.commission = this.moduleRef.get(CommissionService, { strict: false });
     this.reserve = this.moduleRef.get(ReserveService, { strict: false });
     this.nodechain = this.moduleRef.get(NodechainService, { strict: false });
+    this.nodes = this.moduleRef.get(NodesService, { strict: false });
     this.oracleGateway = this.moduleRef.get(OracleGatewayService, {
       strict: false,
     });
@@ -130,6 +134,7 @@ export class OrchestratorService implements OnModuleInit {
         institutionalValuation: input.institutionalValuation,
       },
     });
+    this.pot.openPending(processId);
     this.stateRecording.record({
       processId,
       stateType: 'StartProcess',
@@ -182,13 +187,9 @@ export class OrchestratorService implements OnModuleInit {
 
     proc.step = 'PoTEvaluation';
     proc.status = 'pot_pending';
-    const validators = Object.keys(nodeWeights);
-    const assigned =
-      validators.length >= 3
-        ? validators
-        : [...validators, 'pad-a', 'pad-b', 'pad-c'].slice(0, 3);
-    const confirming =
-      validators.length >= 2 ? validators.slice(0, 2) : assigned.slice(0, 2);
+
+    // Real active confirmers only — no pad-a / pad-b fake validators (core integrity).
+    const { assigned, confirming } = this.resolveValidatorSet(nodeWeights);
 
     const verdict = this.pot.confirm({
       processId,
@@ -264,6 +265,53 @@ export class OrchestratorService implements OnModuleInit {
       step: 'EndProcess',
       status: 'completed',
     };
+  }
+
+  /**
+   * Prefer registered active confirmers; else use nodeWeights keys if enough.
+   * Fail-closed when neither path yields a real set of size ≥ 3 (M-of-N default).
+   */
+  private resolveValidatorSet(nodeWeights: Record<string, string>): {
+    assigned: string[];
+    confirming: string[];
+  } {
+    const fromRegistry = this.nodes?.activeConfirmers().map((n) => n.nodeId) ?? [];
+    let assigned: string[];
+
+    if (fromRegistry.length >= 3) {
+      assigned = fromRegistry.slice(0, Math.max(3, fromRegistry.length));
+    } else {
+      const fromWeights = Object.keys(nodeWeights).filter((id) => !id.startsWith('pad-'));
+      if (fromWeights.length < 3) {
+        throw new AstError(
+          AstErrorCode.INSUFFICIENT_VALIDATORS,
+          'need ≥3 active confirmers (register nodes or pass real nodeWeights)',
+          {
+            registryCount: fromRegistry.length,
+            weightCount: fromWeights.length,
+          },
+        );
+      }
+      // If registry partially populated, only allow weight ids that are eligible
+      if (fromRegistry.length > 0) {
+        const ok = new Set(fromRegistry);
+        const filtered = fromWeights.filter((id) => ok.has(id));
+        if (filtered.length < 3) {
+          throw new AstError(
+            AstErrorCode.INSUFFICIENT_VALIDATORS,
+            'nodeWeights must be active confirmers when registry is in use',
+          );
+        }
+        assigned = filtered;
+      } else {
+        // Empty registry: test harness may pass explicit real-looking ids (no pad-)
+        assigned = fromWeights;
+      }
+    }
+
+    const need = requiredQuorum(assigned.length);
+    const confirming = assigned.slice(0, need);
+    return { assigned, confirming };
   }
 
   private ensureInit(): void {

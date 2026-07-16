@@ -4,6 +4,7 @@ import { CommonModule } from '../common/common.module';
 import { CommissionModule } from '../commission/commission.module';
 import { EmissionModule } from '../emission/emission.module';
 import { NodechainModule } from '../nodechain/nodechain.module';
+import { NodesModule } from '../nodes/nodes.module';
 import { OracleGatewayModule } from '../oracle-gateway/oracle-gateway.module';
 import { PotModule } from '../pot/pot.module';
 import { ReserveModule } from '../reserve/reserve.module';
@@ -19,6 +20,7 @@ import { OrchestratorService } from './orchestrator.service';
     CommissionModule,
     ReserveModule,
     NodechainModule,
+    NodesModule,
     OracleGatewayModule,
     StateRecordingModule,
   ],

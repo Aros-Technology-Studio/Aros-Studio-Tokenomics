@@ -55,7 +55,7 @@ describe('OrchestratorService', () => {
     const result = orch.runFromPot(
       processId,
       { P1: true, P2: true, P3: true, P4: true },
-      { n1: '1', n2: '1' },
+      { n1: '1', n2: '1', n3: '1' },
     );
     expect(result.verified).toBe(1);
     expect(result.status).toBe('completed');
@@ -96,5 +96,23 @@ describe('OrchestratorService', () => {
         holderId: 'h',
       }),
     ).toThrow(/kill switch/i);
+  });
+
+  it('fail-closed without enough real validators (no pad)', () => {
+    const { processId } = orch.startProcess({
+      institutionCode: 'DEMO',
+      idempotencyKey: 'few-val',
+      institutionalValuation: '10',
+      currency: 'GEL',
+      assetType: 'bond',
+      holderId: 'h',
+    });
+    expect(() =>
+      orch.runFromPot(
+        processId,
+        { P1: true, P2: true, P3: true, P4: true },
+        { only1: '1' },
+      ),
+    ).toThrow(/INSUFFICIENT_VALIDATORS|active confirmers/i);
   });
 });

@@ -40,7 +40,7 @@ describe('E2E tokenization flow', () => {
     const done = orch.runFromPot(
       start.processId,
       { P1: true, P2: true, P3: true, P4: true },
-      { v1: '1', v2: '1' },
+      { v1: '1', v2: '1', v3: '1' },
     );
 
     expect(done.status).toBe('completed');

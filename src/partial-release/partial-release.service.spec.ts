@@ -54,7 +54,7 @@ describe('PartialReleaseService', () => {
     orch.runFromPot(
       processId,
       { P1: true, P2: true, P3: true, P4: true },
-      { n1: '1' },
+      { n1: '1', n2: '1', n3: '1' },
     );
     reserve.credit('AST_OWN', 'ASSET', '100');
     reserve.lock('AST_OWN', 'ASSET', '50');
