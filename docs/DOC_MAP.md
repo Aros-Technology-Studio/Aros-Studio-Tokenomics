@@ -39,18 +39,18 @@ Unit of documentation = **runtime component**. Layer folders (`02_…`, `10_…`
 | P0 | `pot` | `components/pot/` | **ready** | `src/pot/` | Sole gate for value; M-of-N; no amount math |
 | P0 | `aroscoin` | `components/aroscoin/` | **ready** | `src/aroscoin/` | ARO/9; emission-after-PoT only |
 | P0 | `reserve` | `components/reserve/` | **ready** | `src/reserve/` | Own funds; bag accounting; reserveIndex |
-| P1 | `nodechain` | `components/nodechain/` | missing | `src/nodechain/` | Process graph / sole SoT ledger |
-| P1 | `nodes` | `components/nodes/` | missing | `src/nodes/` | Register / auth / validators |
-| P1 | `emission` | `components/emission/` | missing | `src/emission/` | Amounts from institutional valuation + ΔValue |
-| P1 | `commission` | `components/commission/` | missing | `src/commission/` | Post-factum fee / settlement |
-| P1 | `all-seeing-eye` | `components/all-seeing-eye/` | missing | `src/all-seeing-eye/` | Observe / notify only — no veto, no rollback |
+| P1 | `nodechain` | `components/nodechain/` | **ready** | `src/nodechain/` | Linear append-only SoT; Postgres index mirror |
+| P1 | `nodes` | `components/nodes/` | **ready** | `src/nodes/` | Cert+keys; mTLS; fixed roles; ARO post-factum pay |
+| P1 | `emission` | `components/emission/` | **ready** | `src/emission/` | Valuation+ΔValue; calls aroscoin.mint; I9 pro-rata |
+| P1 | `commission` | `components/commission/` | **ready** | `src/commission/` | On-PoT settlement; default 70/30; full simple engine |
+| P1 | `all-seeing-eye` | `components/all-seeing-eye/` | **ready** | `src/all-seeing-eye/` | Separate process; observe/notify only |
 | P2 | `orchestrator` | `components/orchestrator/` | missing | `src/orchestrator/` | Coordinates only (not PoT quorum) |
 | P2 | `state-recording` | `components/state-recording/` | missing | `src/state-recording/` | State recording |
 | P2 | `release` | `components/release/` | missing | `src/release/` | Release Phase + release paths |
 | P3 | `common` | `components/common/` | missing | `src/common/` | Shared utilities |
 
 Pack status values: `missing` | `draft` | `ready` | `implemented`.  
-P0 packs are **ready** (owner answers canonical, 16 July 2026 Core Canon). P1–P3 remain **missing**.
+P0 and P1 packs are **ready** (owner answers canonical). P2–P3 remain **missing**.
 
 ---
 
