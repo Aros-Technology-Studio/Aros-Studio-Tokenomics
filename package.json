@@ -14,7 +14,8 @@
     "format": "prettier -c .",
     "format:fix": "prettier -w .",
     "test": "jest",
-    "check:canon": "bash .github/scripts/run-all-guards.sh"
+    "check:canon": "bash .github/scripts/run-all-guards.sh",
+    "check:migration": "bash .github/scripts/migration-doc-gate.sh migration/inbox"
   },
   "dependencies": {
     "@nestjs/common": "^10.4.22",

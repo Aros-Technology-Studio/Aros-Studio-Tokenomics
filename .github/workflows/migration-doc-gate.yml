@@ -1,0 +1,46 @@
+name: Migration doc gate
+
+# Hard-scan candidate docs under migration/ before they can be promoted to product docs.
+# Also runnable on any PR that adds migration inbox content.
+
+on:
+  pull_request:
+    paths:
+      - 'migration/**'
+      - '.github/scripts/migration-doc-gate.sh'
+      - '.github/workflows/migration-doc-gate.yml'
+      - 'docs/MIGRATION_GATE.md'
+  push:
+    branches: [main]
+    paths:
+      - 'migration/**'
+      - '.github/scripts/migration-doc-gate.sh'
+  workflow_dispatch:
+    inputs:
+      target:
+        description: 'Path to scan (default migration/inbox)'
+        required: false
+        default: 'migration/inbox'
+
+permissions:
+  contents: read
+
+jobs:
+  migration-gate:
+    name: scan candidates
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Run migration-doc-gate
+        run: |
+          TARGET="${{ github.event.inputs.target || 'migration/inbox' }}"
+          bash .github/scripts/migration-doc-gate.sh "$TARGET"
+
+      - name: Upload report
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: migration-gate-report
+          path: migration/reports/
+          if-no-files-found: ignore

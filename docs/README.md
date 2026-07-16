@@ -62,4 +62,6 @@ See [`principles/ANTI_POLICE.md`](./principles/ANTI_POLICE.md).
 | `/CANON.md` | Ratified canon and technical spine |
 | `/docs/ARCHITECTURE.md` | Cross-component flows |
 | `/docs/WORKFLOWS.md` | GitHub Actions + runtime process workflows |
+| `/docs/MIGRATION_GATE.md` | Pre-migration / during-migration doc checks vs canon |
+| `/docs/migration/REVIEW_CHECKLIST.md` | Human semantic review per candidate doc |
 | `/docs/DOC_MAP.md` | Registry and priorities |

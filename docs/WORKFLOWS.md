@@ -23,6 +23,7 @@ This document defines (1) **GitHub Action workflows** that defend the canon, and
 | `layout-scaffold-guard.yml` | `/portal`, `/nodechain`, `/pot-engine` + guard workflows exist |
 | `domain-invariants-guard.yml` | Defaults, no admin mint, verified finality, kill-switch docs |
 | `ast-guards.yml` | Runs **all** hard guards via `run-all-guards.sh` |
+| `migration-doc-gate.yml` | Hard-scan `migration/inbox` candidates vs canon rules |
 | `nightly-canon-audit.yml` | Daily full guards + soft concept report |
 
 ### Local command
@@ -48,6 +49,19 @@ bash .github/scripts/run-all-guards.sh
 | `domain-invariants-guard.sh` | Cross-cutting P4 rules |
 | `require-canon-update.sh` | Canon sync on arch PRs |
 | `run-all-guards.sh` | Orchestrates the above |
+| `migration-doc-gate.sh` | Pre-promote scan of legacy/candidate docs |
+
+### Migration (before promote to product docs)
+
+```bash
+# put files in migration/inbox/ then:
+npm run check:migration
+
+# or scan an external export:
+bash .github/scripts/migration-doc-gate.sh /path/to/legacy/docs
+```
+
+Process: `docs/MIGRATION_GATE.md` · Checklist: `docs/migration/REVIEW_CHECKLIST.md`
 
 ---
 
