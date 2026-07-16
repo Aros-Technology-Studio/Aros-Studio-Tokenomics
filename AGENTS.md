@@ -13,9 +13,13 @@ Do not mix Russian into repository files. Explain in Russian in chat; implement 
 
 ## Canon and process
 
-- Source of truth order: `CANON.md` → `docs/` → `src/`
+- **Source of truth:** root `CANON.md` (AST Core Canon v1.0 Final) — immutable except by formal amendment
+- Order when documents conflict: `CANON.md` → `docs/` → `src/`
 - Component docs use the lean four-file pack under `docs/components/` (see `docs/DOC_MAP.md`)
-- Follow `docs/principles/ANTI_POLICE.md`: invariants and veto, not policing
+- Follow `docs/principles/ANTI_POLICE.md` and hard prohibitions in `CANON.md` §X
+- All-Seeing Eye: **observe / record / notify only** — no veto, no rollback (`CANON.md` §4.3, §X)
+- No bypass of **NodeChain** or **PoT** on significant operations
+- Token identity is **AST Token Protocol** (canonical layer in NodeChain + PoT); ERC standards are **adapters only**
 
 ## Stack (reminder)
 

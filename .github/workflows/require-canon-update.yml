@@ -1,0 +1,25 @@
+name: Require canon update
+
+# Architectural / protocol changes must keep CANON.md in the same change set.
+
+on:
+  pull_request:
+    branches: [main]
+  push:
+    branches: [main]
+
+permissions:
+  contents: read
+
+jobs:
+  require-canon:
+    name: CANON.md sync
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Run require-canon-update
+        run: bash .github/scripts/require-canon-update.sh

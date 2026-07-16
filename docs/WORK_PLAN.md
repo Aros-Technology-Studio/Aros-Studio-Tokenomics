@@ -13,10 +13,10 @@ Aligns with `CANON.md` §15, `docs/DOC_MAP.md`, `docs/principles/ANTI_POLICE.md`
 
 | Rule | Meaning |
 |------|---------|
-| Sources of truth | `CANON.md` → `docs/` → `src/` |
+| Sources of truth | `CANON.md` (Core Canon v1.0 Final) → `docs/` → `src/` |
 | Language | Repo = English; conversation = Russian |
 | Docs pack | Exactly 4 files: PURPOSE, MODEL, CONTRACT, ACCEPTANCE |
-| Anti-police | Invariants + veto; no patrol / punish process theater |
+| Anti-police | Invariants + fail-closed structure; Eye observes only (no veto) |
 | Cadence | Docs for a component → brief owner check on substance → code + tests |
 | No ceremony | One sensible PR per coherent slice; no multi-gate sign-off theater |
 
@@ -50,8 +50,8 @@ Goal: every P0/P1 component has a pack that is implementable without guessing ca
 |------:|-----------|---------|
 | 1 | `invariants` | I1–style table from CANON §12; checkable effects |
 | 2 | `pot` | Confirm work; verdict model; no emission without PoT |
-| 3 | `reserve` | 1:1 binding; release on burn; custodian boundary |
-| 4 | `aroscoin` | mint / hold / burn; addressed claim; rate in contract |
+| 3 | `reserve` | AST own funds only; reserveIndex from confirmed volume |
+| 4 | `aroscoin` | AST Token Protocol; mint/burn via PoT + NodeChain |
 
 After each pack: short owner review (substance only) → mark pack `ready` in `DOC_MAP.md`.
 
@@ -63,7 +63,7 @@ After each pack: short owner review (substance only) → mark pack `ready` in `D
 | 6 | `nodes` | register / auth contracts |
 | 7 | `emission` | formula \(T_E = \alpha\cdot TV + \beta\cdot U + \gamma\); constants marked canon vs proposed |
 | 8 | `commission` | model only from canon; open items listed if thin |
-| 9 | `all-seeing-eye` | observe + veto; never initiates |
+| 9 | `all-seeing-eye` | observe / notify only; no veto, no rollback |
 
 ### A3 — P2 / P3 packs
 
@@ -125,9 +125,9 @@ Goal: NestJS modules under `src/<name>/` with unit tests; no invented economics.
 ## 4. Phase C — Integration (CANON §15 Phase 3)
 
 - API / event contracts between modules match `CONTRACT.md` files  
-- Rollback / veto paths exercised in integration tests  
-- E2E: one full cycle mint → hold → partial/full release burn  
-- Eye veto path on deliberate invariant break  
+- Fail-closed paths when PoT/NodeChain missing; no Eye veto/rollback  
+- E2E: confirmed process → mint/burn via AST Token Protocol  
+- Eye notification path on recorded invariant breach (observe only)  
 
 **Phase C exit:** green CI; e2e for the one economic cycle.
 

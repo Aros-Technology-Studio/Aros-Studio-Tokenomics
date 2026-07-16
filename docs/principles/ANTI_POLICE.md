@@ -1,29 +1,29 @@
 # Principle: Avoid Policing
 
-**Status:** Ratified working rule  
+**Status:** Aligned with `CANON.md` v1.0 Final  
 **Applies to:** architecture, documentation, process, language
 
 ---
 
 ## Intent
 
-AST needs **clarity, invariants, and deterministic cause → effect** — not surveillance theater, punitive mechanics, or bureaucratic gates dressed as engineering.
+AST needs **clarity, deterministic rules, and NodeChain + PoT as validity** — not surveillance theater, punitive mechanics, or bureaucratic gates dressed as engineering.
 
 “Avoid policing” means we do not design or document the system as if a force must patrol, punish, or extract compliance from participants.
 
 ---
 
-## Architecture
+## Architecture (canon-aligned)
 
 | Do | Do not |
 |----|--------|
-| **All-Seeing Eye:** observe + veto; never initiate mint, burn, or payment | Patrol, prosecute, or “open cases” on participants |
-| Enforce correctness via **invariants and deterministic rules** | Introduce enforcer components that start actions “for order” |
-| Record causality (append-only ledger) so effects are auditable | Frame records as threat, discipline, or law-enforcement evidence |
-| Fail closed or veto when an invariant would break | Slash, fine, or deposit-as-discipline unless already in canon |
-| AI hierarchy: orchestrate, detect anomalies, decide process steps | Internal-security / “police department” roles |
+| **All-Seeing Eye:** observe, record violations, notify (`CANON.md` §4.3) | Veto, rollback, patrol, prosecute, or “open cases” |
+| Enforce correctness via **invariants, PoT, and NodeChain recording** | Enforcer components that initiate mint/burn/payment “for order” |
+| Record causality (append-only NodeChain) so effects are valid only after the cause | Frame records as threat, discipline, or law-enforcement evidence |
+| Fail closed when an invariant or missing NodeChain/PoT would break validity | Slash, fine, or deposit-as-discipline unless ratified in canon |
+| Payment only post-factum for confirmed work | Staking, farming, passive income without execution |
 
-If a control is required, it is a **rule of the system** (cannot mint without PoT, rate fixed at emission, one reserve per claim) — not a person or agent playing cop.
+If a control is required, it is a **rule of the system** (no value without `verified = 1`, no validity without NodeChain, selective custody only) — not a person or agent playing cop.
 
 ---
 
@@ -32,8 +32,8 @@ If a control is required, it is a **rule of the system** (cannot mint without Po
 | Do | Do not |
 |----|--------|
 | Purpose, model, contract, acceptance | Long compliance-police checklists |
-| Failure modes as **faults, rollbacks, veto paths** | “Punishment of the violator” framing |
-| Vocabulary: observe, veto, invariant, record, cause → effect | monitor-as-threat, enforce, police, compel, audit-as-weapon |
+| Failure modes as **faults, blocks, missing record** | “Punishment of the violator” framing |
+| Vocabulary: observe, notify, invariant, record, cause → effect, post-factum payment | police, patrol, punish, Eye veto/rollback as power |
 | Minimal pack (4 files) | Nested governance-of-docs and approval ladders |
 
 ---
@@ -50,17 +50,17 @@ If a control is required, it is a **rule of the system** (cannot mint without Po
 
 ## Language guide (short)
 
-**Prefer:** observe, veto, invariant, bound claim, confirmed work, deterministic, append-only  
-**Avoid:** police, patrol, punish, enforce compliance, internal affairs, sanction, disciplinary deposit
+**Prefer:** observe, notify, invariant, NodeChain record, PoT verdict, post-factum payment, selective custody  
+**Avoid:** police, patrol, punish, Eye veto, Eye rollback, enforce compliance, disciplinary deposit
 
 ---
 
 ## Relation to CANON
 
-This principle is consistent with:
+Consistent with:
 
-- All-Seeing Eye: veto, not initiation (CANON §2.4, §12)
-- No speculative surface / no governance-by-holding patterns that turn holders into a force
-- Canon as rules of reality for the system — not a police manual
+- All-Seeing Eye without veto/rollback (`CANON.md` §4.3, §X)
+- Hard prohibitions (`CANON.md` §X)
+- Invariants I1–I9 (`CANON.md` §XI)
 
-When in doubt: **if a design only makes sense if someone is “watching and punishing,” redesign it as an invariant or drop it.**
+When in doubt: **if a design only makes sense if someone is “watching and punishing,” redesign it as a structural rule (PoT / NodeChain / fail closed) or drop it.**

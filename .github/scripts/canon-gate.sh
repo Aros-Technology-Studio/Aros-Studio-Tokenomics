@@ -12,6 +12,8 @@ EXCLUDES=(
   --exclude=yarn.lock
   --exclude=pnpm-lock.yaml
   '--exclude=*.lock'
+  # Questionnaire may cite historical external URLs; guards live under .github
+  --exclude=COMPONENT_CLARIFICATIONS.md
 )
 
 # Case-sensitive: "ALB" matches only the literal epoch acronym, never words like "totalBurned".
@@ -40,6 +42,6 @@ fi
 
 if [ "$fail" -ne 0 ]; then
   echo ""
-  echo "Canon gate FAILED. See the AST invariants in CANON.md (the invariant spine I1-I8)."
+  echo "Canon gate FAILED. See CANON.md (AST Core Canon — hard prohibitions §X, invariants I1–I9)."
 fi
 exit "$fail"

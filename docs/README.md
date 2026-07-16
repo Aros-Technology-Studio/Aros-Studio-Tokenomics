@@ -1,8 +1,8 @@
 # AST Documentation
 
-**Status:** Structure ratified (2026-07-14)  
+**Status:** Structure ratified (2026-07-14); Core Canon v1.0 Final (2026-07-16)  
 **Language:** English (repository language)  
-**Source of truth order:** `CANON.md` → `docs/` → `src/`
+**Source of truth:** root `CANON.md` (AST Core Canon). Derived order: `CANON.md` → `docs/` → `src/`
 
 This directory holds architecture and per-component specifications for **Aros Studio Tokenomics (AST)**. It is intentionally lean: clarity without bureaucracy.
 

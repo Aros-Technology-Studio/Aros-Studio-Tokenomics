@@ -29,7 +29,7 @@ Only rules this component must uphold. Link each to CANON where possible.
 
 | ID | Invariant | Effect if violated |
 |----|-----------|--------------------|
-| … | … | block / veto / fail closed — not “punish” |
+| … | … | fail closed / block effect — not “punish”; Eye notifies only |
 
 ---
 

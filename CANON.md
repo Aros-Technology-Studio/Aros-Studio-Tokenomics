@@ -1,353 +1,299 @@
-# AST — Aros Technology Studio
-
-## Canon and technical specification
-
----
-
-## 1. Definition
-
-**AST (Aros Technology Studio)** is a self-sufficient decentralized crypto-economic platform that provides **asset tokenization for institutional participants**.
-
-**The tokenization process is built on:**
-
-- a NodeChain system with the Proof-of-Transaction (PoT) principle
-- ArosCoin emission through that principle
-- All-Seeing Eye oversight
-- process orchestration via a hierarchy of AI agents
-
-**Legal status:** AST is a separate legal entity, licensed as a VASP under NBG supervision. It has the right to:
-
-- act as asset custodian
-- hold and manage reserves
-- emit tokens
-- hold funds
-
----
-
-## 2. Architecture
-
-### 2.1 NodeChain
-
-**Not a blockchain — a process graph.**
-
-- Instead of blocks, nodes process transactions
-- Nodes register via API (`/node/register`, `/node/auth`)
-- Consensus is AST’s own PoT mechanism
-- The ledger is AST’s own, not on a third-party chain
-- **Own network, not Ethereum**
-
-### 2.2 PoT (Proof-of-Transaction)
-
-**Consensus by confirmation of work:**
-
-- Nodes confirm that transactions have been executed
-- ArosCoin is born for confirmation
-- Emission formula: `T_E = α·TV + β·U + γ`
-  - `TV` = transaction volume
-  - `U` = utilization
-  - `α, β, γ` = constants
-
-### 2.3 ArosCoin
-
-**Token of the AST economy:**
-
-- **Emission:** born on PoT confirmation, 1:1 to reserve
-- **Burn:** burned when a claim is closed (return path)
-- **Binding:** every ArosCoin is bound to a specific reserve of a specific transaction
-- **Rate:** lives in the contract — fixed at emission time
-- **Not a freestanding backed asset — an addressed receipt:** ArosCoin does not live outside a transaction; it exists only as a claim on a specific reserve
-
-**Contract:** `ArosCoinReserveManager.sol` (Solidity)
-
-- Mints ArosCoin against reserve
-- Burns on reverse conversion
-- Maintains unique identifiers against double emission
-- Holds rate logic
-
-### 2.4 All-Seeing Eye
-
-**System validator:**
-
-- Veto right, but no initiation
-- Checks transactions against invariants
-- Sees the whole system, but does not control it directly
-- Final control instance
-
-### 2.5 AI agent hierarchy
-
-**Process management:**
-
-- Multiple AIs do not coordinate well peer-to-peer → a **hierarchical system** is used
-- Anomaly detector
-- Meta-learning
-- Decision orchestrator
-- Python layer: `12_nodechain_ai_agents/`
-
----
-
-## 3. Canonical components
-
-AST code is organized by **canonical entities**, not by the old 14 modules.
-
-### `src/` structure (live code):
-
-```
-src/
-├── all-seeing-eye       # Validator, veto right
-├── aroscoin             # Token logic
-├── commission           # Commission model
-├── emission             # Emission by PoT formula
-├── nodechain            # Node graph
-├── nodes                # Node management
-├── orchestrator         # Process orchestration
-├── pot                  # Proof-of-Transaction
-├── release              # Release logic
-├── reserve              # Reserves under ArosCoin
-├── state-recording      # State recording
-├── invariants           # System invariants
-└── common               # Shared utilities
-```
-
-**Each subsystem:** TypeScript/NestJS, with tests (`.spec.ts`).
-
----
-
-## 4. Technology stack
-
-### 4.1 Languages
-
-- **TypeScript/NestJS** — core (NodeChain, PoT, emission, orchestrator)
-- **Solidity** — `ArosCoinReserveManager.sol` (reserve, mint/burn)
-- **Python** — AI agents (`12_nodechain_ai_agents/`)
-
-**Why not all Solidity?**  
-AST is its own network, not on Ethereum. Solidity is needed only for the reserve contract (Bridge Layer); the rest is server-side TypeScript.
-
-### 4.2 Infrastructure
-
-- **Docker** — containerization
-- **Kubernetes** — production orchestration
-- **CI/CD:** GitHub Actions
-  - `ci.yml` — main pipeline
-  - `auto-fix.yml` — automated fixes
-  - `ai-review.yml` — AI code review
-  - `nightly-audit.yml` — nightly audits
-  - `agent-dispatcher.yml` — agent dispatch
-
-### 4.3 Frontend
-
-- **React** — control panel (`frontend/`)
-  - Governance
-  - Ledger feed
-  - Node list
-
----
-
-## 5. Reference implementation
-
-**`reference/ast-core/`** — 19 files of “clean sample”:
-
-- Reference versions of `allSeeingEye`, `aroscoin`, `commission`
-- Cross-check code for the main implementation in `src/`
-
----
-
-## 6. ArosCoin mechanics (detail)
-
-### 6.1 Birth (Mint)
-
-1. External signal for 1:1 emission
-2. Reserve is placed with an Anchor (external party)
-3. AST emits ArosCoin via `ArosCoinReserveManager.sol`
-4. **Rate is fixed in the contract** at emission time
-5. ArosCoin carries a signature and a binding to a specific reserve
-
-### 6.2 Life
-
-- ArosCoin is held by the recipient (Anchor / participant)
-- Serves as a **claim on a specific reserve**
-- May be split (partial return paths)
-- **Not traded, not accumulated outside transactions**
-
-### 6.3 Death (Burn)
-
-1. Request for return path (full or partial)
-2. Contract reads the fixed rate
-3. ArosCoin is burned
-4. Reserve is released
-
-**Formula:** `born-as-claim → held-as-receipt → burned-on-settlement`
-
----
-
-## 7. Rate mechanics
-
-**The rate lives in the contract** — this is settled.
-
-### Scenario:
-
-- **In:** 100K units → emit 100K ArosCoin at rate K₁
-- **Out:** request 10K units → rate K₂ (may have changed)
-- **Contract** applies fixed K₁ or updated K₂ (depends on config: static vs oracle)
-- **Risk:** borne by initiator or participant (configured in the contract)
-
-**Three reverse-path variants were discarded** (by decision).
-
----
-
-## 8. Separation of responsibility
-
-### AST is responsible for:
-
-- Emission and burn of ArosCoin
-- Consensus (PoT)
-- Validation (All-Seeing Eye)
-- Ledger maintenance
-- Holding reserves (custodian right)
-- Rate logic (in the contract)
-
----
-
-## 9. Licensing and regulation
-
-**AST is subject to licensing** — VASP / NBG.
-
-**Strategy:** since licensing is required anyway — take **all rights** of a licensed entity:
-
-- Custodianship
-- Reserves
-- Emission
-- Full token economy
-
-**Do not evade — use.**
-
----
-
-## 10. Organizational firewall
-
-**AST is separated from external processes:**
-
-- GitHub: separate organization `Aros-Technology-Studio`
-- Legal entity: separate structure
-- AST custodianship **does not transfer** to external processes
-
-**The firewall runs to the infrastructure level** — visible even in URLs.
-
----
-
-## 11. AST repository
-
-### Target structure (`Aros-Studio-Tokenomics`):
-
-```
-Aros-Studio-Tokenomics/
-├── /docs/                      # Architecture, specifications, whitepaper, diagrams
-├── /nodechain/                 # Core immutable ledger, sharding, encryption, BFT, chaining
-├── /pot-engine/                # Proof of Transaction implementation (core logic, validators)
-├── /aroscoin/                  # Token logic, emission rules, utilities, smart contracts
-├── /governance/                # AI Governance Layer + The All-Seeing Eye
-├── /portal/                    # Institutional portal (frontend + backend)
-├── /smart-contracts/           # Core contracts (CosmWasm / Rust / Solidity)
-├── /tests/                     # Unit, integration, e2e tests
-├── /scripts/                   # CI/CD, deployment, migration, utilities
-├── README.md
-├── ARCHITECTURE.md
-├── ROADMAP.md
-├── LICENSE
-├── .gitignore
-├── CONTRIBUTING.md
-└── CODE_OF_CONDUCT.md
-```
-
-### Principles of the target structure:
-
-- **Canonical components** — each folder maps to a key AST entity
-- **Layer separation** — nodechain, PoT, token, governance, contracts
-- **Standard documentation** — README, ARCHITECTURE, ROADMAP at root
-- **Clean hierarchy** — without architectural debt of the old repository
-
----
-
-## 12. Key invariants
-
-1. **ArosCoin born = ArosCoin burned** (eventual equality)
-2. **Every ArosCoin is bound to one reserve**
-3. **All-Seeing Eye has veto, not initiation**
-4. **Rate is fixed in the contract**
-5. **AST is the custodian; external processes are not**
-6. **NodeChain is a network of nodes, not blocks**
-7. **PoT is for confirmation of work, not for ownership**
-
----
-
-## 13. Problems settled in the canon
-
-### Adopted:
-
-- Code by canonical entities (`src/`)
-- Rate in the contract
-- AST as a licensed token economy
-- Own network (NodeChain)
-
----
-
-## 14. Open questions (closed)
-
-All three questions are **closed** by the product owner:
-
-1. **What is “1 token”?** → The rate lives in the contract
-2. **Who bears FX / rate risk?** → Configurable; the contract governs it
-3. **Return path full or partial?** → Partial (ArosCoin can be split)
-
----
-
-## 15. Roadmap (high level)
-
-### Phase 1: Order
-
-- Map of `src/` ↔ specifications
-- Archive obsolete modules 01–14
-- Sync documentation with code
-
-### Phase 2: Component development
-
-Parallel work on:
-
-- `nodechain` — node graph
-- `pot` — consensus
-- `emission` — emission formula
-- `aroscoin` — token logic
-- `reserve` — reserves
-- `all-seeing-eye` — validator
-- `orchestrator` — orchestration
-- AI agents (Python)
-
-### Phase 3: Integration
-
-- API contracts between components
-- Rollback mechanisms
-- E2E tests
-
-### Phase 4: Deploy
-
-- Test network
-- Sandbox (NBG)
-- Production
-
----
-
-## 16. Sources of truth
-
-1. **This document** — AST canon
-2. `docs/AST_Developer_Deep_Dive.md` — technical truth
-3. `src/` — code as truth (not specs)
-4. Dialogue with Ketevan — architectural decisions
-
----
-
-## End of canon
-
-**Version:** 1.0 (no AFC)  
-**Date:** 12 July 2026  
-**Status:** Ratified  
+# AST Core Canon
+
+**Aros Studio Tokenomics — Final Canon**  
+**Version:** 1.0 (Final)  
+**Date fixed:** 16 July 2026  
+**Status:** Canonical. Changes only through a formal amendment procedure.  
 **Language:** English (repository language)
+
+This document is the **source of truth** for AST. All architecture, code, workflows, GitHub Actions, documentation, and agent decisions **must** conform to it. Any deviation is a canon violation.
+
+---
+
+## I. Mission of AST
+
+AST exists to move **already confirmed institutional assets** into a digital network space, creating a reliable, immutable, and programmable registry of rights.
+
+AST’s mission is not to create new value and not to appraise assets, but to **record accurately and reliably** an already existing institutional valuation and rights to the asset in the form of a token that continues to live and change together with the real asset.
+
+---
+
+## II. Nature of AST
+
+AST is a **sovereign process token-economy**.  
+It is a standalone legal entity, holds only its **own** value, and is subject to applicable licensing.
+
+AST is **not** a custodian of third-party funds.  
+AST is **not** a valuation organization.  
+AST **is** the **infrastructure for recording and accompanying** tokenized rights.
+
+---
+
+## III. First principles (immutable)
+
+1. Value arises **only** through a confirmed process (PoT).
+2. Payment for executed work is made **only post-factum**.
+3. Any significant action without a NodeChain record is **invalid**.
+4. Execution is deterministic (same inputs → same result).
+5. Emission is possible **only** as part of a confirmed process (pre-mine and free emission are forbidden).
+6. What is earned is retained; speculative holding, farming, and staking are forbidden.
+7. Circulation of ArosCoin is restricted until Release Phase.
+
+---
+
+## IV. Architectural canons
+
+### 4.1. NodeChain
+
+NodeChain is the **sole source of truth**.  
+All significant events (tokenization, value change, transfer of rights, revaluation) **must** be recorded in NodeChain.  
+A NodeChain record is the **only** thing that confers validity on an event.  
+NodeChain is an append-only immutable ledger with ExecutionSnapshot and cryptographic chaining.
+
+### 4.2. Proof of Transaction (PoT)
+
+PoT is the **only gate** for the origin and change of value.  
+Without a positive PoT verdict (`verified = 1`), value does not arise, does not change, and is not recognized as valid.  
+PoT is institutional and process validation of the **fact of execution**, not consensus by hash power or stake.
+
+### 4.3. The All-Seeing Eye
+
+The All-Seeing Eye is an independent monitoring, audit, and alerting layer.  
+It does **not** have veto or rollback rights.  
+Its function is to **observe**, **record violations**, and **notify**.
+
+### 4.4. Selective Custody
+
+AST may hold **only its own funds** (reserves, commissions, own capitalization).  
+Holding participants’ third-party funds is **forbidden**.
+
+---
+
+## V. RWA tokenization canons
+
+### 5.1. Core rules
+
+- AST does **not** appraise assets.
+- AST accepts **only** an already confirmed institutional valuation.
+- An asset is tokenized at the official price provided by the institution.
+- After tokenization, AST (NodeChain) becomes the permanent registry of rights to that asset.
+
+### 5.2. Primary tokenization process
+
+1. The institution provides a document package containing the official asset valuation and a qualified digital signature.
+2. The system verifies authenticity of the signature and documents.
+3. PoT confirms the fact that a confirmed valuation was provided.
+4. NodeChain records creation of the token.
+5. Primary minting of tokens occurs **strictly at the fixed institutional price**.
+
+### 5.3. Lifecycle of a tokenized asset
+
+After primary tokenization:
+
+- The asset loses the ability to circulate fully in the traditional regime without updates in AST.
+- Any significant event (rise/fall in value, transfer of rights, project development, etc.) **must** pass through AST.
+- The traditional registry receives a mark that the asset is tokenized.
+
+---
+
+## VI. Token canons (AST Token Protocol)
+
+### 6.1. Mission of the token
+
+An AST token is a digital carrier of rights to a real asset.  
+Its job is to reflect accurately the current state of rights and economic value of the asset in the network space.
+
+### 6.2. Token architecture
+
+AST defines its **own full protocol** — the **AST Token Protocol**.
+
+Structure:
+
+- **Canonical Layer** — token state always lives in NodeChain + PoT (sole source of truth).
+- **Abstract Interface Layer** — AST’s own abstract token interface (not bound to Ethereum).
+- **Representation Adapters** — plugins for compatibility with ERC-20, ERC-3643, ERC-1400, and any future standards.
+- **Cross-Chain Layer** — abstract transport (support for any bridge protocols, current and future).
+
+### 6.3. Token properties
+
+- Future-proof (not dependent on a specific ERC standard).
+- Maximally mobile and compatible.
+- Fully preserves the AST canon.
+- All critical operations (mint, burn, transfer, revaluation) pass through NodeChain + PoT.
+
+### 6.4. Mechanism of token value change
+
+- On confirmed **increase** in asset value → **new emission** of tokens.
+- On confirmed **decrease** in asset value → **burn** of tokens.
+- New emission is distributed **pro-rata to current holders**.
+- Every supply change is bound to a specific confirmed process (PoT) and recorded in NodeChain.
+
+### 6.5. Asset valuation
+
+AST does **not** calculate asset value.  
+AST accepts only an already confirmed institutional valuation and uses it as the basis for minting and subsequent changes.
+
+---
+
+## VII. Release Phase
+
+### 7.1. Definition
+
+Release Phase is a defined stage of system maturity at which the circulation regime for ArosCoin and asset tokens expands beyond internal roles (process unit and payment unit).
+
+### 7.2. Activation conditions
+
+Transition into Release Phase is possible **only** when both conditions hold at once:
+
+- `reserveIndex > threshold`
+- `velocity > target`
+
+Where:
+
+- `reserveIndex` — logarithmic measure of accumulated capitalization through confirmed work.
+- `velocity` — measure of circulation activity.
+
+### 7.3. Activation mechanism
+
+- The `release_daemon` module continuously tracks metrics.
+- When conditions hold, Release Phase activates automatically.
+- Until activation, tokens exist only in internal roles (process unit + payment unit).
+- After activation, a broader (external) circulation regime is possible.
+
+### 7.4. Protection
+
+Until Release Phase, any attempt to take process value into free market circulation is **architecturally blocked**.
+
+---
+
+## VIII. Implementation modules
+
+### 8.1. Core modules
+
+| Module | Purpose |
+|--------|---------|
+| `proof_of_transaction_engine` | PoT validation of the fact of execution |
+| `nodechain_engine` | Process handling, ExecutionSnapshot assembly, validation and append |
+| `tokenomics_service` | Emission / burn / accounting of ArosCoin and asset tokens |
+| `settlement_controller` | Commission pool and post-factum payment distribution |
+| `release_daemon` | Release Phase activation |
+| `velocity_tracker` | Velocity calculation |
+| `node_reputation_service` | Node reputation and weight |
+| `resource_monitor` | Resource intensity and energy cost of operations |
+| `ledger` | Append-only journal store (Transaction, ExecutionSnapshot) |
+
+### 8.2. Module rules
+
+- Each module implements strictly its own responsibility zone.
+- Modules **must not** bypass NodeChain and PoT.
+- All critical operations are logged in NodeChain.
+
+---
+
+## IX. Formulas and calculations
+
+### 9.1. Confirmed volume
+
+```
+PoT_volume = Σ(tx.amount × tx.verified)
+```
+
+where `tx.verified = 1` only under a positive PoT verdict.
+
+### 9.2. Process reserve index
+
+```
+reserveIndex = log10(1 + totalProcessVolume)
+```
+
+Soft growth reflecting long-term capitalization through confirmed work.
+
+### 9.3. Internal value estimate (informational)
+
+```
+ArosCoin_internalPrice = base × reserveIndex
+```
+
+Used only for internal metrics. It is **not** a market price and is **not** used for minting (minting follows institutional valuation).
+
+### 9.4. Transaction fee
+
+```
+fee = tx.amount × feeRate
+```
+
+### 9.5. Node payment (post-factum)
+
+```
+paymentToNode = (node_weight_in_tx × tx.fee) / Σ(node_weights)
+```
+
+### 9.6. Circulation velocity
+
+```
+velocity = processVolume_24h / circulatingSupply
+```
+
+### 9.7. Release Phase condition
+
+```
+ReleasePhase = (reserveIndex > threshold) ∧ (velocity > target)
+```
+
+### 9.8. Node reputation
+
+```
+nodeReputation = (Σ(successful_participations) / Σ(total_participations)) × uptimeFactor
+```
+
+### 9.9. Dynamic fee (optional)
+
+```
+dynamicFee = fee × (1 + overloadRate)
+```
+
+### 9.10. Token supply change principle
+
+- On confirmed value **increase**:  
+  `new_supply = current_supply × (1 + ΔValue / previous_value)`
+- On confirmed value **decrease**:  
+  `new_supply = current_supply × (1 − ΔValue / previous_value)`
+- New emission / burn is distributed pro-rata to current holders.
+
+---
+
+## X. Hard prohibitions
+
+- System self-appraisal of assets.
+- Pre-mine and free emission.
+- Staking, farming, passive income without execution.
+- Holding third-party funds.
+- All-Seeing Eye rights of **veto** and **rollback**.
+- Bypassing NodeChain and PoT on any significant operation involving a tokenized asset.
+- Speculative holding.
+
+---
+
+## XI. Invariants
+
+- **I1.** Value arises only when `verified = 1` (PoT).
+- **I2.** Every emission / burn is bound to a confirmed process.
+- **I3.** Every significant event is recorded in NodeChain.
+- **I4.** Determinism: same input → one result.
+- **I5.** What is earned is retained; speculative holding is forbidden.
+- **I6.** AST holds only its own funds.
+- **I7.** The token always reflects the current confirmed value of the asset.
+- **I8.** Until Release Phase, circulation is limited to internal roles.
+- **I9.** New emission is always distributed pro-rata to current holders.
+
+---
+
+## XII. Closing
+
+This document is the **final AST canon**.  
+All architectures, code, workflows, GitHub Actions, documentation, and agent decisions **must** conform to it.  
+Any deviation is a canon violation.
+
+---
+
+**End of canon.**

@@ -13,10 +13,11 @@ AST (Aros Technology Studio) is a self-sufficient crypto-economic platform for *
 - **NodeChain** — process graph (not a public L1 block chain for the core ledger)
 - **PoT (Proof-of-Transaction)** — confirmation of work; cause of emission
 - **ArosCoin** — addressed claim on a specific reserve (mint / hold / burn)
-- **All-Seeing Eye** — observe + veto; never initiates economic actions
-- **Orchestration** — hierarchical process management (including AI agents where canon allows)
+- **All-Seeing Eye** — observe, record violations, notify; **no veto, no rollback** (`CANON.md` §4.3)
+- **AST Token Protocol** — canonical state in NodeChain + PoT; ERC standards are adapters only
+- **Release Phase** — broader circulation only after reserveIndex and velocity thresholds
 
-Legal posture (canon): separate entity, VASP under NBG supervision — rights used as licensed capability, not as a policing mandate.
+Legal posture (canon): sovereign process token-economy; selective custody of **own** funds only; not a third-party custodian; not a valuation body.
 
 ---
 
@@ -24,25 +25,26 @@ Legal posture (canon): separate entity, VASP under NBG supervision — rights us
 
 ```
                     ┌─────────────────────┐
-                    │   All-Seeing Eye    │  observe + veto only
+                    │   All-Seeing Eye    │  observe / notify (no veto)
                     └──────────▲──────────┘
-                               │ may veto
+                               │ observes
         ┌──────────────────────┼──────────────────────┐
         │                      │                      │
    ┌────┴────┐          ┌──────┴──────┐         ┌─────┴─────┐
-   │  PoT    │─────────▶│  Emission   │────────▶│ ArosCoin  │
+   │  PoT    │─────────▶│  Emission   │────────▶│  Tokens   │
    └────▲────┘          └─────────────┘         └─────▲─────┘
-        │                                             │ bound 1:1
+        │                                    AST Token Protocol
    ┌────┴────┐          ┌─────────────┐         ┌─────┴─────┐
-   │ Nodes / │          │ Commission  │         │  Reserve  │
-   │NodeChain│          └─────────────┘         └───────────┘
-   └────▲────┘
+   │ Nodes / │          │ Settlement  │         │  Reserve  │
+   │NodeChain│          │ (post-factum│         │ (own only)│
+   │ (SoT)   │          │  payment)   │         └───────────┘
+   └────▲────┘          └─────────────┘
         │
    ┌────┴──────────┐     ┌────────────────┐
    │ Orchestrator  │────▶│ State recording│
    └───────────────┘     └────────────────┘
 
-   invariants  ·  common  ·  release (return path)
+   invariants  ·  common  ·  release_daemon (Release Phase)
 ```
 
 Detail lives in each `components/<name>/` pack.
@@ -51,16 +53,16 @@ Detail lives in each `components/<name>/` pack.
 
 ## 3. One economic cycle (canonical shape)
 
-1. Work / process runs in the node graph.  
-2. **PoT** confirms transaction execution.  
-3. **Emission** applies the PoT formula; **ArosCoin** is minted as a claim.  
-4. **Reserve** is bound 1:1 to that claim; rate fixed at emission (contract).  
-5. Claim is held as receipt — not freestanding speculation.  
-6. On settlement / return path: burn ArosCoin, release reserve (full or partial per canon).  
-7. **All-Seeing Eye** may veto a step that breaks invariants; it does not start the cycle.
+1. Institution provides confirmed valuation and signed package (RWA path) and/or process work runs on the node graph.  
+2. **PoT** confirms the fact of execution / confirmed valuation (`verified = 1`).  
+3. **NodeChain** records the event (sole validity).  
+4. **Emission / burn** of protocol tokens only as part of that confirmed process (AST Token Protocol).  
+5. **Settlement** pays nodes **post-factum**; AST holds only its own reserve share.  
+6. Value changes (revaluation) mint/burn pro-rata after confirmed processes — not free market mint.  
+7. **All-Seeing Eye** observes and notifies; it does not veto, roll back, or initiate.  
+8. Broader circulation only after **Release Phase** (`reserveIndex` ∧ `velocity`).
 
-Formula reference: `T_E = α·TV + β·U + γ` (CANON §2.2).  
-Lifecycle: `born-as-claim → held-as-receipt → burned-on-settlement` (CANON §6).
+See `CANON.md` §§III–XI for formulas, prohibitions, and invariants I1–I9.
 
 ---
 
@@ -71,10 +73,11 @@ Lifecycle: `born-as-claim → held-as-receipt → burned-on-settlement` (CANON �
 | Process / orchestration | Who runs what, in what order |
 | Confirmation (PoT) | What is verified work |
 | Token / reserve | Claims and backing |
-| Oversight (Eye) | Veto on invariant breach |
-| Ledger (NodeChain) | Append-only causality |
+| Oversight (Eye) | Observe / audit / alert (no veto) |
+| Ledger (NodeChain) | Sole source of truth; append-only |
+| Token protocol | Canonical layer + abstract interface + ERC adapters |
 
-Solidity (`ArosCoinReserveManager.sol`) is for reserve mint/burn binding where required; core network logic is TypeScript/NestJS (CANON §4).
+Core logic is TypeScript/NestJS; representation adapters may use Solidity/ERC for external compatibility only (`CANON.md` §VI).
 
 ---
 
@@ -84,4 +87,4 @@ Solidity (`ArosCoinReserveManager.sol`) is for reserve mint/burn binding where r
 - Not a policing or enforcement playbook  
 - Not a substitute for `CANON.md`
 
-As packs are written, this file should gain: sequence diagrams for mint/burn, interface table between components, and explicit invariant checklist references — still without expanding into process theater.
+As packs are written, this file should gain: sequence diagrams for mint/burn, interface table between components, and explicit invariant checklist references (I1–I9) — still without expanding into process theater.

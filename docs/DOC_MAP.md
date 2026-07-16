@@ -1,7 +1,8 @@
 # Document Map
 
-**Status:** Structure ratified (2026-07-14)  
-**Principle:** [ANTI_POLICE.md](./principles/ANTI_POLICE.md)
+**Status:** Structure ratified (2026-07-14); aligned to Core Canon v1.0 Final (2026-07-16)  
+**Principle:** [ANTI_POLICE.md](./principles/ANTI_POLICE.md)  
+**Canon:** `/CANON.md` (AST Core Canon — sole source of truth)
 
 Registry of canonical components, their documentation packs, and target code paths.
 
@@ -9,9 +10,9 @@ Registry of canonical components, their documentation packs, and target code pat
 
 ## Sources of truth
 
-1. `CANON.md` — ratified canon  
+1. `CANON.md` — **AST Core Canon v1.0 Final** (sole source of truth)  
 2. `docs/` — specifications derived from canon  
-3. `src/` — implementation (wins over stale specs when they diverge; then specs must be fixed)
+3. `src/` — implementation (must conform; if code and docs diverge from canon, fix them)
 
 ---
 
@@ -42,7 +43,7 @@ Unit of documentation = **runtime component**. Layer folders (`02_…`, `10_…`
 | P1 | `nodes` | `components/nodes/` | `src/nodes/` | Register / auth |
 | P1 | `emission` | `components/emission/` | `src/emission/` | PoT formula `T_E = α·TV + β·U + γ` |
 | P1 | `commission` | `components/commission/` | `src/commission/` | Commission model (e.g. 75/25 when canon applies) |
-| P1 | `all-seeing-eye` | `components/all-seeing-eye/` | `src/all-seeing-eye/` | Observe + veto only |
+| P1 | `all-seeing-eye` | `components/all-seeing-eye/` | `src/all-seeing-eye/` | Observe / notify only — no veto, no rollback |
 | P2 | `orchestrator` | `components/orchestrator/` | `src/orchestrator/` | Process orchestration |
 | P2 | `state-recording` | `components/state-recording/` | `src/state-recording/` | State recording |
 | P2 | `release` | `components/release/` | `src/release/` | Release / return path |

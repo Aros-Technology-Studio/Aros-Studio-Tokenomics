@@ -41,11 +41,13 @@
 
 ---
 
-## Error / veto paths
+## Error / fail-closed paths
 
-Describe failure and **veto** behavior without framing as punishment.
+Describe failure behavior without framing as punishment.  
+All-Seeing Eye does **not** veto or roll back (`CANON.md` §4.3).
 
 | Condition | Behavior |
 |-----------|----------|
-| invariant would break | fail closed / Eye veto / no side effects |
+| invariant would break | fail closed / no side effects; Eye may notify |
+| missing PoT or NodeChain record | invalid — operation must not complete |
 | dependency unavailable | … |

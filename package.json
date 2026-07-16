@@ -14,7 +14,7 @@
     "format": "prettier -c .",
     "format:fix": "prettier -w .",
     "test": "jest",
-    "check:canon": "bash .github/scripts/canon-gate.sh"
+    "check:canon": "bash .github/scripts/canon-gate.sh && bash .github/scripts/ast-philosophy-guard.sh && bash .github/scripts/token-protocol-guard.sh && bash .github/scripts/no-bypass-pot-nodechain.sh"
   },
   "dependencies": {
     "@nestjs/common": "^10.4.22",
