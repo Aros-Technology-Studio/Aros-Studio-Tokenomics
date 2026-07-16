@@ -41,5 +41,5 @@
 
 | Item | Owner | Status |
 |------|-------|--------|
-| Choose RocksDB vs BadgerDB | engineering | open (both allowed) |
+| Choose RocksDB vs BadgerDB | **RocksDB** | **closed** |
 | Encryption key management | ops | open |

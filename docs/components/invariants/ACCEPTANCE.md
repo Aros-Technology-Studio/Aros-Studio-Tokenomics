@@ -39,4 +39,5 @@
 | Item | Owner | Status |
 |------|-------|--------|
 | Exact reason-code enum for InvariantBroken | engineering | open |
-| P1–P4 criteria live under pot (referenced by pot pack) | pot | pack cross-ref |
+| P1–P4 criteria | CANON §4.2 | **closed** |
+| Kill switch / read-only mode | yes in v1 | **closed** (implement with invariants/ops) |

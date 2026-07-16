@@ -56,6 +56,23 @@ PoT is the **only gate** for the origin and change of value.
 Without a positive PoT verdict (`verified = 1`), value does not arise, does not change, and is not recognized as valid.  
 PoT is institutional and process validation of the **fact of execution**, not consensus by hash power or stake.
 
+#### PoT Criteria (P1–P4)
+
+All four criteria apply to **every** process type in v1 (no per–asset-class subset).  
+They are versioned with the canon semver.  
+Evaluators: **quorum validators** + **Orchestrator** (coordination).  
+Failure of **any** criterion → immediately `verified = 0` (with mandatory reason codes).  
+Formal definitions live **in this canon** (not only in component docs).
+
+| ID | Criterion |
+|----|-----------|
+| **P1** | The process is initiated in an allowed architectural context (valid institutional certificate + allowlist). |
+| **P2** | The full sequence of execution stages has been completed. |
+| **P3** | All significant states are recorded in NodeChain. |
+| **P4** | The process is completed under the rules of the specific process type (deterministic result). |
+
+`criteriaResult` for a positive verdict requires **all** of P1–P4 to pass.
+
 ### 4.3. The All-Seeing Eye
 
 The All-Seeing Eye is an independent monitoring, audit, and alerting layer.  
@@ -288,7 +305,33 @@ dynamicFee = fee × (1 + overloadRate)
 
 ---
 
-## XII. Closing
+## XII. Operational defaults (v1)
+
+These values are ratified for implementation defaults; changing them is a configuration or canon/governance matter as noted.
+
+| Item | Default |
+|------|---------|
+| PoT confirmation timeout | 15 minutes |
+| Orchestrator per-step timeout | 5 minutes (configurable) |
+| Orchestrator process timeout | 30 minutes |
+| Node suspend grace period | 24 hours |
+| Min ARO dust | 0.000000001 (10⁻⁹ ARO / 1 arx) |
+| Commission split (nodes / AST) | 70% / 30% (ship default; configurable) |
+| Sandbox example feeRate | 0.15% |
+| Release config keys | `release.threshold`, `release.target` (numeric values config-only) |
+| Primary ledger engine | RocksDB |
+| Money library (TypeScript) | decimal.js |
+| processId prefix pattern | `AST-{INST}-{YYYYMMDD}-` (+ UUIDv7 as defined in orchestrator pack) |
+| Clock | **UTC only** |
+| Environments | `local`, `test`, `sandbox`, `prod` |
+| Eye analytic mirror max lag | 30 seconds |
+| Kill switch / read-only mode | **yes** in v1 |
+| PoT multi-node same institution | **1 vote total** per institutional certificate |
+| Compensation after `verified = 1` | **not compensatable** |
+| Mint succeeded, settlement failed | **retry settlement** (do not burn-compensate mint) |
+| Oracle Gateway failure | **fail-closed** (process expired) |
+
+## XIII. Closing
 
 This document is the **final AST canon**.  
 All architectures, code, workflows, GitHub Actions, documentation, and agent decisions **must** conform to it.  

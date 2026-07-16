@@ -47,10 +47,18 @@ Unit of documentation = **runtime component**. Layer folders (`02_…`, `10_…`
 | P2 | `orchestrator` | `components/orchestrator/` | **ready** | `src/orchestrator/` | Sole economic entry; fixed pipeline; saga compensation |
 | P2 | `state-recording` | `components/state-recording/` | **ready** | `src/state-recording/` | Process snapshots inside NodeChain; write-ahead |
 | P2 | `release` | `components/release/` | **ready** | `src/release/` | Release Phase gates; split from partial-release |
-| P3 | `common` | `components/common/` | **ready** | `src/common/` | Technical utils only; barrel exports |
+| P3 | `common` | `components/common/` | **ready** | `src/common/` | Technical utils only; barrel exports; decimal.js |
+| P4 | `partial-release` | `components/partial-release/` | **ready** | `src/partial-release/` | Split from phase; holder+institution; full process |
+| P4 | `release-daemon` | `components/release-daemon/` | **ready** | `src/release-daemon/` | Real v1; thresholds initiate |
+| P4 | `velocity-tracker` | `components/velocity-tracker/` | **ready** | `src/velocity-tracker/` | Real v1; §9.6 formula |
+| P4 | `node-reputation` | `components/node-reputation/` | **ready** | `src/node-reputation/` | Real v1; no slashing |
+| P4 | `oracle-gateway` | `components/oracle-gateway/` | **ready** | `src/oracle-gateway/` | Multi-oracle + signatures; fail-closed |
+| later | `resource_monitor` | — | stub | — | Deferred |
 
 Pack status values: `missing` | `draft` | `ready` | `implemented`.  
-**All component packs P0–P3 are ready** (owner answers canonical). Implementation status remains open.
+**P0–P4 documentation complete.** Implementation status remains open.  
+
+Target layout aliases (scaffold): `/nodechain` ↔ nodechain engine+ledger; `/pot-engine` ↔ pot; `/portal` ↔ institutional UI (v1 in-repo).
 
 ---
 

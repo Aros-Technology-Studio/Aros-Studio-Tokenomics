@@ -1,167 +1,90 @@
 # Component Clarifications (owner questionnaire)
 
-**Status:** P0 + P1 + P2–P3 answers **canonical for v1**  
-**Canon:** `/CANON.md` (AST Core Canon v1.0 Final)  
-**Language:** English in repo  
-
-Changes require formal canon amendment.
+**Status:** P0–P4 **complete** (canonical for v1)  
+**Canon:** `/CANON.md` (includes PoT Criteria P1–P4 + §XII operational defaults)
 
 ---
 
 # Pack status
 
-| Priority | Components | Status |
-|----------|------------|--------|
-| P0 | invariants, pot, reserve, aroscoin | ready |
-| P1 | nodechain, nodes, emission, commission, all-seeing-eye | ready |
-| P2–P3 | orchestrator, state-recording, release, common | ready |
+| Group | Status |
+|-------|--------|
+| P0–P3 original 13 components | packs **ready** |
+| P4 gaps | **answered** |
+| `partial-release` + support modules | packs **ready** |
+| `resource_monitor` | **stub / later** (no full pack) |
 
-Full answered text for P0/P1 lives in git history and component packs. Below: **P2–P3 canonical answers**.
-
----
-
-# P2–P3 — CANONICAL ANSWERS (v1)
-
-## 10. `orchestrator`
-
-1. processId?  
-   `A:` Unique id for the full lifecycle of one tokenization / revaluation. Created by **Orchestrator** at start: **UUIDv7 + institutional prefix**.
-
-2. Fixed pipeline v1 order?  
-   `A:`  
-   1. StartProcess (create processId)  
-   2. Document + Signature Validation  
-   3. Oracle Gateway (if needed)  
-   4. PoT Evaluation  
-   5. NodeChain Record  
-   6. Emission / Burn (if ΔValue ≠ 0)  
-   7. Settlement (commission)  
-   8. State Update + Notification  
-   9. EndProcess  
-
-3. Mid-pipeline failure?  
-   `A:` **Compensating transactions** (saga-style) driven by Orchestrator. On failure, compensate prior successful steps.  
-   **Note:** This is pipeline compensation — **not** All-Seeing Eye veto/rollback (`CANON.md` §4.3).
-
-4. AI hierarchy v1?  
-   `A:` **Real services** (L1 mandatory; L2/L3 optional).
-
-5. Human institutional approval?  
-   `A:` **Optional** only for high-value / high-risk processes (asset policy).
-
-6. Idempotency?  
-   `A:` **Yes.** Mandatory `idempotencyKey` at process start.
-
-7. Max concurrent processes per institution?  
-   `A:` Configurable (default **10**).
-
-8. Sole economic entrypoint?  
-   `A:` **Yes.** Only entry for all economic cycles.
-
-9. Timeouts?  
-   `A:` Overall process timeout **30 minutes**. Per-step timeouts configurable.
-
-10. Observability split?  
-    `A:` Logs = technical detail. **NodeChain** = all business events and states.
+Detail answers for P0–P3 live in packs + git history. Below: **P4 canonical answers**.
 
 ---
 
-## 11. `state-recording`
+# P4 — CANONICAL ANSWERS
 
-1. State record schema essentials?  
-   `A:` `processId`, `sequenceId`, `timestamp`, `stateType`, `payloadHash`, `prevStateHash`, `validatorId`, `status`.
+## 14. PoT Criteria P1–P4
 
-2. Store vs NodeChain?  
-   `A:` **Same** NodeChain ledger. Separate tables only for indexing.
+1. **P1** — Process initiated in allowed architectural context (valid institutional cert + allowlist).  
+2. **P2** — Full sequence of execution stages completed.  
+3. **P3** — All significant states recorded in NodeChain.  
+4. **P4** — Process completed under rules of the specific process type (deterministic result).  
+5. Evaluators: **validators (quorum) + Orchestrator (coordination)**.  
+6. **All four always** (no asset-class subset in v1).  
+7. Versioned with **canon semver**.  
+8. Fail any Pi → immediately `verified = 0`.  
+9. **Reason codes required** per Pi fail.  
+10. Formal text in **CANON** (section PoT Criteria) — done.
 
-3. Write-ahead before side-effect ack?  
-   `A:` **Mandatory** (write-ahead).
+## 15. partial-release
 
-4. Retention / immutability?  
-   `A:` Full immutability. Retention **forever**.
+1. Name: **`partial-release`**.  
+2. Requester: **holder via Portal + institutional approval**.  
+3. Dust: **same as ArosCoin**.  
+4. Each partial = **full process + new processId**.  
+5. **Atomic** burn + reserve child records.  
+6. Pre–Release Phase: **internal only**.  
+7. **Pro-rata** holder impact.  
+8. Governance **lighter** than full phase change.  
+9. NodeChain: ExecutionSnapshot + `partialRelease` payload.  
+10. Link: **burn + remint** (claim split).
 
-5. PII / secrets redaction?  
-   `A:` **Redaction forbidden.** Sensitive data **encrypted before write**.
+## 16. Extra modules
 
-6. Institution query API?  
-   `A:` Own `processId` / `claimId` only.
+1. `release_daemon` — **real v1**  
+2. `velocity_tracker` — **real v1**  
+3. `node_reputation_service` — **real v1**  
+4. `resource_monitor` — **stub → later**  
+5. `ledger` vs `nodechain` — **one binary** (`nodechain_engine` + ledger store)  
+6. Oracle: module **`oracle_gateway`**, multi-oracle + signature verification  
+7. Settlement = **commission** (alias)  
+8. AI L1 — **mandatory** (document validation + basic risk)  
+9. AI L2/L3 — **optional** (advanced anomaly detection)  
+10. Frontend/portal — **yes**, this repo v1 (`/portal`)
 
-7. Correlation ids?  
-   `A:` **processId mandatory.** Others as needed.
+## 17. Defaults
 
-8. Difference from NodeChain (one sentence)?  
-   `A:` State-recording is the **process state snapshots** living **inside** the NodeChain ledger.
+| Item | Value |
+|------|--------|
+| PoT timeout | 15 min |
+| Per-step orchestrator timeout | 5 min default (configurable) |
+| Suspend grace | 24 h |
+| Min dust ARO | 0.000000001 |
+| Commission split | 70/30 ship default |
+| Config keys | `release.threshold`, `release.target` |
+| Ledger engine | RocksDB |
+| Money | decimal.js |
+| processId prefix | `AST-{INST}-{YYYYMMDD}-` |
+| Sandbox feeRate | 0.15% |
 
-9. Fail to record?  
-   `A:` **Yes — fail closed** (block business action).
+(Also in `CANON.md` §XII.)
 
-10. Replay tool v1?  
-    `A:` **Yes** — built-in replay for determinism checks.
+## 18. Cross-cutting
 
----
-
-## 12. `release`
-
-1. Who requests release / phase actions?  
-   `A:` **System only** (on thresholds) + **governance approval**.
-
-2. Link to release_daemon?  
-   `A:` Daemon monitors thresholds and **initiates** phase transition.
-
-3. threshold / target defaults?  
-   `A:` **Config only** in v1 (no hard-coded numeric defaults in canon packs).
-
-4. Blocked before Release Phase?  
-   `A:` Free transfer to external chains, CEX listing, public trading.
-
-5. Allowed after Release Phase?  
-   `A:` External transfers, bridge, listing — still under compliance rules.
-
-6. Partial asset release vs phase activation?  
-   `A:` **Split modules** (separate).
-
-7. Atomicity with burn/reserve?  
-   `A:` **Full atomicity** (all or nothing).
-
-8. Multi-step approval for large releases?  
-   `A:` **Yes**, configurable multi-step governance approval.
-
-9. NodeChain on phase change / release ops?  
-   `A:` Full event with `prevStateHash` + verifier signatures.
-
-10. Reverse / deactivate Release Phase?  
-    `A:` **Yes**, via governance, with mandatory NodeChain record.
-
----
-
-## 13. `common`
-
-1. What belongs in v1?  
-   `A:` Money/Decimal; IDs (processId, claimId, snapshotId); Errors & Reason Codes; crypto primitives (hash, signature verify); Types & Interfaces.
-
-2. Forbidden in common?  
-   `A:` Any domain rules, business logic, policies — **technical utilities only**.
-
-3. Shared error catalog?  
-   `A:` **Yes**, centralized.
-
-4. Decimal/money library?  
-   `A:` `decimal.js` or `big.js` (TypeScript stack → prefer one; pack records both allowed).
-
-5. Logging/tracing helpers?  
-   `A:` **Yes.**
-
-6. Shared config loading?  
-   `A:` **Yes.**
-
-7. Export surface?  
-   `A:` **Barrel exports only.**
-
-8. Test utils?  
-   `A:` Separate **`testing/`** package (not inside common).
-
-9. Domain event types?  
-   `A:` **No** — only base interfaces.
-
-10. Breaking changes?  
-    `A:` Semver + backward compatibility (deprecate; do not remove in v1).
+1. Compensatable: **everything before PoT verified**. After verified — **not compensatable**.  
+2. Mint ok, settlement fail → **retry settle** (no burn-compensate).  
+3. Oracle fail → **fail-closed / expired**.  
+4. Multi-node institution → **1 vote total** per institutional cert.  
+5. Eye mirror lag max → **30 s**.  
+6. Kill switch / read-only → **yes v1**.  
+7. Envs: `local`, `test`, `sandbox`, `prod`.  
+8. Document languages: **any** (signature + metadata only; no text NLP required).  
+9. Clock: **UTC only**.  
+10. Must before first `src/` PR: Core Canon fixed; P0–P4 recorded; scaffold `/portal`, `/nodechain`, `/pot-engine`; protective GitHub Actions — **satisfied when this commit lands**.

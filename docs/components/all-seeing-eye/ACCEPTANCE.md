@@ -40,5 +40,6 @@
 
 | Item | Owner | Status |
 |------|-------|--------|
-| Reason code catalog v1 list | owner/engineering | open |
+| Reason code catalog v1 list | engineering | open (required) |
 | Critical vs non-critical classification rules | owner | open (both channels exist) |
+| Analytic mirror max lag | 30 seconds | **closed** |

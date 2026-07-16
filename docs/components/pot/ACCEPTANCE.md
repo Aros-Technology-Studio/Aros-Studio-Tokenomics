@@ -40,5 +40,5 @@
 
 | Item | Owner | Status |
 |------|-------|--------|
-| Formal text of criteria P1–P4 | owner / processing pack | open |
-| Exact timeout default (seconds) | owner | open (behavior fixed: expired) |
+| Formal text of criteria P1–P4 | CANON §4.2 | **closed** |
+| PoT timeout default | 15 minutes | **closed** |

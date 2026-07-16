@@ -52,4 +52,15 @@ PoT_volume = Σ(tx.amount × tx.verified)
 
 Default quorum ratio: **2/3** of assigned validators (configurable).
 
-Criteria **P1–P4**: must all pass in `criteriaResult` (detailed criterion specs may live with processing layer; absence of all-pass ⇒ no verified=1).
+Criteria **P1–P4** (canonical text in `CANON.md` §4.2 PoT Criteria; all four always in v1):
+
+| ID | Meaning |
+|----|---------|
+| P1 | Allowed architectural context (valid institutional cert + allowlist) |
+| P2 | Full sequence of execution stages completed |
+| P3 | All significant states recorded in NodeChain |
+| P4 | Completed under rules of the process type (deterministic result) |
+
+Fail any Pi → immediately `verified = 0` + reason code.  
+Default PoT timeout: **15 minutes** (`CANON.md` §XII).  
+Multi-node same institution: **1 vote total** per institutional certificate.

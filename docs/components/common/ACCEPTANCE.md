@@ -36,4 +36,4 @@
 
 | Item | Owner | Status |
 |------|-------|--------|
-| Choose decimal.js vs big.js | engineering | open (both allowed) |
+| Choose decimal.js vs big.js | **decimal.js** | **closed** |

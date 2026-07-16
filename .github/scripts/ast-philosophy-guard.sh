@@ -42,8 +42,11 @@ for needle in \
   "## VI. Token canons (AST Token Protocol)" \
   "## X. Hard prohibitions" \
   "## XI. Invariants" \
+  "#### PoT Criteria (P1–P4)" \
+  "**P1**" \
   "**I1.**" \
-  "**I9.**"
+  "**I9.**" \
+  "## XIII. Closing"
 do
   if ! grep -qF "$needle" CANON.md; then
     echo "::error::CANON.md is missing required anchor: $needle"

@@ -59,4 +59,9 @@ Idempotent start: same `idempotencyKey` → same process or reject duplicate sta
 |-----------|---------|
 | maxConcurrentProcesses / institution | 10 |
 | processTimeout | 30 minutes |
-| per-step timeout | configurable |
+| per-step timeout | default **5 minutes** (configurable) |
+| processId prefix | `AST-{INST}-{YYYYMMDD}-` + UUIDv7 |
+| compensation | only **before** PoT `verified=1` |
+| post-mint settlement fail | **retry settle** (do not burn-compensate) |
+| oracle fail | fail-closed → process expired |
+| clock | UTC only |

@@ -37,5 +37,6 @@
 
 | Item | Owner | Status |
 |------|-------|--------|
-| Confirm default 70/30 vs other policy defaults | owner | default recorded 70/30 |
-| Node weight formula detail | engineering | open |
+| Confirm default 70/30 vs other policy defaults | 70/30 ship default | **closed** |
+| Sandbox feeRate example | 0.15% | **closed** |
+| Node weight formula detail | engineering | open (canon §9.5 shape) |

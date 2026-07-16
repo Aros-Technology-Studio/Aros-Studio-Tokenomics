@@ -39,5 +39,6 @@
 
 | Item | Owner | Status |
 |------|-------|--------|
-| Grace period duration default | owner | open |
-| Reputation formula details | engineering | open (behavior fixed) |
+| Grace period duration default | 24 hours | **closed** |
+| Reputation formula details | engineering | open (formula in canon §9.8) |
+| PoT vote per institution | 1 vote total per cert | **closed** |
