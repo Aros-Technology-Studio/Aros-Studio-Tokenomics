@@ -44,13 +44,13 @@ Unit of documentation = **runtime component**. Layer folders (`02_…`, `10_…`
 | P1 | `emission` | `components/emission/` | **ready** | `src/emission/` | Valuation+ΔValue; calls aroscoin.mint; I9 pro-rata |
 | P1 | `commission` | `components/commission/` | **ready** | `src/commission/` | On-PoT settlement; default 70/30; full simple engine |
 | P1 | `all-seeing-eye` | `components/all-seeing-eye/` | **ready** | `src/all-seeing-eye/` | Separate process; observe/notify only |
-| P2 | `orchestrator` | `components/orchestrator/` | missing | `src/orchestrator/` | Coordinates only (not PoT quorum) |
-| P2 | `state-recording` | `components/state-recording/` | missing | `src/state-recording/` | State recording |
-| P2 | `release` | `components/release/` | missing | `src/release/` | Release Phase + release paths |
-| P3 | `common` | `components/common/` | missing | `src/common/` | Shared utilities |
+| P2 | `orchestrator` | `components/orchestrator/` | **ready** | `src/orchestrator/` | Sole economic entry; fixed pipeline; saga compensation |
+| P2 | `state-recording` | `components/state-recording/` | **ready** | `src/state-recording/` | Process snapshots inside NodeChain; write-ahead |
+| P2 | `release` | `components/release/` | **ready** | `src/release/` | Release Phase gates; split from partial-release |
+| P3 | `common` | `components/common/` | **ready** | `src/common/` | Technical utils only; barrel exports |
 
 Pack status values: `missing` | `draft` | `ready` | `implemented`.  
-P0 and P1 packs are **ready** (owner answers canonical). P2–P3 remain **missing**.
+**All component packs P0–P3 are ready** (owner answers canonical). Implementation status remains open.
 
 ---
 

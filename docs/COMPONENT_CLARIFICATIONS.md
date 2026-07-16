@@ -1,214 +1,167 @@
 # Component Clarifications (owner questionnaire)
 
-**Status:** P0 + P1 answers **canonical for v1** (owner; Core Canon v1.0 Final)  
-**Language:** English in repo; product owner may answer in Russian in chat.  
-**Canon:** `/CANON.md`  
-**Principle:** [ANTI_POLICE.md](./principles/ANTI_POLICE.md)
+**Status:** P0 + P1 + P2–P3 answers **canonical for v1**  
+**Canon:** `/CANON.md` (AST Core Canon v1.0 Final)  
+**Language:** English in repo  
 
-Changes to these answers require formal canon amendment.
-
----
-
-# P0 — CANONICAL (summary)
-
-| Component | Pack |
-|-----------|------|
-| `invariants` | ready — pure+guards, fail closed, I1–I9 CI, no Eye veto |
-| `pot` | ready — M-of-N, final verified, NodeChain before emission, no amounts |
-| `reserve` | ready — multi-asset own books, bag, reserveIndex, NodeChain primary |
-| `aroscoin` | ready — ARO/9, emission-after-PoT only, no admin mint |
-
-Full text: historical sections below were replaced by pack files; P0 detail remains in `docs/components/{invariants,pot,reserve,aroscoin}/` and prior commit history.
+Changes require formal canon amendment.
 
 ---
 
-# P1 — CANONICAL ANSWERS (v1)
+# Pack status
 
-## 5. `nodechain`
+| Priority | Components | Status |
+|----------|------------|--------|
+| P0 | invariants, pot, reserve, aroscoin | ready |
+| P1 | nodechain, nodes, emission, commission, all-seeing-eye | ready |
+| P2–P3 | orchestrator, state-recording, release, common | ready |
 
-1. Data model?  
-   `A:` **Linear append-only log** as the main chain. DAG allowed only **inside one processId** as internal representation.
-
-2. Storage v1?  
-   `A:` **Primary:** own append-only ledger (RocksDB/BadgerDB). **Secondary:** Postgres for indexes/search only (mirror, not SoT).
-
-3. Word “blocks”?  
-   `A:` **Forbidden** in public API, docs, and code. Use: snapshot, execution record, state entry.
-
-4. Sharding v1?  
-   `A:` **No.** Single shard. Sharding v2+.
-
-5. Encryption at rest v1?  
-   `A:` **Required** for all sensitive data.
-
-6. Who may append?  
-   `A:` **Internal services with roles** + quorum validators. Direct append from arbitrary nodes forbidden.
-
-7. Read API?  
-   `A:` Institutions: **own processes only** (by claimId/processId). Full history: Eye + authorized audit only.
-
-8. Finality?  
-   `A:` **Immediately immutable** (append-only). Soft finality not allowed.
-
-9. Link to PoT/ArosCoin?  
-   `A:` **Content hashes** (primary) + processId for navigation.
-
-10. BFT inside NodeChain v1?  
-    `A:` **Later.** v1: PoT + quorum validators suffice.
+Full answered text for P0/P1 lives in git history and component packs. Below: **P2–P3 canonical answers**.
 
 ---
 
-## 6. `nodes`
+# P2–P3 — CANONICAL ANSWERS (v1)
 
-1. Identity?  
-   `A:` **Both** — institutional certificate (qualified e-signature / X.509) + key pair.
+## 10. `orchestrator`
 
-2. Registration?  
-   `A:` **Manual approval** + allowlist for known institutions.
+1. processId?  
+   `A:` Unique id for the full lifecycle of one tokenization / revaluation. Created by **Orchestrator** at start: **UUIDv7 + institutional prefix**.
 
-3. Auth?  
-   `A:` **mTLS + signed challenges** (primary). JWT only for internal services.
+2. Fixed pipeline v1 order?  
+   `A:`  
+   1. StartProcess (create processId)  
+   2. Document + Signature Validation  
+   3. Oracle Gateway (if needed)  
+   4. PoT Evaluation  
+   5. NodeChain Record  
+   6. Emission / Burn (if ΔValue ≠ 0)  
+   7. Settlement (commission)  
+   8. State Update + Notification  
+   9. EndProcess  
 
-4. Roles?  
-   `A:` **Fixed set** for v1 (executor, confirmer/validator, observer).
+3. Mid-pipeline failure?  
+   `A:` **Compensating transactions** (saga-style) driven by Orchestrator. On failure, compensate prior successful steps.  
+   **Note:** This is pipeline compensation — **not** All-Seeing Eye veto/rollback (`CANON.md` §4.3).
 
-5. Suspend without slashing?  
-   `A:` Reputation decrease + temporary exclusion from quorum (grace period).
+4. AI hierarchy v1?  
+   `A:` **Real services** (L1 mandatory; L2/L3 optional).
 
-6. Uptime / heartbeats?  
-   `A:` Heartbeats required. Min uptime configurable (default **95%**).
+5. Human institutional approval?  
+   `A:` **Optional** only for high-value / high-risk processes (asset policy).
 
-7. Geo / jurisdiction?  
-   `A:` **Yes**, configurable (compliance).
+6. Idempotency?  
+   `A:` **Yes.** Mandatory `idempotencyKey` at process start.
 
-8. Node payment?  
-   `A:` **ARO** post-factum via commission pool.
+7. Max concurrent processes per institution?  
+   `A:` Configurable (default **10**).
 
-9. API surface?  
-   `A:` Minimum: register, auth, heartbeat, task assignment.
+8. Sole economic entrypoint?  
+   `A:` **Yes.** Only entry for all economic cycles.
 
-10. Multi-node per institution?  
-    `A:` **Allowed** under one institutional certificate.
+9. Timeouts?  
+   `A:` Overall process timeout **30 minutes**. Per-step timeouts configurable.
 
----
-
-## 7. `emission`
-
-1. Amount inputs?  
-   `A:` **Institutional valuation** (primary) + **ΔValue** (confirmed change).
-
-2. Old `T_E = α·TV + β·U + γ`?  
-   `A:` **Replaced** by valuation + ΔValue.
-
-3. Output unit?  
-   `A:` **ARO**.
-
-4. Rounding?  
-   `A:` **Floor** to minimum unit (9 decimals / arx).
-
-5. Deterministic / replayable?  
-   `A:` **Yes** — strictly from NodeChain inputs only.
-
-6. Caps?  
-   `A:` **Yes**, configurable per asset class.
-
-7. Calls mint?  
-   `A:` Calls **`aroscoin.mint`** after successful PoT (not DTO-only).
-
-8. Zero/negative ΔValue?  
-   `A:` **Emit zero** or **burn path** (per asset policy).
-
-9. Who changes parameters?  
-   `A:` **Only canon change** + governance.
-
-10. Pro-rata (I9)?  
-    `A:` **Emission service** computes and invokes mint.
+10. Observability split?  
+    `A:` Logs = technical detail. **NodeChain** = all business events and states.
 
 ---
 
-## 8. `commission` (settlement / post-factum)
+## 11. `state-recording`
 
-1. Fee schedules?  
-   `A:` **Multiple** (per asset class).
+1. State record schema essentials?  
+   `A:` `processId`, `sequenceId`, `timestamp`, `stateType`, `payloadHash`, `prevStateHash`, `validatorId`, `status`.
 
-2. Fee base?  
-   `A:` **Valuation** (institutional).
+2. Store vs NodeChain?  
+   `A:` **Same** NodeChain ledger. Separate tables only for indexing.
 
-3. Split nodes vs AST reserve?  
-   `A:` Configurable ratios (default **70/30** or per policy).
+3. Write-ahead before side-effect ack?  
+   `A:` **Mandatory** (write-ahead).
 
-4. When taken?  
-   `A:` **On PoT** (after confirmation).
+4. Retention / immutability?  
+   `A:` Full immutability. Retention **forever**.
 
-5. Currency?  
-   `A:` **ARO**.
+5. PII / secrets redaction?  
+   `A:` **Redaction forbidden.** Sensitive data **encrypted before write**.
 
-6. Commission fate?  
-   `A:` Redistribute to nodes + accrue to AST reserve.
+6. Institution query API?  
+   `A:` Own `processId` / `claimId` only.
 
-7. Waivers / tiers v1?  
-   `A:` **Yes**, configurable.
+7. Correlation ids?  
+   `A:` **processId mandatory.** Others as needed.
 
-8. NodeChain visibility?  
-   `A:` **Mandatory**.
+8. Difference from NodeChain (one sentence)?  
+   `A:` State-recording is the **process state snapshots** living **inside** the NodeChain ledger.
 
-9. API vocabulary?  
-   `A:` Owner intent: settlement + node distribution; avoid payout/compensation-style naming.  
-   **Repo resolution (mandatory):** vocabulary gate + Core Canon require post-factum **payment** language.  
-   Canonical API names for v1: **`settleCommission`**, **`distributeNodePayment`**. Do not ship banned-token identifiers (see `canon-gate.sh`).
+9. Fail to record?  
+   `A:` **Yes — fail closed** (block business action).
 
-10. v1 scope?  
-    `A:` **Full distribution engine** (simple).
+10. Replay tool v1?  
+    `A:` **Yes** — built-in replay for determinism checks.
 
 ---
 
-## 9. `all-seeing-eye`
+## 12. `release`
 
-1. Scope?  
-   `A:` **All events** (variable analysis depth).
+1. Who requests release / phase actions?  
+   `A:` **System only** (on thresholds) + **governance approval**.
 
-2. Notify mode?  
-   `A:` **Async batch audit** + **critical sync alerts**.
+2. Link to release_daemon?  
+   `A:` Daemon monitors thresholds and **initiates** phase transition.
 
-3. Consumers v1?  
-   `A:` **Ops human + orchestrator**.
+3. threshold / target defaults?  
+   `A:` **Config only** in v1 (no hard-coded numeric defaults in canon packs).
 
-4. Reason codes?  
-   `A:` **Yes**, standardized.
+4. Blocked before Release Phase?  
+   `A:` Free transfer to external chains, CEX listing, public trading.
 
-5. Fail-closed owner?  
-   `A:` **Executing module** itself (not Eye).
+5. Allowed after Release Phase?  
+   `A:` External transfers, bridge, listing — still under compliance rules.
 
-6. Deployment shape?  
-   `A:` **Separate process** (independence).
+6. Partial asset release vs phase activation?  
+   `A:` **Split modules** (separate).
 
-7. Log store?  
-   `A:` **NodeChain primary** + mirrored analytic store.
+7. Atomicity with burn/reserve?  
+   `A:` **Full atomicity** (all or nothing).
 
-8. Disable?  
-   `A:` Allowed in **dev/test**; **never in prod**.
+8. Multi-step approval for large releases?  
+   `A:` **Yes**, configurable multi-step governance approval.
 
-9. Ban list extras?  
-   `A:` Ban list is for **monitoring only** (Eye never mint/burn/pay/veto/rollback). No extra executive powers.
+9. NodeChain on phase change / release ops?  
+   `A:` Full event with `prevStateHash` + verifier signatures.
 
-10. AI hierarchy?  
-    `A:` **Yes** — parallel observation plane only.
-
----
-
-# P2–P3 — QUESTIONS (later)
-
-`orchestrator`, `state-recording`, `release`, `common` — 10 each; open after P1 packs.
+10. Reverse / deactivate Release Phase?  
+    `A:` **Yes**, via governance, with mandatory NodeChain record.
 
 ---
 
-## Mapping to packs
+## 13. `common`
 
-| Component | Pack status |
-|-----------|-------------|
-| P0 four | ready |
-| `nodechain` | ready |
-| `nodes` | ready |
-| `emission` | ready |
-| `commission` | ready |
-| `all-seeing-eye` | ready |
+1. What belongs in v1?  
+   `A:` Money/Decimal; IDs (processId, claimId, snapshotId); Errors & Reason Codes; crypto primitives (hash, signature verify); Types & Interfaces.
+
+2. Forbidden in common?  
+   `A:` Any domain rules, business logic, policies — **technical utilities only**.
+
+3. Shared error catalog?  
+   `A:` **Yes**, centralized.
+
+4. Decimal/money library?  
+   `A:` `decimal.js` or `big.js` (TypeScript stack → prefer one; pack records both allowed).
+
+5. Logging/tracing helpers?  
+   `A:` **Yes.**
+
+6. Shared config loading?  
+   `A:` **Yes.**
+
+7. Export surface?  
+   `A:` **Barrel exports only.**
+
+8. Test utils?  
+   `A:` Separate **`testing/`** package (not inside common).
+
+9. Domain event types?  
+   `A:` **No** — only base interfaces.
+
+10. Breaking changes?  
+    `A:` Semver + backward compatibility (deprecate; do not remove in v1).
