@@ -1,39 +1,34 @@
 # Aros Studio Tokenomics (AST)
 
-## Status: CLEAN SLATE
+Institutional process token-economy: **NodeChain** is the sole source-of-truth journal; value gates through **PoT**; AST holds only its own funds.
 
-Scaffold, freelanced code, and fake “complete” docs were **removed**.
+## Status
 
-Work restarts **docs-first**: Core Canon → layer/module specifications → then core code.  
-**No portal.** Not in scope.
+| Area | State |
+|------|--------|
+| Canon | `docs/AST-CORE-CANON.md` |
+| Layer specs | `docs/layers/01_NodeChain` full draft; 02–10 skeletons |
+| Code | **NodeChain journal live** — genesis + first record |
+| Portal | **Out of scope** |
 
-## Source of truth (kept)
+## First journal record
 
-| Path | Role |
-|------|------|
-| [`docs/AST-CORE-CANON.md`](docs/AST-CORE-CANON.md) | Sole law (I1–I9, PoT, Eye, token protocol) |
-| [`docs/P0-P4-TECHNICAL-DECISIONS.md`](docs/P0-P4-TECHNICAL-DECISIONS.md) | Ratified technical decisions (owner Q&A) |
-| [`docs/BUILD_SCHEDULE.md`](docs/BUILD_SCHEDULE.md) | Work order (owner) |
-| [`AGENTS.md`](AGENTS.md) | Agent language/process rules |
-| [`CANON.md`](CANON.md) | Pointer to Core Canon |
+```bash
+npm install
+npm test
+npm run journal:first -- --dir data/journal
+npm run cli -- journal dump --dir data/journal
+```
 
-## Not present (intentionally)
+- Height **0** = `genesis`  
+- Height **1** = `system_boot` (first operational append)  
+- Chain verified via `npm run cli -- journal verify --dir data/journal`
 
-- `src/` — no core code yet  
-- no portal, no UI  
-- `docs/modules/`, layers — not rebuilt yet  
-- CI, Docker, packages — removed with scaffold  
+## Layers
 
-## Rebuild order (mandatory)
+See [`docs/STRUCTURE.md`](docs/STRUCTURE.md) and [`docs/layers/`](docs/layers/).
 
-1. Documentation tree by **layers** (real specs, not stubs)  
-2. Acceptance criteria per layer  
-3. Core implementation against those specs  
-4. Tests on core  
-5. Core API only if needed for core (no portal)
+## Stack
 
-## Layers (in progress)
-
-| ID | Path |
-|----|------|
-| **01** | [`docs/layers/01_NodeChain/`](docs/layers/01_NodeChain/) — ledger SoT (structure locked; content next) |
+TypeScript, NestJS modules, Jest, Node ≥ 20.  
+Issue titles on GitHub are the backlog map for layers 01–10 and ENV work.

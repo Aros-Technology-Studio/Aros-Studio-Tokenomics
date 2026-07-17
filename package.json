@@ -1,0 +1,31 @@
+{
+  "name": "aros-studio-tokenomics",
+  "version": "0.1.0",
+  "private": true,
+  "description": "AST — Aros Studio Tokenomics (NodeChain journal first)",
+  "license": "UNLICENSED",
+  "engines": {
+    "node": ">=20"
+  },
+  "scripts": {
+    "build": "tsc -p tsconfig.build.json",
+    "test": "jest",
+    "cli": "tsx scripts/ast-cli.ts",
+    "journal:genesis": "tsx scripts/ast-cli.ts journal genesis",
+    "journal:first": "tsx scripts/ast-cli.ts journal first-record"
+  },
+  "dependencies": {
+    "@nestjs/common": "^11.0.0",
+    "@nestjs/core": "^11.0.0",
+    "reflect-metadata": "^0.2.2",
+    "rxjs": "^7.8.1"
+  },
+  "devDependencies": {
+    "@types/jest": "^29.5.14",
+    "@types/node": "^22.10.0",
+    "jest": "^29.7.0",
+    "ts-jest": "^29.2.5",
+    "tsx": "^4.19.2",
+    "typescript": "^5.7.2"
+  }
+}

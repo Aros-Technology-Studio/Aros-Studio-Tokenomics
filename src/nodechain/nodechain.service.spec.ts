@@ -1,0 +1,85 @@
+import { NodechainService } from './nodechain.service';
+import { MemoryJournalStore } from './memory.store';
+import { NodeChainError, NcErrorCode } from './errors';
+
+describe('NodechainService', () => {
+  let nc: NodechainService;
+
+  beforeEach(() => {
+    nc = new NodechainService(new MemoryJournalStore());
+  });
+
+  it('writes genesis at height 0', async () => {
+    const g = await nc.ensureGenesis('system');
+    expect(g.height).toBe(0);
+    const tip = await nc.getTip();
+    expect(tip?.height).toBe(0);
+    const v = await nc.verifyChain();
+    expect(v.ok).toBe(true);
+  });
+
+  it('writes first operational record after genesis', async () => {
+    await nc.ensureGenesis();
+    const first = await nc.append({
+      clientRecordId: 'first-boot',
+      recordType: 'system_boot',
+      payload: {
+        event: 'first_journal_record',
+        layer: '01_NodeChain',
+        note: 'journal is live',
+      },
+      writerId: 'system',
+      writerRole: 'system',
+    });
+    expect(first.height).toBe(1);
+    const rec = await nc.getByHeight(1);
+    expect(rec?.recordType).toBe('system_boot');
+    expect(rec?.prevHash).toBe((await nc.getByHeight(0))!.envelopeHash);
+    const v = await nc.verifyChain();
+    expect(v.ok).toBe(true);
+    expect(v.height).toBe(1);
+  });
+
+  it('rejects process-scoped type without processId', async () => {
+    await nc.ensureGenesis();
+    await expect(
+      nc.append({
+        recordType: 'process_open',
+        payload: {},
+        writerId: 'orchestrator',
+        writerRole: 'orchestrator',
+      }),
+    ).rejects.toMatchObject({ code: NcErrorCode.PROCESS_REQUIRED });
+  });
+
+  it('is idempotent on clientRecordId', async () => {
+    await nc.ensureGenesis();
+    const a = await nc.append({
+      clientRecordId: 'idem-1',
+      recordType: 'system_boot',
+      payload: { n: 1 },
+      writerId: 'system',
+      writerRole: 'system',
+    });
+    const b = await nc.append({
+      clientRecordId: 'idem-1',
+      recordType: 'system_boot',
+      payload: { n: 1 },
+      writerId: 'system',
+      writerRole: 'system',
+    });
+    expect(b.recordId).toBe(a.recordId);
+    expect(b.height).toBe(a.height);
+  });
+
+  it('fails closed without genesis', async () => {
+    await expect(
+      nc.append({
+        recordType: 'system_boot',
+        payload: {},
+        writerId: 'system',
+        writerRole: 'system',
+      }),
+    ).rejects.toBeInstanceOf(NodeChainError);
+  });
+});

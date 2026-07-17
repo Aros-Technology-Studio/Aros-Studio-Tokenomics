@@ -1,0 +1,18 @@
+# AST machine rules (v0.1) — expand with layers
+version: "0.1"
+invariants:
+  - id: I3_NODECHAIN_RECORD
+    summary: Significant events require NodeChain record
+  - id: I1_POT_GATED
+    summary: Value requires PoT verified=1 (enforced when PoT layer lands)
+firewall:
+  banned_product_surfaces:
+    - staking_for_yield
+    - free_mint
+    - third_party_custody
+commission:
+  ship_default_nodes: 0.70
+  ship_default_ast: 0.30
+nodechain:
+  primary_store: file_or_rocksdb
+  genesis_required: true
