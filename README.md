@@ -26,8 +26,14 @@ Work restarts **docs-first**: Core Canon → layer/module specifications → the
 
 ## Rebuild order (mandatory)
 
-1. Documentation tree by **layers** and **modules** (real specs, not stubs)  
+1. Documentation tree by **layers** (real specs, not stubs)  
 2. Acceptance criteria per layer  
 3. Core implementation against those specs  
 4. Tests on core  
 5. Core API only if needed for core (no portal)
+
+## Layers (in progress)
+
+| ID | Path |
+|----|------|
+| **01** | [`docs/layers/01_NodeChain/`](docs/layers/01_NodeChain/) — ledger SoT (structure locked; content next) |
