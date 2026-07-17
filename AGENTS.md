@@ -12,18 +12,18 @@
 1. **`docs/AST-CORE-CANON.md`** — full Core Canon (sole law)  
 2. **`docs/P0-P4-TECHNICAL-DECISIONS.md`** — ratified decisions  
 3. **`docs/BUILD_SCHEDULE.md`** — phase order  
-4. **`docs/components/`** — packs  
-5. Code last  
+4. Code **last** — only after real layer/module specs exist  
 
 Root `CANON.md` is a pointer only.
 
-## Process
+## Process (hard)
 
-- Follow `.grok/rules.md`  
-- Work only within the active build phase unless the owner expands the range  
-- On ambiguity: ask the product owner  
-- Migration: `docs/MIGRATION_GATE.md`  
+1. **Docs first** — full specs by layers and modules, visible in the tree  
+2. **No freelanced code** without a written spec for that unit  
+3. **No fake Done** — do not mark issues or layers complete for scaffold, README, or empty acceptance  
+4. **Portal last** — client entry after core works  
+5. On ambiguity: ask the product owner  
 
-## Stack (reminder)
+## Stack (when implementation phase starts)
 
-TypeScript / NestJS core; tests with Jest; Node ≥ 20; portal Next.js edge under `portal/`.
+TypeScript / NestJS core; tests with Jest; Node ≥ 20; portal (later) under `portal/`.

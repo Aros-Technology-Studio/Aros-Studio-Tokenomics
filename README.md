@@ -1,57 +1,34 @@
 # Aros Studio Tokenomics (AST)
 
-Self-sufficient institutional tokenization platform: **NodeChain**, **Proof-of-Transaction (PoT)**, **ArosCoin**, reserves, settlement, and observe-only **All-Seeing Eye**.
+## Status: CLEAN SLATE
 
-## Source of truth
+Implementation scaffold, portal, pseudo-complete module/component docs, and freelanced code were **removed**.
 
-| Document | Role |
-|----------|------|
-| [`docs/AST-CORE-CANON.md`](docs/AST-CORE-CANON.md) | **Core Canon** (sole full SoT) |
-| [`docs/P0-P4-TECHNICAL-DECISIONS.md`](docs/P0-P4-TECHNICAL-DECISIONS.md) | Ratified technical decisions |
-| [`docs/BUILD_SCHEDULE.md`](docs/BUILD_SCHEDULE.md) | Build order (phases 0–5) |
-| [`CANON.md`](CANON.md) | Root pointer to Core Canon |
+Work restarts **docs-first**: Core Canon → layer/module specifications → then code.  
+Portal is **last**, not first.
 
-## Quick links
-
-- Architecture: [`docs/ARCHITECTURE.md`](docs/ARCHITECTURE.md)  
-- Portal: [`docs/PORTAL.md`](docs/PORTAL.md)  
-- Component packs: [`docs/components/`](docs/components/)  
-- Workflows (CI + runtime): [`docs/WORKFLOWS.md`](docs/WORKFLOWS.md)  
-- Migration gate: [`docs/MIGRATION_GATE.md`](docs/MIGRATION_GATE.md)  
-- Contributing: [`CONTRIBUTING.md`](CONTRIBUTING.md)  
-
-## Status
-
-**Phase 0 — Foundation.** Protective CI is active. Implementation follows the build schedule **after** foundation exit — not ad hoc.
-
-## Development
-
-```bash
-# Product guards (canon, philosophy, packs, layout, …)
-npm run check:canon
-
-# Candidate docs before promote from legacy
-npm run check:migration
-
-npm test
-npm run build
-```
-
-Core API (when running): default port `3000`, prefix `/v1`.  
-Portal edge: `portal/` (Next.js + Nest), talks to core via `CORE_API_URL`.
-
-## Layout (aliases)
+## Source of truth (kept)
 
 | Path | Role |
 |------|------|
-| `docs/` | Canon, decisions, architecture, packs, processes |
-| `src/` | Core NestJS modules (draft until phase execution) |
-| `portal/` | Institutional portal edge |
-| `nodechain/`, `pot-engine/`, `aroscoin/` | Layout aliases + README |
-| `migration/` | Inbox for legacy doc candidates |
-| `.github/` | CI + protective workflows |
+| [`docs/AST-CORE-CANON.md`](docs/AST-CORE-CANON.md) | Sole law (I1–I9, PoT, Eye, token protocol) |
+| [`docs/P0-P4-TECHNICAL-DECISIONS.md`](docs/P0-P4-TECHNICAL-DECISIONS.md) | Ratified technical decisions (owner Q&A) |
+| [`docs/BUILD_SCHEDULE.md`](docs/BUILD_SCHEDULE.md) | Work order (owner) |
+| [`AGENTS.md`](AGENTS.md) | Agent language/process rules |
+| [`CANON.md`](CANON.md) | Pointer to Core Canon |
 
-## Language
+## Not present (intentionally)
 
-- Repository: **English**  
-- Product owner chat: **Russian** (see `AGENTS.md`)
+- `src/` — no core code  
+- `portal/` — no portal  
+- `docs/modules/`, `docs/components/` — no fake complete specs  
+- CI, Docker, packages — removed with scaffold  
+
+## Rebuild order (mandatory)
+
+1. Documentation tree by **layers** and **modules** (real specs, not stubs)  
+2. Acceptance criteria per layer  
+3. Core implementation against those specs  
+4. Tests on core  
+5. Core API  
+6. Portal (last)
