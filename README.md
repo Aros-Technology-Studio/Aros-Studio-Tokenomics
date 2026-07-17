@@ -2,10 +2,10 @@
 
 ## Status: CLEAN SLATE
 
-Implementation scaffold, portal, pseudo-complete module/component docs, and freelanced code were **removed**.
+Scaffold, freelanced code, and fake “complete” docs were **removed**.
 
-Work restarts **docs-first**: Core Canon → layer/module specifications → then code.  
-Portal is **last**, not first.
+Work restarts **docs-first**: Core Canon → layer/module specifications → then core code.  
+**No portal.** Not in scope.
 
 ## Source of truth (kept)
 
@@ -19,9 +19,9 @@ Portal is **last**, not first.
 
 ## Not present (intentionally)
 
-- `src/` — no core code  
-- `portal/` — no portal  
-- `docs/modules/`, `docs/components/` — no fake complete specs  
+- `src/` — no core code yet  
+- no portal, no UI  
+- `docs/modules/`, layers — not rebuilt yet  
 - CI, Docker, packages — removed with scaffold  
 
 ## Rebuild order (mandatory)
@@ -30,5 +30,4 @@ Portal is **last**, not first.
 2. Acceptance criteria per layer  
 3. Core implementation against those specs  
 4. Tests on core  
-5. Core API  
-6. Portal (last)
+5. Core API only if needed for core (no portal)

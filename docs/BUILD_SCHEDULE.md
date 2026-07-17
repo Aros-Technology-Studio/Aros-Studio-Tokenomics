@@ -1,14 +1,16 @@
 # AST Build Schedule
 
-**Version:** 1.1  
-**Status:** Canonical — **owner pre-approved full execution** (2026-07-16)  
+**Version:** 2.0  
+**Status:** Canonical — rebuild after clean slate (`f0ee2c8`)  
 **Source of Truth:** `docs/AST-CORE-CANON.md` + `docs/P0-P4-TECHNICAL-DECISIONS.md`
 
 ---
 
 ## 1. Purpose
 
-Order and priorities for building AST. Owner confirmed advance approval for all phases; agent executes sequentially without per-step confirmation unless blocked by canon ambiguity.
+Order of work for AST. **Docs first**, then core. No freelanced code. No fake Done.
+
+**Out of scope:** portal, web UI, issuer frontends — do not plan, build, or mention as deliverables unless the owner explicitly re-opens that scope.
 
 ---
 
@@ -16,82 +18,63 @@ Order and priorities for building AST. Owner confirmed advance approval for all 
 
 | Phase | Name | Status |
 |-------|------|--------|
-| 0 | Foundation | **Complete** |
-| 1 | Core Ledger & Validation | **Complete** |
-| 2 | Token & Emission | **Complete** (core path) |
-| 3 | Orchestration & Portal | **Complete** (core path + portal edge wire) |
-| 4 | Governance & Release | **Complete** (core path) |
-| 5 | Hardening & Production | **Partial** (kill-switch, CLI, e2e, guards; prod deploy TBD) |
+| 0 | Foundation (docs tree by layers/modules) | **Not started** |
+| 1 | Core Ledger & Validation | **Not started** |
+| 2 | Token & Emission | **Not started** |
+| 3 | Orchestration (core only) | **Not started** |
+| 4 | Governance & Release | **Not started** |
+| 5 | Hardening | **Not started** |
+
+Prior “Complete” checklists referred to removed scaffold and are **void**.
 
 ---
 
 ## 3. Phase checklist
 
 ### Phase 0 — Foundation
-- [x] Core Canon, decisions, schedule, architecture, portal docs  
-- [x] Protective GitHub Actions  
-- [x] Folder structure, README, CONTRIBUTING, `.grok/rules.md`  
+- [ ] Layer + module documentation tree (real specs, visible in repo)
+- [ ] Acceptance criteria per layer
+- [ ] Architecture map from Core Canon only
+- [ ] Protective rules only when code exists
 
 ### Phase 1 — Core Ledger & Validation
-- [x] 1.1 nodechain core (snapshot, hash, integrity)  
-- [x] 1.2 storage (file/rocksdb-oriented durable + Postgres index mirror)  
-- [x] 1.3 pot-engine (P1–P4, M-of-N quorum, binary verdict)  
-- [x] 1.4 PoT → NodeChain write-ahead (`okToEmit` requires ledger height)  
-- [x] 1.5 invariants (I1–I9 + CI tests)  
-- [x] 1.6 CLI + core HTTP API (`npm run cli`, `/v1/core/processes`)  
+- [ ] NodeChain
+- [ ] PoT engine (P1–P4, M-of-N)
+- [ ] PoT → NodeChain write-ahead
+- [ ] Invariants I1–I9
 
 ### Phase 2 — Token & Emission
-- [x] aroscoin mint/burn, 9 decimals, process binding  
-- [x] emission valuation + ΔValue + pro-rata plan  
-- [x] double-mint protection  
-- [x] commission post-factum 70/30  
-- [x] ERC-20 **representation adapter** (view-only, not SoT)  
-- [x] integration/e2e tokenize flow  
+- [ ] ArosCoin mint/burn (protocol)
+- [ ] Emission / ΔValue
+- [ ] Commission post-factum (ship default 70/30)
+- [ ] Reserve (own funds only)
 
-### Phase 3 — Orchestration & Portal
-- [x] orchestrator fixed pipeline, idempotency, kill-switch gate  
-- [x] state-recording into NodeChain  
-- [x] portal backend wired to core API  
-- [x] portal frontend scaffold + OpenAPI  
-- [x] КЭП required on document upload path (edge)  
-- [x] e2e path start → pot → mint → settle  
+### Phase 3 — Orchestration (core only)
+- [ ] Fixed pipeline orchestrator
+- [ ] State recording into NodeChain
+- [ ] Idempotency / fail-closed
+- [ ] Core API **only if** needed for core (no portal)
 
 ### Phase 4 — Governance & Release
-- [x] All-Seeing Eye observe/notify  
-- [x] node reputation + grace  
-- [x] release + velocity + daemon  
-- [x] partial-release  
-- [x] oracle gateway  
-- [x] governance multi-step service  
+- [ ] All-Seeing Eye (observe/notify only)
+- [ ] Node reputation
+- [ ] Release phase logic
+- [ ] Oracle gateway (if in scope for core)
 
-### Phase 5 — Hardening & Production
-- [x] kill-switch / read-only  
-- [x] protective CI suite  
-- [x] e2e + unit tests  
-- [x] CLI smoke  
-- [ ] Full external security audit (human/org)  
-- [ ] Production deploy pipeline (infra TBD)  
-- [ ] Monitoring stack (ops TBD)  
+### Phase 5 — Hardening
+- [ ] Tests against specs
+- [ ] Kill-switch
+- [ ] External audit / prod (later, owner-driven)
 
 ---
 
 ## 4. Rules
 
-1. Canon wins; no merge that violates it.  
-2. Fail-closed default.  
-3. Ask owner only on true canon ambiguity.  
-4. Chat RU / repo EN.  
-
----
-
-## 5. How to run
-
-```bash
-npm test
-npm run check:canon
-npm run cli tokenize -- --inst DEMO --valuation 100 --holder h1
-# core API: npm run dev  → http://localhost:3000/v1/core/processes/start
-```
+1. Canon wins.  
+2. Fail-closed.  
+3. Chat RU / repo EN.  
+4. **No portal.**  
+5. Close work only when acceptance is real.
 
 ---
 

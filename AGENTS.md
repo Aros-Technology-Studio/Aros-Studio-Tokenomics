@@ -21,9 +21,9 @@ Root `CANON.md` is a pointer only.
 1. **Docs first** — full specs by layers and modules, visible in the tree  
 2. **No freelanced code** without a written spec for that unit  
 3. **No fake Done** — do not mark issues or layers complete for scaffold, README, or empty acceptance  
-4. **Portal last** — client entry after core works  
+4. **No portal** — out of scope unless the owner explicitly adds it later  
 5. On ambiguity: ask the product owner  
 
 ## Stack (when implementation phase starts)
 
-TypeScript / NestJS core; tests with Jest; Node ≥ 20; portal (later) under `portal/`.
+TypeScript / NestJS core; tests with Jest; Node ≥ 20.
