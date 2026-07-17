@@ -1,5 +1,7 @@
 # 06_FeeCommission
 
-**Issue guidance:** LAYER 06 fee_commission — post-factum; ship default **70% nodes / 30% AST**  
-**Status:** skeleton  
-**Role:** Settle commission after confirmed work; append settlement facts to NodeChain.
+**Status:** v1 draft + code `src/commission`  
+**Issue:** LAYER 06 fee_commission  
+**Role:** Post-factum fee on valuation; **ship default 70% nodes / 30% AST**; payment_credited per node; commission_settled on NodeChain.
+
+fee = valuation × feeRate (sandbox example 0.15%).

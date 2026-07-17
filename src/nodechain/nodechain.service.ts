@@ -109,6 +109,9 @@ export class NodechainService {
       throw new NodeChainError(NcErrorCode.PROCESS_REQUIRED, 'processId required for type');
     }
 
+    // Deep-freeze payload so later mutation of caller objects cannot rewrite history.
+    const payload = JSON.parse(JSON.stringify(req.payload)) as Record<string, unknown>;
+
     if (req.clientRecordId) {
       const existing = await this.store.getByClientRecordId(req.clientRecordId);
       if (existing) {
@@ -138,33 +141,8 @@ export class NodechainService {
       schemaVersion: SCHEMA_VERSION,
       recordType: req.recordType,
       processId,
-      payload: req.payload,
+      payload,
     });
-
-    const signatures =
-      req.signatures && req.signatures.length > 0
-        ? req.signatures
-        : [
-            {
-              signerId: req.writerId,
-              algorithm: 'dev-self-attest',
-              signature: computeEnvelopeHash({
-                recordId,
-                schemaVersion: SCHEMA_VERSION,
-                recordType: req.recordType,
-                processId,
-                writerId: req.writerId,
-                writerRole: req.writerRole,
-                timestampUtc,
-                prevHash,
-                contentHash,
-                height,
-                payload: req.payload,
-                signatures: [],
-              }).slice(0, 32),
-              signedOver: 'contentHash' as const,
-            },
-          ];
 
     const envelopeHash = computeEnvelopeHash({
       recordId,
@@ -177,9 +155,20 @@ export class NodechainService {
       prevHash,
       contentHash,
       height,
-      payload: req.payload,
-      signatures,
+      payload,
     });
+
+    const signatures =
+      req.signatures && req.signatures.length > 0
+        ? req.signatures
+        : [
+            {
+              signerId: req.writerId,
+              algorithm: 'dev-self-attest',
+              signature: contentHash.slice(0, 32),
+              signedOver: 'contentHash' as const,
+            },
+          ];
 
     const record: JournalRecord = {
       recordId,
@@ -192,7 +181,7 @@ export class NodechainService {
       prevHash,
       contentHash,
       height,
-      payload: req.payload,
+      payload,
       signatures,
       envelopeHash,
     };

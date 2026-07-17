@@ -19,3 +19,5 @@ jobs:
       - run: npm run build
       - name: First journal record (ephemeral)
         run: npm run journal:first -- --dir /tmp/ast-journal-ci
+      - name: Tokenization demo (layers 01–10 path)
+        run: npm run demo:tokenize -- --dir /tmp/ast-tokenize-ci

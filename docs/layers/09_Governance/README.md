@@ -1,5 +1,6 @@
 # 09_Governance
 
-**Issue guidance:** LAYER 09 governance — AI hierarchy, no token-holder voting  
-**Status:** skeleton  
-**Role:** Role-based parameter and policy governance; records `param_change` on NodeChain.
+**Status:** v1 draft + code `src/governance`  
+**Issue:** LAYER 09 governance AI hierarchy, no voting  
+**Role:** L1 automated policy (docs, signature, allowlist); multi-step approvals; param_change on NodeChain.  
+No ARO-weighted votes.

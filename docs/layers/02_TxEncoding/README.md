@@ -1,8 +1,17 @@
 # 02_TxEncoding
 
-**Issue guidance:** LAYER 02 tx_encoding (write new)  
-**Status:** skeleton — after NodeChain journal is live  
-**Role:** Deterministic encoding of process transactions / payloads bound to NodeChain records.
+**Status:** v1 draft complete (docs + code `src/tx-encoding`)  
+**Issue:** LAYER 02 tx_encoding  
+**Role:** Deterministic encoding of process transaction payloads.
 
-Depends on: `01_NodeChain`  
-Does not: mint, PoT verdict, ASE control.
+## Job
+Produce a canonical byte/string representation and `payloadHash` so the same process body always hashes the same way (determinism / I4-style).
+
+## Non-goals
+- PoT verdict, mint, UI, sharding mesh
+
+## Code
+- `src/tx-encoding/encode.ts` — `encodeProcessTx`, `canonicalEncode`, `payloadHash`
+
+## Docs
+- `00_scope/`, `01_model/`, `03_api/`, `09_acceptance/`

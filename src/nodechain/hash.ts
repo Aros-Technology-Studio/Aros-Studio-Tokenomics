@@ -40,6 +40,10 @@ export function computeContentHash(input: {
   return sha256Hex(material);
 }
 
+/**
+ * Envelope hash chains the journal. Signatures are attached evidence and are
+ * intentionally excluded so signing does not change the chain id.
+ */
 export function computeEnvelopeHash(input: {
   recordId: string;
   schemaVersion: string;
@@ -52,7 +56,7 @@ export function computeEnvelopeHash(input: {
   contentHash: string;
   height: number;
   payload: Record<string, unknown>;
-  signatures: RecordSignature[];
+  signatures?: RecordSignature[];
 }): string {
   const material = canonicalJson({
     recordId: input.recordId,
@@ -66,7 +70,6 @@ export function computeEnvelopeHash(input: {
     contentHash: input.contentHash,
     height: input.height,
     payload: input.payload,
-    signatures: input.signatures,
   });
   return sha256Hex(material);
 }

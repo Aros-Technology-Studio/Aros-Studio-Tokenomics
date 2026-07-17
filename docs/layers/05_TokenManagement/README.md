@@ -1,8 +1,7 @@
 # 05_TokenManagement
 
-**Issue guidance:** LAYER 05 token_management (ArosCoin + release)  
-**Status:** skeleton  
-**Role:** Mint/burn/transfer facts after PoT; supply bound to process; release constraints.
+**Status:** v1 draft + code `src/token`  
+**Issue:** LAYER 05 token_management  
+**Role:** ARO balances (9 decimals); mint only after pot verified=1; double-mint guard per processId; burn; mint_fact/burn_fact on NodeChain.
 
-Depends on: PoT + NodeChain  
-Commission formulas: layer 06.
+Privileged free mint: **forbidden**.

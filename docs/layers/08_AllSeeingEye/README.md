@@ -1,6 +1,8 @@
 # 08_AllSeeingEye
 
-**Issue guidance:** LAYER 08 all_seeing_eye (observe/notify; hierarchical AI as product defines)  
-**Status:** skeleton  
-**Role:** Supra-layer observation of all layers including NodeChain event stream.  
-**Not** a subdirectory of NodeChain; does not replace ledger write rules.
+**Status:** v1 draft + code `src/eye`  
+**Issue:** LAYER 08 all_seeing_eye  
+**Role:** Supra-layer **observe + notify** across pipeline.  
+**No veto, no rollback, no mint, no executive append as Eye.**
+
+Hierarchical AI agents (product vision) consume the same observe/notify bus; v1 code is the notification core.

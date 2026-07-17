@@ -1,8 +1,11 @@
 # 03_Processing
 
-**Issue guidance:** LAYER 03 processing (StateRecording / pipeline)  
-**Status:** skeleton  
-**Role:** Process stage ordering, validation pipeline before/around PoT, write process_* facts to NodeChain.
+**Status:** v1 draft + code `src/processing`  
+**Issue:** LAYER 03 processing  
+**Role:** Process lifecycle stages; write `process_*` records to NodeChain before PoT.
 
-Depends on: `01_NodeChain`, encoding  
-Does not: final PoT criteria engine (layer 04).
+## Stages (v1 primary tokenization)
+opened → documents → encoded → awaiting_pot → pot_done → settled/closed
+
+## Code
+`ProcessService.open | markPotDone | close`
