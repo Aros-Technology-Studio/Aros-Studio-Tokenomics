@@ -20,6 +20,9 @@ import { AssetRegistry } from '../intake/asset-registry';
 import type { IndexMirror } from '../index-mirror/index-mirror';
 import { MemoryIndexMirror } from '../index-mirror/index-mirror';
 import { MemoryJournalStore } from '../nodechain/memory.store';
+import { NodeRegistryService } from '../nodes/node-registry.service';
+import { NodeReputationService } from '../nodes/node-reputation.service';
+import { ReleaseDaemon } from '../release/release-daemon';
 import { OrchestratorError, OrchestratorErrorCode } from './errors';
 import type {
   OrchestratorPrimaryInput,
@@ -44,6 +47,9 @@ export class OrchestratorService {
   readonly allSeeingEye: AllSeeingEyeService;
   readonly governance: GovernanceService;
   readonly assets: AssetRegistry;
+  readonly nodes: NodeRegistryService;
+  readonly reputation: NodeReputationService;
+  readonly release: ReleaseDaemon;
   readonly keys: KeyRegistry;
   readonly mirror: IndexMirror;
 
@@ -68,6 +74,10 @@ export class OrchestratorService {
     this.allSeeingEye = new AllSeeingEyeService();
     this.governance = new GovernanceService(nodechain);
     this.assets = new AssetRegistry(nodechain);
+    this.nodes = new NodeRegistryService(nodechain);
+    this.nodes.registerMany(['v1', 'v2', 'v3'], 'confirmer');
+    this.reputation = new NodeReputationService();
+    this.release = new ReleaseDaemon(nodechain, this.reserve, this.aroscoin);
     this.mirror = mirror ?? new MemoryIndexMirror();
     this.maxConcurrent = opts?.maxConcurrentPerInstitution ?? 10;
   }
@@ -250,6 +260,13 @@ export class OrchestratorService {
         ledgerHeight: verdict.ledgerHeight,
       });
 
+      // Node reputation: successful confirmer participations
+      for (const id of confirmers) {
+        this.nodes.heartbeat(id);
+        this.reputation.recordParticipation(id, verdict.verified === 1);
+        this.reputation.setUptimeFactor(id, 1);
+      }
+
       // Explicit ok-to-emit gate (journal P1–P4)
       const okToEmit = await this.pot.okToEmit(processId);
 
@@ -336,8 +353,14 @@ export class OrchestratorService {
         throw new Error(`chain verify failed: ${chain.error}`);
       }
 
+      // Release daemon tick (may activate phase when metrics pass)
+      const releaseStatus = await this.release.tick();
+
       log('end', true);
-      await this.journalStep(processId, 'end', { chainOk: true });
+      await this.journalStep(processId, 'end', {
+        chainOk: true,
+        releaseActive: releaseStatus.active,
+      });
 
       this.allSeeingEye.notify({
         level: 'info',
@@ -362,6 +385,8 @@ export class OrchestratorService {
         settlement,
         reserve,
         reserveIndex: this.reserve.reserveIndex(),
+        release: releaseStatus,
+        nodeReputations: this.reputation.listSnapshots(),
         asset: this.assets.get(assetId),
         aroscoin: this.aroscoin.snapshot(),
         holderBalance: this.aroscoin.balanceOf(input.holderId),

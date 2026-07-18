@@ -13,6 +13,9 @@
 | 06 | docs/layers/06_FeeCommission | src/commission | post-factum 70/30 |
 | 07 | docs/layers/07_Reserve | src/reserve | own funds + reserveIndex |
 | — | orchestrator | src/orchestrator | sole-entry happy path |
+| — | nodes | src/nodes | registry + reputation |
+| — | release | src/release | velocity + daemon + I8 gate |
+| — | core API | src/core-api | `/v1/core/*` for portal |
 | 08 | docs/layers/08_AllSeeingEye | src/all-seeing-eye | done v1 |
 | 09 | docs/layers/09_Governance | src/governance | done v1 |
 | 10 | docs/layers/10_AssetTokenization | src/intake | done v1 |

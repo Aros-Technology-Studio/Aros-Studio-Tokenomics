@@ -3,7 +3,6 @@ import {
   Controller,
   Get,
   Headers,
-  HttpCode,
   HttpException,
   Param,
   Post,
@@ -16,13 +15,12 @@ export class ProcessesController {
   constructor(private readonly processes: ProcessesService) {}
 
   @Post()
-  @HttpCode(202)
-  create(
+  async create(
     @Body() body: CreateProcessBody,
     @Headers('idempotency-key') idempotencyKey: string | undefined,
     @Headers('x-institution-id') institutionId: string | undefined,
   ) {
-    const result = this.processes.create(body, institutionId, idempotencyKey);
+    const result = await this.processes.create(body, institutionId, idempotencyKey);
     if (result.statusCode >= 400) {
       throw new HttpException(result.body, result.statusCode);
     }
@@ -30,11 +28,11 @@ export class ProcessesController {
   }
 
   @Get(':processId')
-  get(
+  async get(
     @Param('processId') processId: string,
     @Headers('x-institution-id') institutionId: string | undefined,
   ) {
-    const result = this.processes.get(processId, institutionId);
+    const result = await this.processes.get(processId, institutionId);
     if (result.statusCode >= 400) {
       throw new HttpException(result.body, result.statusCode);
     }
@@ -42,13 +40,13 @@ export class ProcessesController {
   }
 
   @Post(':processId/documents')
-  attachDocuments(
+  async attachDocuments(
     @Param('processId') processId: string,
     @Body() body: AttachDocumentsBody,
     @Headers('idempotency-key') idempotencyKey: string | undefined,
     @Headers('x-institution-id') institutionId: string | undefined,
   ) {
-    const result = this.processes.attachDocuments(
+    const result = await this.processes.attachDocuments(
       processId,
       body,
       institutionId,

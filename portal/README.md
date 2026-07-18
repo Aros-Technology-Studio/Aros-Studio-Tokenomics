@@ -40,6 +40,21 @@ Env:
 | `PORTAL_PORT` | `3100` | Nest edge port |
 | `NEXT_PUBLIC_PORTAL_API_URL` | `http://localhost:3100` | Browser → edge API |
 
-## Stub vs Core
+## Core hand-off
 
-`coreHandOff: stub` — submissions stay in edge memory. Wiring to `TokenizationPipeline` is a follow-on; economic emission remains Core-only after PoT.
+Portal validates admission, then calls Core:
+
+| Portal | Core |
+|--------|------|
+| `POST /v1/processes` | `POST /v1/core/processes` → Orchestrator |
+| `GET /v1/processes/:id` | `GET /v1/core/processes/:id` |
+
+```bash
+# terminal 1 — core
+PORT=3000 npm run start:dev
+
+# terminal 2 — portal edge
+CORE_API_URL=http://localhost:3000 PORTAL_PORT=3100 npm --prefix portal/backend run start:dev
+```
+
+If Core is down, edge keeps `awaiting_core` (**no mint on portal**).

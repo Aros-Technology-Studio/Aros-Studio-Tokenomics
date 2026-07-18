@@ -12,6 +12,9 @@ import { AllSeeingEyeService } from './all-seeing-eye/all-seeing-eye.service';
 import { GovernanceService } from './governance/governance.service';
 import { OrchestratorService } from './orchestrator/orchestrator.service';
 import { TokenizationPipeline } from './intake/tokenization.pipeline';
+import { NodeRegistryService } from './nodes/node-registry.service';
+import { NodeReputationService } from './nodes/node-reputation.service';
+import { ReleaseDaemon } from './release/release-daemon';
 import { KEY_REGISTRY } from './nodechain/nodechain.module';
 import type { KeyRegistry } from './common/crypto/key-registry';
 import { MemoryIndexMirror, type IndexMirror } from './index-mirror/index-mirror';
@@ -66,6 +69,22 @@ export const INDEX_MIRROR = 'INDEX_MIRROR';
       useFactory: (nc: NodechainService) => new GovernanceService(nc),
     },
     {
+      provide: NodeRegistryService,
+      inject: [NodechainService],
+      useFactory: (nc: NodechainService) => {
+        const reg = new NodeRegistryService(nc);
+        reg.registerMany(['v1', 'v2', 'v3'], 'confirmer');
+        return reg;
+      },
+    },
+    NodeReputationService,
+    {
+      provide: ReleaseDaemon,
+      inject: [NodechainService, ReserveService, ArosCoinService],
+      useFactory: (nc: NodechainService, reserve: ReserveService, coin: ArosCoinService) =>
+        new ReleaseDaemon(nc, reserve, coin),
+    },
+    {
       provide: INDEX_MIRROR,
       useFactory: (): IndexMirror => {
         const url = process.env.DATABASE_URL;
@@ -98,6 +117,9 @@ export const INDEX_MIRROR = 'INDEX_MIRROR';
     ReserveService,
     AllSeeingEyeService,
     GovernanceService,
+    NodeRegistryService,
+    NodeReputationService,
+    ReleaseDaemon,
     OrchestratorService,
     TokenizationPipeline,
     INDEX_MIRROR,
