@@ -15,7 +15,7 @@ One institution may run multiple nodes; **one vote / one cert** unless product l
 
 - Not stake-weighted influence  
 - Not “governance token” holders  
-- Not ASE agents (ASE is supra-layer)
+- Not All-Seeing Eye agents (All-Seeing Eye is supra-layer)
 
 ## Role vs writerRole
 

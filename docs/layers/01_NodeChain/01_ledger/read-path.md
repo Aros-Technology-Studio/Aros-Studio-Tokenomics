@@ -22,7 +22,7 @@ Never invent order different from main chain for SoT views.
 |-----------|--------|
 | Internal services | As authorized |
 | Institution | **Own processes only** (filter by institution id on process records) |
-| ASE / audit roles | Broad read per deployment policy |
+| All-Seeing Eye / audit roles | Broad read per deployment policy |
 | Anonymous | None |
 
 ## Consistency

@@ -16,8 +16,8 @@ This file is the **decision register** used by build schedule Phase 0+. It does 
 
 - Set = I1–I9 in Core Canon §XI; new invariants only via formal canon update (semver).  
 - Pure predicates **and** hard write-path guards (fail-closed).  
-- Any component asserts before side-effect; Eye only observes.  
-- On breach: fail-closed + NodeChain record; **no** Eye veto/rollback.  
+- Any component asserts before side-effect; All-Seeing Eye only observes.  
+- On breach: fail-closed + NodeChain record; **no** All-Seeing Eye veto/rollback.  
 - Versioned ids `I-ID-vX.Y`; all critical; every invariant has CI tests.  
 - Supply conservation: online hard gate + offline reconciliation.  
 - Selective custody as machine rules.  
@@ -32,7 +32,7 @@ This file is the **decision register** used by build schedule Phase 0+. It does 
 - Quorum validators submit; orchestrator coordinates only.  
 - NodeChain record **before** emission.  
 - No amount math in pot.  
-- Double confirm → error + Eye-visible record.
+- Double confirm → error + All-Seeing Eye-visible record.
 
 ### reserve
 
@@ -54,7 +54,7 @@ This file is the **decision register** used by build schedule Phase 0+. It does 
 
 ---
 
-## P1 — Network, emission, settlement, eye
+## P1 — Network, emission, settlement, All-Seeing Eye
 
 ### nodechain
 

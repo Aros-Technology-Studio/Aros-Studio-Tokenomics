@@ -4,7 +4,7 @@ import { PotService } from '../pot/pot.service';
 import { TokenService } from '../token/token.service';
 import { CommissionService } from '../commission/commission.service';
 import { ReserveService } from '../reserve/reserve.service';
-import { EyeService } from '../eye/eye.service';
+import { AllSeeingEyeService } from '../all-seeing-eye/all-seeing-eye.service';
 import { GovernanceService } from '../governance/governance.service';
 import { KeyRegistry } from '../common/crypto/key-registry';
 import { bootstrapPipelineKeys } from '../common/crypto/bootstrap-keys';
@@ -49,7 +49,7 @@ export class TokenizationPipeline {
   readonly token: TokenService;
   readonly commission: CommissionService;
   readonly reserve: ReserveService;
-  readonly eye: EyeService;
+  readonly allSeeingEye: AllSeeingEyeService;
   readonly governance: GovernanceService;
   readonly assets: AssetRegistry;
   readonly keys: KeyRegistry;
@@ -66,7 +66,7 @@ export class TokenizationPipeline {
     this.token = new TokenService(nodechain);
     this.commission = new CommissionService(nodechain);
     this.reserve = new ReserveService(nodechain);
-    this.eye = new EyeService();
+    this.allSeeingEye = new AllSeeingEyeService();
     this.governance = new GovernanceService(nodechain);
     this.assets = new AssetRegistry(nodechain);
     this.mirror = mirror ?? new MemoryIndexMirror();
@@ -107,7 +107,7 @@ export class TokenizationPipeline {
       hasQualifiedSignature,
       institutionAllowlisted,
     });
-    this.eye.observe({
+    this.allSeeingEye.observe({
       level: l1.pass ? 'info' : 'critical',
       source: 'governance',
       code: l1.pass ? 'L1_PASS' : 'L1_FAIL',
@@ -151,7 +151,7 @@ export class TokenizationPipeline {
       documentPackageHash,
     });
 
-    this.eye.observe({
+    this.allSeeingEye.observe({
       level: 'info',
       source: 'processing',
       code: 'PROCESS_OPEN',
@@ -166,7 +166,7 @@ export class TokenizationPipeline {
       validatorIds: validators,
       keys: this.keys,
     });
-    this.eye.observe({
+    this.allSeeingEye.observe({
       level: verdict.verified === 1 ? 'info' : 'critical',
       source: 'pot',
       code: verdict.verified === 1 ? 'POT_VERIFIED' : 'POT_REJECTED',
@@ -193,7 +193,7 @@ export class TokenizationPipeline {
       potVerified: 1,
       institutionAllowlisted,
       stagesCompleted: this.processes.get(processId)?.stagesCompleted ?? proc.stagesCompleted,
-      eyeCriticalCount: this.eye.history().filter((e) => e.level === 'critical').length,
+      allSeeingEyeCriticalCount: this.allSeeingEye.history().filter((e) => e.level === 'critical').length,
       highValue,
     });
     await this.governance.recordGovernanceEvent(processId, 'L3_PANEL', {
@@ -239,7 +239,7 @@ export class TokenizationPipeline {
       throw new Error(`chain verify failed: ${chain.error}`);
     }
 
-    this.eye.notify({
+    this.allSeeingEye.notify({
       level: 'info',
       source: 'intake',
       code: 'TOKENIZATION_COMPLETE',
@@ -262,7 +262,7 @@ export class TokenizationPipeline {
       tokenSnapshot: this.token.snapshot(),
       holderBalance: this.token.balanceOf(input.holderId),
       chain,
-      eyeEvents: this.eye.history().length,
+      allSeeingEyeEvents: this.allSeeingEye.history().length,
       tip: await this.nodechain.getTip(),
       crypto: 'ed25519' as const,
       killSwitch: globalKillSwitch.isEngaged(),

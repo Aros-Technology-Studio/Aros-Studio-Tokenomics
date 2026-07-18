@@ -16,6 +16,6 @@ Zero-trust service mesh: no implicit trust by IP.
 - passive eavesdropping on the wire  
 - trivial node impersonation without cert
 
-## Relation to ASE
+## Relation to All-Seeing Eye
 
-Transport logs and anomalies may be exported to ASE observation; transport does not implement ASE policy.
+Transport logs and anomalies may be exported to All-Seeing Eye observation; transport does not implement All-Seeing Eye policy.

@@ -18,13 +18,13 @@ Layer is **done** only when all items below are true (docs + later implementatio
 - [ ] Encryption at rest on  
 - [ ] Index mirror optional and non-authoritative  
 - [ ] Institution read scoping  
-- [ ] Event stream for observers (ASE/ops)  
+- [ ] Event stream for observers (All-Seeing Eye/ops)  
 - [ ] Kill-switch read-only  
 - [ ] Tests in test-plan green  
 
 ## Explicitly not required for this layer’s “done”
 
 - PoT P1–P4 engine  
-- ASE AI agents  
+- All-Seeing Eye AI agents  
 - Commission math  
 - UI  

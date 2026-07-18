@@ -51,7 +51,7 @@ fi
 # 4) Settlement alias: commission is settlement — forbid parallel settle that skips commission naming in docs claiming dual SoT
 # (soft check skipped)
 
-# 5) Compensation after verified must not be implemented as Eye rollback
+# 5) Compensation after verified must not be implemented as All-Seeing Eye rollback
 hits="$(grep -RInE 'compensateAfterVerified|rollbackVerifiedPoT|unverifyPoT' "${SCAN[@]}" "${EXCLUDES[@]}" 2>/dev/null || true)"
 if [ -n "$hits" ]; then
   echo "::error::domain-invariants-guard: PoT verified is final — no unverify/compensate-after-verified"

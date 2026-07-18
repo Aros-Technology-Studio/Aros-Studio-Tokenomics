@@ -13,7 +13,7 @@ Recovery = **replay journal** (and trusted snapshots), never synthesize missing 
 | Writer crash mid-append | Idempotency key → retry; no double height |
 | Network partition | Minority must not finalize a divergent tip; read-only until rejoin + replay |
 | Disk corruption | Restore from replica/backup; verify chain |
-| Hash mismatch on replicate | Reject segment; alert ops/ASE stream |
+| Hash mismatch on replicate | Reject segment; alert ops/All-Seeing Eye stream |
 
 ## Partition rule
 
@@ -27,4 +27,4 @@ Process and token layers define burns/settlement completion; NodeChain only guar
 ## From prior materials
 
 Kept: replay-only recovery, no invent state, partition does not finalize divergent truth.  
-Dropped as NodeChain duty: Eye veto as recovery actuator; born-and-burned token rules.
+Dropped as NodeChain duty: All-Seeing Eye veto as recovery actuator; born-and-burned token rules.

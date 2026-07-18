@@ -37,7 +37,7 @@ export interface VerifyInput {
 /**
  * Layer 04 — Proof of Transaction (full).
  * P1–P4 + signed attestations + quorum + timeout + challenge gate.
- * Write-ahead pot_evidence then pot_verdict. No amount math. No Eye veto.
+ * Write-ahead pot_evidence then pot_verdict. No amount math. No All-Seeing Eye veto.
  */
 export class PotService {
   private readonly config: PotConfig;

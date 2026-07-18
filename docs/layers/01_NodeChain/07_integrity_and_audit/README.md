@@ -3,7 +3,7 @@
 **Status:** documented
 
 Replay, audit queries, failure codes.  
-Outbound hooks so ASE can **observe** — ASE does not own this folder.
+Outbound hooks so All-Seeing Eye can **observe** — All-Seeing Eye does not own this folder.
 
 ## Planned
 

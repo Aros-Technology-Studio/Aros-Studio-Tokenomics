@@ -74,7 +74,7 @@ nodechain:
   genesis_required: true
   require_real_crypto_default: true
 
-eye:
+all_seeing_eye:
   mode: observe_notify
   veto: false
   rollback: false

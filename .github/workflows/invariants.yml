@@ -20,14 +20,14 @@ jobs:
           fetch-depth: 0
       - name: Level 1 — vocabulary / firewall (canon-gate)
         run: bash .github/scripts/canon-gate.sh
-      - name: Level 2 — domain + philosophy + pot/eye/token
+      - name: Level 2 — domain + philosophy + pot/all-seeing-eye/token
         run: |
           set -e
           bash .github/scripts/ast-philosophy-guard.sh
           bash .github/scripts/token-protocol-guard.sh
           bash .github/scripts/no-bypass-pot-nodechain.sh
           bash .github/scripts/pot-criteria-guard.sh
-          bash .github/scripts/no-eye-executive-guard.sh
+          bash .github/scripts/no-all-seeing-eye-executive-guard.sh
           bash .github/scripts/domain-invariants-guard.sh
       - name: Level 2b — layout + layers docs
         run: |

@@ -15,7 +15,7 @@ flowchart TB
     IDX[Index mirror]
   end
   subgraph observers [Observers]
-    ASE[ASE / ops]
+    AllSeeingEye[All-Seeing Eye / ops]
   end
   ORCH --> API
   POT --> API
@@ -23,5 +23,5 @@ flowchart TB
   SET --> API
   API --> J --> ST
   J -.-> IDX
-  J --> ASE
+  J --> AllSeeingEye
 ```

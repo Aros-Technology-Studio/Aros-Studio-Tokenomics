@@ -9,7 +9,7 @@
 | 05 | docs/layers/05_TokenManagement | src/token | done v1 |
 | 06 | docs/layers/06_FeeCommission | src/commission | done v1 |
 | 07 | docs/layers/07_Reserve | src/reserve | done v1 |
-| 08 | docs/layers/08_AllSeeingEye | src/eye | done v1 |
+| 08 | docs/layers/08_AllSeeingEye | src/all-seeing-eye | done v1 |
 | 09 | docs/layers/09_Governance | src/governance | done v1 |
 | 10 | docs/layers/10_AssetTokenization | src/intake | done v1 |
 

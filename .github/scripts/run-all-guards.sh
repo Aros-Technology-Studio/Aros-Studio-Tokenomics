@@ -11,7 +11,7 @@ SCRIPTS=(
   token-protocol-guard.sh
   no-bypass-pot-nodechain.sh
   pot-criteria-guard.sh
-  no-eye-executive-guard.sh
+  no-all-seeing-eye-executive-guard.sh
   component-docs-guard.sh
   domain-invariants-guard.sh
   layout-scaffold-guard.sh

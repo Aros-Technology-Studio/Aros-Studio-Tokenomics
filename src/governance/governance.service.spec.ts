@@ -21,7 +21,7 @@ describe('Governance L1/L2/L3', () => {
       potVerified: 1,
       institutionAllowlisted: true,
       stagesCompleted: ['opened', 'documents', 'encoded'],
-      eyeCriticalCount: 0,
+      allSeeingEyeCriticalCount: 0,
       highValue: false });
     expect(r.pass).toBe(true);
     expect(r.opinions).toHaveLength(5);
@@ -35,7 +35,7 @@ describe('Governance L1/L2/L3', () => {
       potVerified: 0,
       institutionAllowlisted: true,
       stagesCompleted: ['opened'],
-      eyeCriticalCount: 0,
+      allSeeingEyeCriticalCount: 0,
       highValue: false });
     expect(r.pass).toBe(false);
   });

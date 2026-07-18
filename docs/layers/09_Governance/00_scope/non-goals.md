@@ -1,2 +1,2 @@
 # Non-goals
-No holder franchise; Eye does not replace L1.
+No holder franchise; All-Seeing Eye does not replace L1.

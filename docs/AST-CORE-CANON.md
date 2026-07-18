@@ -327,7 +327,7 @@ These values are ratified for implementation defaults; changing them is a config
 | processId prefix pattern | `AST-{INST}-{YYYYMMDD}-` (+ UUIDv7 as defined in orchestrator pack) |
 | Clock | **UTC only** |
 | Environments | `local`, `test`, `sandbox`, `prod` |
-| Eye analytic mirror max lag | 30 seconds |
+| All-Seeing Eye analytic mirror max lag | 30 seconds |
 | Kill switch / read-only mode | **yes** in v1 |
 | PoT multi-node same institution | **1 vote total** per institutional certificate |
 | Compensation after `verified = 1` | **not compensatable** |

@@ -32,7 +32,7 @@ PoT is the **only gate** for the origin and change of value: a binary `verified 
 | Amount / fee / mint math | Token, commission |
 | Process stage machine | Layer 03 Processing |
 | Journal storage | Layer 01 NodeChain |
-| Eye veto / halt API | Forbidden; ASE observes only |
+| All-Seeing Eye veto / halt API | Forbidden; All-Seeing Eye observes only |
 | Stake-weighted voting | Forbidden |
 
 ---
@@ -46,7 +46,7 @@ PoT is the **only gate** for the origin and change of value: a binary `verified 
 ├── 01_model/          criteria, quorum, evidence, verdict, codes, timeouts
 ├── 02_process/        verify flow, admissibility, double-confirm, write-ahead
 ├── 03_api/            service contracts
-├── 04_integration/    NodeChain, processing, emission, ASE
+├── 04_integration/    NodeChain, processing, emission, All-Seeing Eye
 ├── 05_diagrams/       mermaid
 └── 09_acceptance/     criteria + test plan
 ```

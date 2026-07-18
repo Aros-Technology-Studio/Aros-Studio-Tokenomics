@@ -17,7 +17,7 @@ A significant event is valid only if it is recorded here.
 | Not here | Elsewhere |
 |----------|-----------|
 | PoT P1–P4 / verdict logic | PoT layer |
-| ASE AI hierarchy / control policy | ASE supra-layer (observes via event stream) |
+| All-Seeing Eye AI hierarchy / control policy | All-Seeing Eye supra-layer (observes via event stream) |
 | Mint/burn/ΔValue math | Token / emission |
 | Commission split formulas | Settlement |
 | UI | out of scope |
@@ -36,7 +36,7 @@ A significant event is valid only if it is recorded here.
 ├── 04_transaction_and_process_binding/
 ├── 05_network/               replication, ordering, faults
 ├── 06_storage/               RocksDB primary, mirror
-├── 07_integrity_and_audit/   replay, codes, ASE hooks
+├── 07_integrity_and_audit/   replay, codes, All-Seeing Eye hooks
 ├── 08_api/                   append / query / snapshot / events
 ├── 09_acceptance/            criteria, tests
 └── diagrams/
@@ -47,7 +47,7 @@ A significant event is valid only if it is recorded here.
 - Core Canon §4.1 NodeChain, write-ahead / SoT principles  
 - P0–P4 nodechain & nodes decisions  
 - Prior paradigm `02_nodechain_engine` **selectively**: append-only causality, ExecutionSnapshot, identity-not-stake, 2/3 append quorum idea, fault replay-only, mTLS  
-- **Not carried in:** shard-mesh as v1 core, PoT-inside-NodeChain, Eye veto as ledger API, 75/25 payment engine, Rust-as-required runtime  
+- **Not carried in:** shard-mesh as v1 core, PoT-inside-NodeChain, All-Seeing Eye veto as ledger API, 75/25 payment engine, Rust-as-required runtime  
 
 ## Next layer
 

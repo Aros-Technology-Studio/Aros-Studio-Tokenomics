@@ -11,7 +11,7 @@ Canonical folder numbering uses **01–10**. GitHub titles used mixed 01/04 numb
 | `05_TokenManagement` | `src/token` | #22, #66 LAYER 05 token | implemented |
 | `06_FeeCommission` | `src/commission` | #23, #65 LAYER 06 fee 70/30 | implemented |
 | `07_Reserve` | `src/reserve` | #24, #64 LAYER 07 reserve | implemented |
-| `08_AllSeeingEye` | `src/eye` | #25, #63 LAYER 08 ASE | implemented |
+| `08_AllSeeingEye` | `src/all-seeing-eye` | #25, #63 LAYER 08 All-Seeing Eye | implemented |
 | `09_Governance` | `src/governance` | #26, #62 LAYER 09 governance | implemented |
 | `10_AssetTokenization` | `src/intake` | #27, #40 LAYER 10 | implemented |
 

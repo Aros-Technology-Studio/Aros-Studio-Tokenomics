@@ -9,6 +9,6 @@ Map to Core Canon concepts; NodeChain enforces the **recording** side.
 | Append-only causality / write-ahead | write-path + caller discipline |
 | No speculative stake gate | registration without capital |
 | Selective custody | N/A directly; no custody APIs here |
-| ASE observation | events-out hooks |
+| All-Seeing Eye observation | events-out hooks |
 
 Implementation CI should automate chain verify + immutability tests when code exists.

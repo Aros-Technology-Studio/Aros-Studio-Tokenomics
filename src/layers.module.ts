@@ -6,7 +6,7 @@ import { ProcessService } from './processing/process.service';
 import { TokenService } from './token/token.service';
 import { CommissionService } from './commission/commission.service';
 import { ReserveService } from './reserve/reserve.service';
-import { EyeService } from './eye/eye.service';
+import { AllSeeingEyeService } from './all-seeing-eye/all-seeing-eye.service';
 import { GovernanceService } from './governance/governance.service';
 import { TokenizationPipeline } from './intake/tokenization.pipeline';
 import { KEY_REGISTRY } from './nodechain/nodechain.module';
@@ -46,7 +46,7 @@ export const INDEX_MIRROR = 'INDEX_MIRROR';
       inject: [NodechainService],
       useFactory: (nc: NodechainService) => new ReserveService(nc),
     },
-    EyeService,
+    AllSeeingEyeService,
     {
       provide: GovernanceService,
       inject: [NodechainService],
@@ -75,7 +75,7 @@ export const INDEX_MIRROR = 'INDEX_MIRROR';
     TokenService,
     CommissionService,
     ReserveService,
-    EyeService,
+    AllSeeingEyeService,
     GovernanceService,
     TokenizationPipeline,
     INDEX_MIRROR,

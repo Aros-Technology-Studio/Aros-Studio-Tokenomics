@@ -34,7 +34,7 @@ If it is significant and has no NodeChain record, it is **invalid** for AST purp
 2. The journal is append-only and immediately immutable.  
 3. Replay of the journal yields the same logical state (determinism).  
 4. Other layers never bypass NodeChain for significant operations.  
-5. ASE and ops can observe the journal/event stream without owning write rules.
+5. All-Seeing Eye and ops can observe the journal/event stream without owning write rules.
 
 ## Relationship to the product outcome
 

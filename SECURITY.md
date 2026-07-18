@@ -10,7 +10,7 @@ Do not open public issues for active exploits.
 - NodeChain is sole SoT; index DB is not authoritative  
 - Mint only after PoT `verified=1`  
 - Kill-switch → fail-closed read-only  
-- ASE observes/notifies only (no veto in code)  
+- All-Seeing Eye observes/notifies only (no veto in code)  
 - Production keys: HSM provider (see issue #68) — v1 demo uses `.ast-keys.json`  
 
 ## Dependencies

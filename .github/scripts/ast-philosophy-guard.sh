@@ -81,7 +81,7 @@ check_pattern() {
   fi
 }
 
-# Eye must not gain veto/rollback as a feature in product code/docs (positive framing)
+# All-Seeing Eye must not gain veto/rollback as a feature in product code/docs (positive framing)
 check_pattern "eye-veto" 'eye[^\n]{0,40}(veto|rollback)|(veto|rollback)[^\n]{0,40}(all[- ]seeing|the eye)|allSeeingEye\.(veto|rollback)|function\s+veto\s*\('
 
 # Pre-mine / free mint as a feature

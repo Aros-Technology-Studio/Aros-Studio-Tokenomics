@@ -29,7 +29,7 @@ npm run cli -- journal verify --dir data/journal-rocks --engine rocksdb
 | Signatures | **Ed25519** over contentHash |
 | Governance | **L1** auto → **L2** committee → **L3** 5-agent panel |
 | Kill-switch | engages on chain integrity failure |
-| ASE | observe/notify only |
+| All-Seeing Eye | observe/notify only |
 
 See [`docs/HARDENING.md`](docs/HARDENING.md).  
 **Next (tracked):** HSM keys · journal replication · L3 LLM adapters — [`docs/BACKLOG.md`](docs/BACKLOG.md) · issues #68 #69 #70.
@@ -40,7 +40,7 @@ L1 → L2 → process open/encode → PoT P1–P4 → L3 AI panel → mint → c
 ## Layers
 
 See [`docs/STRUCTURE.md`](docs/STRUCTURE.md) and [`docs/layers/`](docs/layers/).  
-Code under `src/nodechain`, `tx-encoding`, `processing`, `pot`, `token`, `commission`, `reserve`, `eye`, `governance`, `intake`.
+Code under `src/nodechain`, `tx-encoding`, `processing`, `pot`, `token`, `commission`, `reserve`, `all-seeing-eye`, `governance`, `intake`.
 
 ## Stack
 

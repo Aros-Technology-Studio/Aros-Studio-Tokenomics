@@ -10,7 +10,7 @@ GetTip() → { height, tipHash }
 ## AuthZ
 
 Institution principals: filter to own processes.  
-Internal/ASE: broader per policy.
+Internal/All-Seeing Eye: broader per policy.
 
 ## Errors
 

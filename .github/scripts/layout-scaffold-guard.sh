@@ -49,7 +49,7 @@ for wf in \
   .github/workflows/token-protocol-guard.yml \
   .github/workflows/no-bypass-pot-nodechain.yml \
   .github/workflows/pot-criteria-guard.yml \
-  .github/workflows/no-eye-executive-guard.yml \
+  .github/workflows/no-all-seeing-eye-executive-guard.yml \
   .github/workflows/component-docs-guard.yml \
   .github/workflows/layout-scaffold-guard.yml \
   .github/workflows/domain-invariants-guard.yml \

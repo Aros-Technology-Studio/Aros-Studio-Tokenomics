@@ -15,7 +15,7 @@
 |----------|----------------|
 | Token (05) | Mint only if `verified=1` and ledger height known |
 | Commission (06) | Settle only after pot |
-| ASE (08) | Observe reason codes / failures |
+| All-Seeing Eye (08) | Observe reason codes / failures |
 | L3 governance | pot_consistency agent |
 
 ## Hard rules

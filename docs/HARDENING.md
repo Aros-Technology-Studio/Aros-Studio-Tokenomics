@@ -11,7 +11,7 @@
 | Double-mint guard | TokenService |
 | PoT before mint | TokenService + pipeline |
 | L1/L2/L3 gates | GovernanceService |
-| ASE no veto | EyeService.veto throws |
+| All-Seeing Eye no veto | AllSeeingEyeService.veto throws |
 | Fail-closed errors | NodeChainError codes |
 
 ## Env

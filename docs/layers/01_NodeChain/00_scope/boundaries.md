@@ -19,7 +19,7 @@ All writers use the **append API** (see `08_api`). No silent side files as SoT.
 | PoT | read process history to assert P3 (states recorded) |
 | Emission / token | read causes before mint/burn ack |
 | Settlement | read confirmed process and weight-related facts |
-| ASE | subscribe to event stream / query for observation |
+| All-Seeing Eye | subscribe to event stream / query for observation |
 | Institution (if exposed) | **own processes only** |
 | Ops / audit | controlled full or scoped read |
 
@@ -29,19 +29,19 @@ All writers use the **append API** (see `08_api`). No silent side files as SoT.
 2. **No invent state on recovery:** only replay recorded causes.  
 3. **Index mirrors are not SoT:** Postgres/search may lag; journal wins.  
 4. **Fail-closed on write errors:** prefer reject over partial ack.  
-5. **ASE does not append as Eye:** observation is read-side; executive halt if any is owned by executing modules / governance as product law defines — not as “ledger veto API” inside NodeChain.
+5. **All-Seeing Eye does not append in an executive role:** observation is read-side; executive halt if any is owned by executing modules / governance as product law defines — not as “ledger veto API” inside NodeChain.
 
 ## Interface sketch
 
 ```text
 [Other layers] --append(record)--> [01_NodeChain] --durable height--> ack
 [Other layers] <--query-- [01_NodeChain]
-[ASE / ops]    <--events-- [01_NodeChain]
+[All-Seeing Eye / ops]    <--events-- [01_NodeChain]
 ```
 
 ## Dependency direction
 
 ```text
 PoT, Token, Settlement, Orchestrator  →  depend on NodeChain
-NodeChain  →  does not depend on token formulas or ASE hierarchy
+NodeChain  →  does not depend on token formulas or All-Seeing Eye hierarchy
 ```

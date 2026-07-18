@@ -14,7 +14,7 @@
 
 ## Do not
 
-- Free mint / bypass PoT / Eye veto  
+- Free mint / bypass PoT / All-Seeing Eye veto  
 - Third-party custody  
 - Fake “Done” without acceptance evidence  
 - Portal unless owner re-opens scope  

@@ -9,7 +9,7 @@
 3. **L2** committee when required  
 4. `TokenizationPipeline.runPrimaryTokenization` (layer 10)  
 5. PoT P1–P4 → mint → commission 70/30 → reserve  
-6. ASE observe/notify  
+6. All-Seeing Eye observe/notify  
 
 ## CLI
 

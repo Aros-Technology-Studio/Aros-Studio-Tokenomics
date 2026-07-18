@@ -25,7 +25,7 @@ export interface L3Context {
   potVerified: 0 | 1;
   institutionAllowlisted: boolean;
   stagesCompleted: string[];
-  eyeCriticalCount: number;
+  allSeeingEyeCriticalCount: number;
   highValue: boolean;
 }
 
@@ -97,10 +97,10 @@ export class PolicyAgent implements L3Agent {
         break;
       }
       case 'anomaly_watch':
-        if (ctx.eyeCriticalCount > 0) {
+        if (ctx.allSeeingEyeCriticalCount > 0) {
           pass = false;
           score = 0.2;
-          reasons.push('critical eye events present');
+          reasons.push('critical All-Seeing Eye events present');
         }
         break;
       case 'release_risk':

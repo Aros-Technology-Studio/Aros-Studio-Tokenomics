@@ -29,4 +29,4 @@ Fraudulent confirmation attempts or cert compromise:
 
 - Not seizure of earned ARO already retained  
 - Not stake slash (no stake)  
-- Not ASE “veto API” inside NodeChain — suspension is executed by nodes/identity services and **recorded** here
+- Not All-Seeing Eye “veto API” inside NodeChain — suspension is executed by nodes/identity services and **recorded** here

@@ -30,4 +30,4 @@
 
 - PoT P1–P4 correctness  
 - mint math  
-- ASE agent behaviour  
+- All-Seeing Eye agent behaviour  

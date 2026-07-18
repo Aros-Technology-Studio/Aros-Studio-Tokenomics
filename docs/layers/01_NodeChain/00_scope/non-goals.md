@@ -8,7 +8,7 @@ This layer **does not** own the following. They must not be implemented or speci
 | Institutional document / signature **policy evaluation** | PoT / governance / intake policy |
 | Mint, burn, supply formulas, ΔValue | Token / emission |
 | Commission rates and 70/30 (or any) split math | Commission / settlement |
-| All-Seeing Eye AI hierarchy, policy, halt/veto rules | ASE + governance (supra-layer) |
+| All-Seeing Eye AI hierarchy, policy, halt/veto rules | All-Seeing Eye + governance (supra-layer) |
 | Market price, staking, farming, liquidity | Forbidden by product model — nowhere |
 | End-user portal / UI | Out of product scope |
 | Full BFT multi-shard consensus mesh (v1) | Roadmap only (`05_network/consensus-roadmap.md`) |
@@ -22,10 +22,10 @@ This layer **does not** own the following. They must not be implemented or speci
 NodeChain **stores** records such as `pot_evidence_ref` or `pot_verdict` payloads that other components submit.  
 NodeChain **does not** evaluate P1–P4.
 
-### ASE presence
+### All-Seeing Eye presence
 
-ASE may appear in observability docs as a **consumer** of events.  
-ASE is not a subdirectory of NodeChain and does not define append authorization here.
+All-Seeing Eye may appear in observability docs as a **consumer** of events.  
+All-Seeing Eye is not a subdirectory of NodeChain and does not define append authorization here.
 
 ### Payment of nodes
 
