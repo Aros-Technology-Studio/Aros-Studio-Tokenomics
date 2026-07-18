@@ -1,29 +1,38 @@
 # Backlog — do not drop
 
-Tracked items beyond v1 core path.  
-GitHub Issues are the operational list; this file is the in-repo mirror so nothing is lost offline.
+Tracked items beyond shipped core path.  
+GitHub Issues are the operational list; this file is the in-repo mirror.
 
-## Next hardening / governance (priority)
+## Shipped hardening / governance
 
-| # | Item | Issue | Notes |
+| # | Item | Issue | Status |
 |---|------|--------|--------|
-| 1 | **HSM key provider** | [#68](https://github.com/Aros-Technology-Studio/Aros-Studio-Tokenomics/issues/68) | Replace `.ast-keys.json` for production; pluggable `KeyProvider` |
-| 2 | **Network replication** | [#69](https://github.com/Aros-Technology-Studio/Aros-Studio-Tokenomics/issues/69) | Multi-node journal catch-up; no divergent tip on partition |
-| 3 | **Formal L3 LLM adapters** | [#70](https://github.com/Aros-Technology-Studio/Aros-Studio-Tokenomics/issues/70) | Five-agent panel with real LLM adapters; keep deterministic backend for tests |
+| 1 | **HSM key provider** | [#68](https://github.com/Aros-Technology-Studio/Aros-Studio-Tokenomics/issues/68) | **Done** — `KeyProvider` + `HsmKeyProvider` (`AST_KEY_PROVIDER=hsm`) |
+| 2 | **Network replication** | [#69](https://github.com/Aros-Technology-Studio/Aros-Studio-Tokenomics/issues/69) | **Done** — `JournalReplicator` catch-up, diverge refuse |
+| 3 | **Formal L3 LLM adapters** | [#70](https://github.com/Aros-Technology-Studio/Aros-Studio-Tokenomics/issues/70) | **Done** — `llm-adapters.ts` + `AST_L3_USE_LLM` |
 
 ## Already in v1 (reference)
 
 - NodeChain journal (memory / file / RocksDB)
 - Ed25519 sign/verify on append
-- L1 + L2 committee + L3 deterministic agent panel
+- L1 + L2 committee + L3 policy / LLM panel
 - Kill-switch, verifyEveryN
-- Layers 01–10 pipeline (`demo:tokenize`)
+- Layers 01–10 + orchestrator + core API
+- Portal edge + institution token auth + КЭП hash verify
 
-## Portal edge (re-opened scaffold)
+## Portal edge
 
-- [x] Layout + OpenAPI + architecture (`portal/`, `docs/portal/`)  
-- [ ] Wire Nest edge → `TokenizationPipeline` / Orchestrator (live hand-off)  
-- [ ] Production institution auth (mTLS / cert), full КЭП verification  
+- [x] Layout + OpenAPI + architecture  
+- [x] Wire Nest edge → Core Orchestrator (`CoreApiClient`)  
+- [x] Institution token auth (`X-Institution-Token`) + optional Ed25519 package signature  
+- [ ] Full X.509 chain / production mTLS (ops deploy)
+
+## Later (owner-driven)
+
+- External security audit  
+- Cloud KMS / real PKCS#11 behind `KeyProvider`  
+- Multi-region replication mesh (beyond single catch-up API)  
+- Live multi-vendor LLM keys in prod secrets store  
 
 ---
 

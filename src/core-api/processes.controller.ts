@@ -12,6 +12,11 @@ import { OrchestratorService } from '../orchestrator/orchestrator.service';
 import { OrchestratorError } from '../orchestrator/errors';
 import { isValidProcessId } from '../common/process-id';
 import { globalKillSwitch } from '../hardening/kill-switch';
+import { InstitutionAuthService } from '../intake/institution-auth';
+import {
+  verifyQualifiedSignature,
+  type QualifiedSignaturePackage,
+} from '../intake/qualified-signature';
 
 export interface CoreCreateProcessBody {
   processType?: string;
@@ -21,6 +26,8 @@ export interface CoreCreateProcessBody {
   processId?: string;
   hasQualifiedSignature: boolean;
   documentPackageHash?: string;
+  /** Optional cryptographic КЭП binding (Ed25519 over documentPackageHash). */
+  qualifiedSignature?: QualifiedSignaturePackage;
   feeRate?: number;
   confirmers?: string[];
   validators?: string[];
@@ -38,6 +45,8 @@ export interface CoreCreateProcessBody {
  */
 @Controller('v1/core/processes')
 export class CoreProcessesController {
+  private readonly auth = new InstitutionAuthService();
+
   constructor(private readonly orchestrator: OrchestratorService) {}
 
   @Post()
@@ -46,6 +55,7 @@ export class CoreProcessesController {
     @Body() body: CoreCreateProcessBody,
     @Headers('idempotency-key') idempotencyKey: string | undefined,
     @Headers('x-institution-id') institutionId: string | undefined,
+    @Headers('x-institution-token') institutionToken: string | undefined,
   ) {
     if (globalKillSwitch.isEngaged()) {
       throw new HttpException(
@@ -53,7 +63,18 @@ export class CoreProcessesController {
         503,
       );
     }
-    if (!institutionId?.trim()) {
+    // When AST_REQUIRE_INSTITUTION_AUTH=1, token is mandatory (prod).
+    // Dev default: accept DEMO without token for existing tests; token validated if present.
+    const requireAuth =
+      process.env.AST_REQUIRE_INSTITUTION_AUTH === '1' ||
+      process.env.AST_REQUIRE_INSTITUTION_AUTH === 'true';
+    if (requireAuth || institutionToken) {
+      const auth = this.auth.authenticate(institutionId, institutionToken);
+      if (!auth.ok) {
+        throw new HttpException({ code: auth.code, message: auth.message }, 401);
+      }
+      institutionId = auth.institutionId;
+    } else if (!institutionId?.trim()) {
       throw new HttpException(
         { code: 'FORBIDDEN', message: 'X-Institution-Id required' },
         403,
@@ -73,6 +94,15 @@ export class CoreProcessesController {
         },
         422,
       );
+    }
+    if (body.qualifiedSignature) {
+      const q = verifyQualifiedSignature(this.orchestrator.keys, body.qualifiedSignature);
+      if (!q.ok) {
+        throw new HttpException(
+          { code: 'QSIG_FAILED', message: 'qualified signature invalid', details: q.reasonCodes },
+          422,
+        );
+      }
     }
     if (!body.valuation?.trim() || !body.holderId?.trim()) {
       throw new HttpException(

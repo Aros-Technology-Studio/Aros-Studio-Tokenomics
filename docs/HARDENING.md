@@ -6,7 +6,9 @@
 |---------|------|
 | Kill-switch | `src/hardening/kill-switch.ts` — blocks appends, engage on chain fail |
 | Periodic chain verify | `NodechainService` `verifyEveryN` |
-| Real crypto required | `Ed25519 KeyRegistry` + KeyRegistry |
+| Real crypto required | `Ed25519` via `KeyRegistry` / `KeyProvider` |
+| HSM key provider | `AST_KEY_PROVIDER=hsm` → soft-HSM vault (AES-GCM); swap for PKCS#11 later |
+| Journal replication | `JournalReplicator.catchUpFrom` — refuse divergent tips |
 | Payload deep-clone | append freezes history from caller mutation |
 | Double-mint guard | TokenService |
 | PoT before mint | TokenService + pipeline |
@@ -22,13 +24,19 @@
 | `AST_JOURNAL_DIR` | path for file/rocksdb |
 | `AST_REQUIRE_CRYPTO` | `1` force ed25519 |
 | `AST_VERIFY_EVERY_N` | chain verify interval |
+| `AST_KEY_PROVIDER` | `memory` \| `file` \| `hsm` |
+| `AST_HSM_MASTER_KEY` | 64-hex master for soft-HSM seal |
+| `AST_L3_USE_LLM` | `1` enables five-agent LLM/mock panel |
+| `AST_L3_LLM_PROVIDER` | `mock` \| `openai_compatible` |
+| `AST_REQUIRE_INSTITUTION_AUTH` | `1` requires `X-Institution-Token` on core writes |
+| `AST_INSTITUTION_TOKEN` | portal → core institution secret |
 
-## Must-not-forget (open)
+## Must-not-forget
 
-| Item | Issue |
-|------|--------|
-| HSM key provider (prod keys) | [#68](https://github.com/Aros-Technology-Studio/Aros-Studio-Tokenomics/issues/68) |
-| Network replication of journal | [#69](https://github.com/Aros-Technology-Studio/Aros-Studio-Tokenomics/issues/69) |
-| Formal L3 LLM adapters | [#70](https://github.com/Aros-Technology-Studio/Aros-Studio-Tokenomics/issues/70) |
+| Item | Issue | Status |
+|------|--------|--------|
+| HSM key provider | #68 | Done (soft-HSM + interface) |
+| Network replication | #69 | Done (catch-up API) |
+| Formal L3 LLM adapters | #70 | Done (adapters + mock/OpenAI-compatible) |
 
 Full list: [`docs/BACKLOG.md`](BACKLOG.md).

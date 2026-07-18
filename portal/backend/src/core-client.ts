@@ -43,7 +43,7 @@ export class CoreApiClient {
 
   async createProcess(
     body: CoreCreateProcessRequest,
-    headers: { institutionId: string; idempotencyKey: string },
+    headers: { institutionId: string; idempotencyKey: string; institutionToken?: string },
   ): Promise<{ statusCode: number; body: Record<string, unknown> }> {
     return this.request('POST', '/v1/core/processes', body, headers);
   }
@@ -51,12 +51,15 @@ export class CoreApiClient {
   async getProcess(
     processId: string,
     institutionId?: string,
+    institutionToken?: string,
   ): Promise<{ statusCode: number; body: Record<string, unknown> }> {
     return this.request(
       'GET',
       `/v1/core/processes/${encodeURIComponent(processId)}`,
       undefined,
-      institutionId ? { institutionId, idempotencyKey: 'status-read' } : undefined,
+      institutionId
+        ? { institutionId, idempotencyKey: 'status-read', institutionToken }
+        : undefined,
     );
   }
 
@@ -68,10 +71,14 @@ export class CoreApiClient {
     method: string,
     path: string,
     body?: unknown,
-    headers?: { institutionId?: string; idempotencyKey?: string },
+    headers?: { institutionId?: string; idempotencyKey?: string; institutionToken?: string },
   ): Promise<{ statusCode: number; body: Record<string, unknown> }> {
     const controller = new AbortController();
     const timer = setTimeout(() => controller.abort(), this.timeoutMs);
+    const token =
+      headers?.institutionToken ??
+      process.env.AST_INSTITUTION_TOKEN ??
+      process.env.PORTAL_INSTITUTION_TOKEN;
     try {
       const res = await fetch(`${this.baseUrl}${path}`, {
         method,
@@ -83,6 +90,7 @@ export class CoreApiClient {
           ...(headers?.idempotencyKey
             ? { 'Idempotency-Key': headers.idempotencyKey }
             : {}),
+          ...(token ? { 'X-Institution-Token': token } : {}),
         },
         body: body !== undefined ? JSON.stringify(body) : undefined,
         signal: controller.signal,

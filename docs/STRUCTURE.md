@@ -24,10 +24,10 @@
 
 Portal edge scaffold: `portal/` + `docs/portal/` (not SoT).
 
-## Open backlog (must not drop)
+## Hardening (#68–#70) — shipped
 
-See [`docs/BACKLOG.md`](BACKLOG.md) and issues **#68–#70**:
+1. HSM / `KeyProvider` — **done**  
+2. Journal replication — **done**  
+3. L3 LLM adapters — **done**  
 
-1. HSM key provider  
-2. Network replication  
-3. Formal L3 LLM adapters  
+See [`docs/BACKLOG.md`](BACKLOG.md) for residual prod ops items.  

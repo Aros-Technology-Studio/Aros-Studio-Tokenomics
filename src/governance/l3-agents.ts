@@ -16,7 +16,7 @@ export interface AgentOpinion {
   score: number;
   pass: boolean;
   reasons: string[];
-  backend: 'policy' | 'http';
+  backend: 'policy' | 'http' | 'llm';
 }
 
 export interface L3Context {
@@ -178,8 +178,19 @@ export class L3AgentRegistry {
     return reg;
   }
 
-  /** Optional: AST_L3_HTTP_<AGENT_ID>=url */
+  /**
+   * Env panel:
+   * - default: deterministic PolicyAgent × 5
+   * - AST_L3_HTTP_<AGENT_ID>=url → HttpL3Agent
+   * - AST_L3_USE_LLM=1 → LlmL3Agent for each role (mock|openai_compatible)
+   */
   static fromEnv(): L3AgentRegistry {
+    if (process.env.AST_L3_USE_LLM === '1' || process.env.AST_L3_USE_LLM === 'true') {
+      // Dynamic import path via function to limit circular init risk
+      // eslint-disable-next-line @typescript-eslint/no-var-requires
+      const { buildLlmPanelFromEnv } = require('./llm-adapters');
+      return buildLlmPanelFromEnv();
+    }
     const reg = L3AgentRegistry.defaultPolicyPanel();
     for (const id of POLICY_AGENT_IDS) {
       const url = process.env[`AST_L3_HTTP_${id.toUpperCase()}`];

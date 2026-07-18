@@ -23,6 +23,7 @@ describe('Core API processes controller', () => {
       },
       'idem-core-api-test-001',
       'DEMO',
+      undefined,
     );
 
     expect(body.processId).toBe('AST-DEMO-20260719-coreapi1');
@@ -48,6 +49,7 @@ describe('Core API processes controller', () => {
       },
       'idem-core-mint-for-pr',
       'DEMO',
+      undefined,
     );
     // Fund reserve for child claim
     await orch.reserve.accrueFromCommission({
