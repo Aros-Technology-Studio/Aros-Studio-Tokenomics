@@ -23,3 +23,13 @@
 | `AST_REQUIRE_CRYPTO` | `1` force ed25519 |
 | `AST_VERIFY_EVERY_N` | chain verify interval |
 | `ALLOW_DEV_ATTEST` | allow legacy self-attest (tests only) |
+
+## Must-not-forget (open)
+
+| Item | Issue |
+|------|--------|
+| HSM key provider (prod keys) | [#68](https://github.com/Aros-Technology-Studio/Aros-Studio-Tokenomics/issues/68) |
+| Network replication of journal | [#69](https://github.com/Aros-Technology-Studio/Aros-Studio-Tokenomics/issues/69) |
+| Formal L3 LLM adapters | [#70](https://github.com/Aros-Technology-Studio/Aros-Studio-Tokenomics/issues/70) |
+
+Full list: [`docs/BACKLOG.md`](BACKLOG.md).

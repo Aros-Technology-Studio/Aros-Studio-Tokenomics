@@ -14,3 +14,11 @@
 | 10 | docs/layers/10_AssetTokenization | src/intake | done v1 |
 
 Portal / Issuer UI: out of scope.
+
+## Open backlog (must not drop)
+
+See [`docs/BACKLOG.md`](BACKLOG.md) and issues **#68–#70**:
+
+1. HSM key provider  
+2. Network replication  
+3. Formal L3 LLM adapters  

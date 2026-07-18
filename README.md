@@ -31,7 +31,8 @@ npm run cli -- journal verify --dir data/journal-rocks --engine rocksdb
 | Kill-switch | engages on chain integrity failure |
 | ASE | observe/notify only |
 
-See [`docs/HARDENING.md`](docs/HARDENING.md).
+See [`docs/HARDENING.md`](docs/HARDENING.md).  
+**Next (tracked):** HSM keys · journal replication · L3 LLM adapters — [`docs/BACKLOG.md`](docs/BACKLOG.md) · issues #68 #69 #70.
 
 ### Full layer path (no portal)
 
