@@ -1,5 +1,6 @@
 import { NodechainService } from '../nodechain/nodechain.service';
-import { encodeProcessTx } from '../tx-encoding/encode';
+import { EncodingService } from '../tx-encoding/encoding.service';
+import type { ProcessTxBody } from '../tx-encoding/types';
 
 export type ProcessStage =
   | 'opened'
@@ -18,17 +19,25 @@ export interface ProcessState {
   stage: ProcessStage;
   stagesCompleted: ProcessStage[];
   payloadHash?: string;
+  encoded?: string;
   valuation?: string;
   holderId?: string;
+  body?: ProcessTxBody;
 }
 
 /**
- * Layer 03 — process lifecycle; writes process_* facts to NodeChain.
+ * Layer 03 — process lifecycle; uses layer 02 encoding before journal write.
  */
 export class ProcessService {
   private readonly processes = new Map<string, ProcessState>();
+  private readonly encoding: EncodingService;
 
-  constructor(private readonly nodechain: NodechainService) {}
+  constructor(
+    private readonly nodechain: NodechainService,
+    encoding?: EncodingService,
+  ) {
+    this.encoding = encoding ?? new EncodingService();
+  }
 
   get(processId: string): ProcessState | undefined {
     return this.processes.get(processId);
@@ -38,8 +47,11 @@ export class ProcessService {
     processId: string;
     processType: string;
     institutionId: string;
-    valuation: string;
-    holderId: string;
+    /** Full body for encoding (preferred). */
+    body?: ProcessTxBody;
+    /** Primary-tokenization convenience fields. */
+    valuation?: string;
+    holderId?: string;
     institutionAllowlisted: boolean;
     hasDocuments: boolean;
     hasQualifiedSignature: boolean;
@@ -47,13 +59,21 @@ export class ProcessService {
     if (this.processes.has(input.processId)) {
       throw new Error(`process exists: ${input.processId}`);
     }
-    const encoded = encodeProcessTx({
+
+    const body: ProcessTxBody = input.body ?? {
+      institutionId: input.institutionId,
+      valuation: input.valuation,
+      holderId: input.holderId,
+    };
+    if (!body.institutionId) {
+      body.institutionId = input.institutionId;
+    }
+
+    const encoded = this.encoding.encode({
       processId: input.processId,
       processType: input.processType,
-      body: {
-        institutionId: input.institutionId,
-        valuation: input.valuation,
-        holderId: input.holderId } });
+      body,
+    });
 
     await this.nodechain.append({
       clientRecordId: `process-open:${input.processId}`,
@@ -62,14 +82,19 @@ export class ProcessService {
       payload: {
         processType: input.processType,
         institutionId: input.institutionId,
-        valuation: input.valuation,
-        holderId: input.holderId,
+        valuation: input.valuation ?? body.valuation ?? body.newValue ?? body.amount,
+        holderId: input.holderId ?? body.holderId ?? body.toHolderId,
+        body: encoded.body,
         payloadHash: encoded.payloadHash,
+        encoded: encoded.encoded,
+        schemaVersion: encoded.schemaVersion,
         institutionAllowlisted: input.institutionAllowlisted,
         hasDocuments: input.hasDocuments,
-        hasQualifiedSignature: input.hasQualifiedSignature },
+        hasQualifiedSignature: input.hasQualifiedSignature,
+      },
       writerId: 'orchestrator',
-      writerRole: 'orchestrator' });
+      writerRole: 'orchestrator',
+    });
 
     const state: ProcessState = {
       processId: input.processId,
@@ -78,8 +103,11 @@ export class ProcessService {
       stage: 'awaiting_pot',
       stagesCompleted: ['opened', 'documents', 'encoded'],
       payloadHash: encoded.payloadHash,
-      valuation: input.valuation,
-      holderId: input.holderId };
+      encoded: encoded.encoded,
+      valuation: input.valuation ?? body.valuation ?? body.newValue ?? body.amount,
+      holderId: input.holderId ?? body.holderId ?? body.toHolderId,
+      body: encoded.body,
+    };
     this.processes.set(input.processId, state);
 
     await this.nodechain.append({
@@ -88,7 +116,8 @@ export class ProcessService {
       processId: input.processId,
       payload: { stage: 'encoded', payloadHash: encoded.payloadHash },
       writerId: 'orchestrator',
-      writerRole: 'orchestrator' });
+      writerRole: 'orchestrator',
+    });
 
     return state;
   }
@@ -103,7 +132,8 @@ export class ProcessService {
       processId,
       payload: { stage: 'pot_done' },
       writerId: 'orchestrator',
-      writerRole: 'orchestrator' });
+      writerRole: 'orchestrator',
+    });
   }
 
   async close(processId: string): Promise<void> {
@@ -116,7 +146,8 @@ export class ProcessService {
       processId,
       payload: { stage: 'closed' },
       writerId: 'orchestrator',
-      writerRole: 'orchestrator' });
+      writerRole: 'orchestrator',
+    });
   }
 
   private require(processId: string): ProcessState {

@@ -1,2 +1,3 @@
-# Purpose — 02_TxEncoding
-Canonical, deterministic serialization of process payloads before they are referenced on NodeChain and evaluated by later stages.
+# Purpose
+
+Make every process payload **single-valued** across nodes: same inputs → same bytes → same `payloadHash`, so PoT and NodeChain never disagree about what was confirmed.

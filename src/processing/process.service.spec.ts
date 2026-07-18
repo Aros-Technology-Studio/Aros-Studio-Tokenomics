@@ -11,7 +11,7 @@ describe('ProcessService (layer 03)', () => {
     await nc.ensureGenesis('system');
     const proc = new ProcessService(nc);
     const p = await proc.open({
-      processId: 'AST-PROC-1',
+      processId: 'AST-DEMO-20260718-proc1',
       processType: 'primary_tokenization',
       institutionId: 'DEMO',
       valuation: '1.000000000',
@@ -21,7 +21,7 @@ describe('ProcessService (layer 03)', () => {
       hasQualifiedSignature: true });
     expect(p.stage).toBe('awaiting_pot');
     expect(p.payloadHash).toBeTruthy();
-    const rows = await nc.listByProcessId('AST-PROC-1');
+    const rows = await nc.listByProcessId('AST-DEMO-20260718-proc1');
     expect(rows.map((r) => r.recordType)).toEqual(
       expect.arrayContaining(['process_open', 'process_stage']),
     );

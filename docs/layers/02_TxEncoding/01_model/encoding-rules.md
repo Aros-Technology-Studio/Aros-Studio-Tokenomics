@@ -1,5 +1,8 @@
 # Encoding rules
-1. JSON with sorted object keys (recursive).  
-2. schemaVersion `ast-tx-1`.  
-3. `payloadHash = SHA-256(utf8(encoded))`.  
-4. Same logical body ⇒ same hash regardless of key insertion order.
+
+1. Validate against process-type schema.  
+2. Normalize: trim strings, lowercase hashes.  
+3. Build envelope: `{ body, processId, processType, schemaVersion }`  
+4. Canonical JSON: recursive key sort, no whitespace, no undefined, no floats.  
+5. `payloadHash = SHA-256(utf8(encoded))`  
+6. schemaVersion: `ast-tx-2`  

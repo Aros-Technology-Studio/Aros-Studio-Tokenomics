@@ -1,2 +1,6 @@
 # Non-goals
-Not encryption product, not PoT, not network transport, not field-sharding privacy mesh (v1).
+
+- PoT verdict  
+- Mint / burn / payment  
+- Network sharding privacy mesh  
+- Multi-node encoding quorum (v1: pure function; multi-node agreement is ops on identical code)  

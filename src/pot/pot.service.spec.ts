@@ -42,7 +42,7 @@ describe('PotService (deep)', () => {
 
   it('verified=1 with signed attestations + ordered evidence/verdict', async () => {
     const { nc, processes, pot, keys } = await setup();
-    const p = await openOk(processes, 'AST-POT-OK-1');
+    const p = await openOk(processes, 'AST-DEMO-20260718-potok1');
     const v = await pot.verify({
       process: p,
       confirmers: ['v1', 'v2', 'v3'],
@@ -53,14 +53,14 @@ describe('PotService (deep)', () => {
     expect(v.final).toBe(true);
     expect(v.attestationDigest.length).toBe(64);
     expect(v.evidenceHeight).toBeLessThan(v.ledgerHeight);
-    const rows = await nc.listByProcessId('AST-POT-OK-1');
+    const rows = await nc.listByProcessId('AST-DEMO-20260718-potok1');
     expect(rows.some((r) => r.recordType === 'pot_evidence')).toBe(true);
     expect(rows.some((r) => r.recordType === 'pot_verdict')).toBe(true);
   });
 
   it('blocks positive when challenge open', async () => {
     const { processes, pot, keys } = await setup();
-    const p = await openOk(processes, 'AST-POT-CH-1');
+    const p = await openOk(processes, 'AST-DEMO-20260718-potch1');
     await pot.openChallenge(p.processId, 'v1', 'suspicious package');
     const v = await pot.verify({
       process: p,
@@ -75,7 +75,7 @@ describe('PotService (deep)', () => {
 
   it('allows after challenge closed', async () => {
     const { processes, pot, keys } = await setup();
-    const p = await openOk(processes, 'AST-POT-CH-2');
+    const p = await openOk(processes, 'AST-DEMO-20260718-potch2');
     await pot.openChallenge(p.processId, 'v1', 'check');
     await pot.closeChallenge(p.processId, 'committee', 'resolved');
     const v = await pot.verify({
@@ -90,7 +90,7 @@ describe('PotService (deep)', () => {
   it('excludes suspended validators from eligible set', async () => {
     const { processes, pot, keys, validators } = await setup();
     validators.suspend('v3', 'timeout');
-    const p = await openOk(processes, 'AST-POT-SUS-1');
+    const p = await openOk(processes, 'AST-DEMO-20260718-potsus1');
     // only v1,v2 active of proposed 3 — K=2 < kMin after filter
     const v = await pot.verify({
       process: p,
@@ -105,7 +105,7 @@ describe('PotService (deep)', () => {
 
   it('verified=0 P1 not allowlisted', async () => {
     const { processes, pot, keys } = await setup();
-    const p = await openOk(processes, 'AST-POT-FAIL-1', { institutionAllowlisted: false });
+    const p = await openOk(processes, 'AST-DEMO-20260718-potfail1', { institutionAllowlisted: false });
     const v = await pot.verify({
       process: p,
       confirmers: ['v1', 'v2', 'v3'],
@@ -117,7 +117,7 @@ describe('PotService (deep)', () => {
 
   it('verified=0 when all attestation signatures invalid', async () => {
     const { processes, pot, keys } = await setup();
-    const p = await openOk(processes, 'AST-POT-BAD-2');
+    const p = await openOk(processes, 'AST-DEMO-20260718-potbad2');
     const tip = await (pot as unknown as { nodechain: NodechainService }).nodechain.getTip();
     const atts = pot.createAttestations(
       keys,
@@ -147,7 +147,7 @@ describe('PotService (deep)', () => {
 
   it('timeout', async () => {
     const { processes, pot, keys, nc } = await setup({ timeoutMs: 1 });
-    const p = await openOk(processes, 'AST-POT-TO-1');
+    const p = await openOk(processes, 'AST-DEMO-20260718-potto1');
     await new Promise((r) => setTimeout(r, 5));
     const pot2 = new PotService(nc, { timeoutMs: 1 }, pot.validators);
     const v = await pot2.verify({
@@ -162,7 +162,7 @@ describe('PotService (deep)', () => {
 
   it('double final throws', async () => {
     const { processes, pot, keys } = await setup();
-    const p = await openOk(processes, 'AST-POT-DUP-1');
+    const p = await openOk(processes, 'AST-DEMO-20260718-potdup1');
     await pot.verify({ process: p, confirmers: ['v1', 'v2', 'v3'], keys });
     await expect(
       pot.verify({ process: p, confirmers: ['v1', 'v2', 'v3'], keys }),
