@@ -54,8 +54,8 @@ firewall:
     - staking_for_yield
     - farming
     - third_party_custody
-    - eye_veto
-    - eye_rollback
+    - all_seeing_eye_veto
+    - all_seeing_eye_rollback
     - admin_mint
     - mint_without_pot
 

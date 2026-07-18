@@ -71,7 +71,7 @@ check_file() {
 
   scan "firewall-afc" 'AFC|Aros Financial Core|LacMusa|Fiat Anchor|Crypto Anchor|Aros Logic Bridge|\bALB\b'
   scan "vocab-yield" '\breward(s)?\b|\bincentive(s)?\b|\bstimulus\b'
-  scan "eye-executive" 'eye[^\n]{0,40}(veto|rollback)|(veto|rollback)[^\n]{0,40}(eye|all[- ]seeing)|allSeeingEye\.(veto|rollback|mint|burn)|EyeVeto|eyeRollback'
+  scan "all-seeing-eye-executive" 'eye[^\n]{0,40}(veto|rollback)|(veto|rollback)[^\n]{0,40}(eye|all[- ]seeing)|allSeeingEye\.(veto|rollback|mint|burn)|EyeVeto|eyeRollback'
   scan "premine-stake" '\bpre[- ]?mine\b|free\s+emission|mintOnDeposit|\bstaking[- ]for[- ]yield\b|\byield\s*farm'
   scan "bypass" 'bypass[_-]?(pot|nodechain)|skip[_-]?(pot|nodechain)|POT_BYPASS|NODECHAIN_BYPASS|adminMint|godModeMint|forceMint|mintWithout(Verdict|PoT)'
   scan "erc-sot" 'native\s+ERC-?20|ERC-?20\s+is\s+(the\s+)?(source of truth|canonical|protocol)|source of truth[^\n]{0,40}ERC'
