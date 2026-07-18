@@ -47,3 +47,12 @@ src/processing/
 2. **Terminal** — `closed` and `aborted` accept no further transitions  
 3. **Encode before open** — payloadHash always set via layer 02  
 4. **No mint/fee/PoT inside this layer** — orchestrator (intake) calls other layers  
+5. **`markSettled` ≠ commission** — lifecycle stage only; fee math is layer 06  
+
+## Orchestrator wiring
+
+| Event | Processing call |
+|-------|-----------------|
+| PoT verified=1 | `markPotDone` |
+| Economic path done | `markSettled` then `close` |
+| PoT / L3 failure | `abort(reason)` → `process_abort` |

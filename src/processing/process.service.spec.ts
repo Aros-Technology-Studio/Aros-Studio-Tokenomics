@@ -195,4 +195,34 @@ describe('ProcessService (layer 03 deep)', () => {
     const events = proc.recentTransitions();
     expect(events.some((e) => e.to === 'pot_done')).toBe(true);
   });
+
+  it('aborts from pot_done (PoT pass but later fail path)', async () => {
+    const { nc, proc } = await setup();
+    await openPrimary(proc, 'AST-DEMO-20260719-abortpot');
+    await proc.markPotDone('AST-DEMO-20260719-abortpot');
+    const a = await proc.abort('AST-DEMO-20260719-abortpot', 'L3 failed');
+    expect(a.stage).toBe('aborted');
+    expect(a.abortReason).toBe('L3 failed');
+    const rows = await nc.listByProcessId('AST-DEMO-20260719-abortpot');
+    expect(rows.some((r) => r.recordType === 'process_abort')).toBe(true);
+  });
+
+  it('hydrateAllFromJournal rebuilds multiple processes', async () => {
+    const { nc, proc } = await setup();
+    await openPrimary(proc, 'AST-DEMO-20260719-ha1');
+    await openPrimary(proc, 'AST-DEMO-20260719-ha2');
+    await proc.markPotDone('AST-DEMO-20260719-ha2');
+    const proc2 = new ProcessService(nc);
+    const all = await proc2.hydrateAllFromJournal();
+    expect(all.length).toBeGreaterThanOrEqual(2);
+    expect(proc2.get('AST-DEMO-20260719-ha2')?.stage).toBe('pot_done');
+  });
+
+  it('does not expose mutable internal stage arrays via get()', async () => {
+    const { proc } = await setup();
+    await openPrimary(proc, 'AST-DEMO-20260719-immut');
+    const snap = proc.get('AST-DEMO-20260719-immut')!;
+    snap.stagesCompleted.push('closed' as never);
+    expect(proc.get('AST-DEMO-20260719-immut')!.stagesCompleted).not.toContain('closed');
+  });
 });
