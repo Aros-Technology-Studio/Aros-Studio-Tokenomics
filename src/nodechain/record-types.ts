@@ -11,10 +11,12 @@ export const PROCESS_SCOPED_TYPES = new Set([
   'burn_fact',
   'transfer_fact',
   'revaluation_fact',
+  'emission_fact',
   'commission_settled',
   'payment_credited',
   'reserve_accrual',
   'reserve_release',
+  'orchestrator_step',
 ]);
 
 export const KNOWN_TYPES = new Set([

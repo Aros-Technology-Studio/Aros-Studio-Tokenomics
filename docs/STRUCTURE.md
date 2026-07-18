@@ -8,9 +8,11 @@
 | 02 | docs/layers/02_TxEncoding | src/tx-encoding | done v1 |
 | 03 | docs/layers/03_Processing | src/processing | done v1 |
 | 04 | docs/layers/04_ProofOfTransaction | src/pot | P1–P4 + journal before ok-to-emit |
-| 05 | docs/layers/05_TokenManagement | src/token | done v1 |
-| 06 | docs/layers/06_FeeCommission | src/commission | done v1 |
-| 07 | docs/layers/07_Reserve | src/reserve | done v1 |
+| 05 | docs/layers/05_TokenManagement | src/token + src/aroscoin | ARO mint/burn PoT-gated |
+| — | emission | src/emission | valuation / ΔValue → ArosCoin |
+| 06 | docs/layers/06_FeeCommission | src/commission | post-factum 70/30 |
+| 07 | docs/layers/07_Reserve | src/reserve | own funds + reserveIndex |
+| — | orchestrator | src/orchestrator | sole-entry happy path |
 | 08 | docs/layers/08_AllSeeingEye | src/all-seeing-eye | done v1 |
 | 09 | docs/layers/09_Governance | src/governance | done v1 |
 | 10 | docs/layers/10_AssetTokenization | src/intake | done v1 |

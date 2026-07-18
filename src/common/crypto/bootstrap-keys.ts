@@ -6,6 +6,7 @@ export const PIPELINE_KEY_IDS = [
   'orchestrator',
   'pot',
   'token',
+  'emission',
   'settlement',
   'governance',
   'v1',

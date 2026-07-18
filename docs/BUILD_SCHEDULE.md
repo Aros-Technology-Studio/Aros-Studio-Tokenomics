@@ -50,7 +50,7 @@ Prior “Complete” checklists referred to removed scaffold and are **void**.
 - [ ] Reserve (own funds only)
 
 ### Phase 3 — Orchestration (core only)
-- [ ] Fixed pipeline orchestrator
+- [x] Fixed pipeline orchestrator (`src/orchestrator`)
 - [ ] State recording into NodeChain
 - [ ] Idempotency / fail-closed
 - [x] Institutional Portal edge scaffold (`portal/`) — OpenAPI + Nest + Next.js

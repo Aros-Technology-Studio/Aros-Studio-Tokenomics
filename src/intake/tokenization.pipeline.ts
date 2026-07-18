@@ -2,6 +2,8 @@ import { NodechainService } from '../nodechain/nodechain.service';
 import { ProcessService } from '../processing/process.service';
 import { PotService } from '../pot/pot.service';
 import { TokenService } from '../token/token.service';
+import { ArosCoinService } from '../aroscoin/aroscoin.service';
+import { EmissionService } from '../emission/emission.service';
 import { CommissionService } from '../commission/commission.service';
 import { ReserveService } from '../reserve/reserve.service';
 import { AllSeeingEyeService } from '../all-seeing-eye/all-seeing-eye.service';
@@ -20,6 +22,7 @@ import {
 } from './document-package';
 import type { IndexMirror } from '../index-mirror/index-mirror';
 import { MemoryIndexMirror } from '../index-mirror/index-mirror';
+import { OrchestratorService } from '../orchestrator/orchestrator.service';
 
 export interface PrimaryTokenizationInput {
   institutionId: string;
@@ -37,16 +40,21 @@ export interface PrimaryTokenizationInput {
   institutionAllowlisted?: boolean;
   hasDocuments?: boolean;
   hasQualifiedSignature?: boolean;
+  /** Optional; sole-entry orchestrator path generates one if omitted. */
+  idempotencyKey?: string;
 }
 
 /**
- * Layer 10 — Asset tokenization processes (no portal).
- * Orchestrates layers 01–09 for primary mint, revaluation, ownership transfer.
+ * Layer 10 — Asset tokenization processes.
+ * Primary path delegates to OrchestratorService (sole economic entry).
+ * Reval/transfer keep specialized flows.
  */
 export class TokenizationPipeline {
   readonly processes: ProcessService;
   readonly pot: PotService;
   readonly token: TokenService;
+  readonly aroscoin: ArosCoinService;
+  readonly emission: EmissionService;
   readonly commission: CommissionService;
   readonly reserve: ReserveService;
   readonly allSeeingEye: AllSeeingEyeService;
@@ -54,6 +62,7 @@ export class TokenizationPipeline {
   readonly assets: AssetRegistry;
   readonly keys: KeyRegistry;
   readonly mirror: IndexMirror;
+  readonly orchestrator: OrchestratorService;
 
   constructor(
     readonly nodechain: NodechainService,
@@ -61,211 +70,75 @@ export class TokenizationPipeline {
     mirror?: IndexMirror,
   ) {
     this.keys = keys ?? bootstrapPipelineKeys();
-    this.processes = new ProcessService(nodechain);
-    this.pot = new PotService(nodechain);
-    this.token = new TokenService(nodechain);
-    this.commission = new CommissionService(nodechain);
-    this.reserve = new ReserveService(nodechain);
-    this.allSeeingEye = new AllSeeingEyeService();
-    this.governance = new GovernanceService(nodechain);
-    this.assets = new AssetRegistry(nodechain);
     this.mirror = mirror ?? new MemoryIndexMirror();
+    this.orchestrator = new OrchestratorService(nodechain, this.keys, this.mirror);
+    // Share services with orchestrator so state stays consistent
+    this.processes = this.orchestrator.processes;
+    this.pot = this.orchestrator.pot;
+    this.token = this.orchestrator.token;
+    this.aroscoin = this.orchestrator.aroscoin;
+    this.emission = this.orchestrator.emission;
+    this.commission = this.orchestrator.commission;
+    this.reserve = this.orchestrator.reserve;
+    this.allSeeingEye = this.orchestrator.allSeeingEye;
+    this.governance = this.orchestrator.governance;
+    this.assets = this.orchestrator.assets;
   }
 
   async runPrimaryTokenization(input: PrimaryTokenizationInput) {
-    globalKillSwitch.assertWritable();
-
-    const processId = input.processId ?? makeProcessId(input.institutionId);
-    if (!isValidProcessId(processId)) {
-      throw new Error(`invalid processId: ${processId}`);
-    }
-    const assetId = input.assetId ?? `asset-${processId}`;
-    const feeRate = input.feeRate ?? 0.0015;
-    const validators = input.validators ?? ['v1', 'v2', 'v3'];
-    const confirmers = input.confirmers ?? ['v1', 'v2', 'v3'];
-    const requireL2 = input.requireL2 ?? true;
-    const l2Approvers = input.l2Approvers ?? ['committee-a', 'committee-b'];
-
+    let documentPackageHash: string | undefined;
     let hasDocuments = input.hasDocuments ?? true;
     let hasQualifiedSignature = input.hasQualifiedSignature ?? true;
-    let documentPackageHash: string | undefined;
     if (input.documentPackage) {
       assertDocumentPackage(input.documentPackage);
       documentPackageHash = hashDocumentPackage(input.documentPackage);
       hasDocuments = true;
       hasQualifiedSignature = input.documentPackage.hasQualifiedSignature;
     }
-    const institutionAllowlisted = input.institutionAllowlisted ?? true;
 
-    parseAro(input.valuation); // validate amount
-
-    await this.nodechain.ensureGenesis('system');
-
-    const l1 = this.governance.evaluateL1({
-      processId,
-      hasDocuments,
-      hasQualifiedSignature,
-      institutionAllowlisted,
-    });
-    this.allSeeingEye.observe({
-      level: l1.pass ? 'info' : 'critical',
-      source: 'governance',
-      code: l1.pass ? 'L1_PASS' : 'L1_FAIL',
-      message: l1.pass ? 'L1 policy ok' : l1.reasonCodes.join(','),
-      processId,
-    });
-    if (!l1.pass) throw new Error(`L1 failed: ${l1.reasonCodes.join(',')}`);
-    await this.governance.recordGovernanceEvent(processId, 'L1_PASS', { reasonCodes: [] });
-
-    let l2: { complete: boolean; count: number; required: number } | null = null;
-    if (requireL2) {
-      if (!l2Approvers.length) throw new Error('L2 requires l2Approvers');
-      this.governance.openL2(processId, l2Approvers.length, 'committee');
-      for (const approver of l2Approvers) {
-        l2 = this.governance.grantL2(processId, approver);
-      }
-      if (!l2!.complete) throw new Error('L2 committee incomplete');
-      await this.governance.recordGovernanceEvent(processId, 'L2_PASS', {
-        ...l2!,
-        approvers: l2Approvers,
-      });
-    }
-
-    const proc = await this.processes.open({
-      processId,
-      processType: 'primary_tokenization',
+    const r = await this.orchestrator.runPrimary({
       institutionId: input.institutionId,
       valuation: input.valuation,
       holderId: input.holderId,
-      institutionAllowlisted,
+      assetId: input.assetId,
+      processId: input.processId,
+      feeRate: input.feeRate,
+      confirmers: input.confirmers,
+      validators: input.validators,
+      requireL2: input.requireL2,
+      l2Approvers: input.l2Approvers,
+      requireL3: input.requireL3,
+      institutionAllowlisted: input.institutionAllowlisted,
       hasDocuments,
       hasQualifiedSignature,
-    });
-
-    await this.assets.journalRegister({
-      assetId,
-      institutionId: input.institutionId,
-      processId,
-      valuation: input.valuation,
-      holderId: input.holderId,
       documentPackageHash,
-    });
-
-    this.allSeeingEye.observe({
-      level: 'info',
-      source: 'processing',
-      code: 'PROCESS_OPEN',
-      message: 'process opened and asset registered',
-      processId,
-      payload: { assetId, documentPackageHash },
-    });
-
-    const verdict = await this.pot.verify({
-      process: proc,
-      confirmers,
-      validatorIds: validators,
-      keys: this.keys,
-    });
-    this.allSeeingEye.observe({
-      level: verdict.verified === 1 ? 'info' : 'critical',
-      source: 'pot',
-      code: verdict.verified === 1 ? 'POT_VERIFIED' : 'POT_REJECTED',
-      message: `verified=${verdict.verified}`,
-      processId,
-      payload: {
-        reasonCodes: verdict.reasonCodes,
-        criteriaResult: verdict.criteriaResult,
-        attestationDigest: verdict.attestationDigest,
-      },
-    });
-    if (verdict.verified !== 1) {
-      await this.processes.abort(processId, `PoT rejected: ${verdict.reasonCodes.join(',')}`);
-      throw new Error(`PoT rejected: ${verdict.reasonCodes.join(',')}`);
-    }
-    await this.processes.markPotDone(processId, { potLedgerHeight: verdict.ledgerHeight });
-
-    const highValue =
-      parseAro(input.valuation) >= parseAro(defaultHardeningConfig.highValueThreshold);
-    const requireL3HardFail = input.requireL3 ?? highValue;
-    const l3 = await this.governance.evaluateL3({
-      processId,
-      valuation: input.valuation,
-      potVerified: 1,
-      institutionAllowlisted,
-      stagesCompleted: this.processes.get(processId)?.stagesCompleted ?? proc.stagesCompleted,
-      allSeeingEyeCriticalCount: this.allSeeingEye.history().filter((e) => e.level === 'critical').length,
-      highValue,
-    });
-    await this.governance.recordGovernanceEvent(processId, 'L3_PANEL', {
-      pass: l3.pass,
-      aggregateScore: l3.aggregateScore,
-      reasonCodes: l3.reasonCodes,
-      opinions: l3.opinions,
-    });
-    if (requireL3HardFail && !l3.pass) {
-      await this.processes.abort(processId, `L3 failed: ${l3.reasonCodes.join(',')}`);
-      throw new Error(`L3 failed: ${l3.reasonCodes.join(',')}`);
-    }
-
-    const mint = await this.token.mintAfterPot({
-      processId,
-      holderId: input.holderId,
-      amount: input.valuation,
-      potVerified: 1,
-      potLedgerHeight: verdict.ledgerHeight,
-    });
-
-    const settlement = await this.commission.settle({
-      processId,
-      valuation: input.valuation,
-      feeRate,
-      nodeWeights: Object.fromEntries(confirmers.map((c) => [c, 1])),
-      potVerified: 1,
-    });
-
-    const reserve = await this.reserve.accrueFromCommission({
-      processId,
-      astShare: settlement.astShare,
-      processValuation: input.valuation,
-    });
-
-    await this.processes.markSettled(processId, { note: 'mint+commission+reserve' });
-    await this.processes.close(processId);
-    await this.mirror.replayFrom(this.nodechain);
-
-    const chain = await this.nodechain.verifyChain();
-    if (!chain.ok) {
-      globalKillSwitch.engage(`post-pipeline chain fail: ${chain.error}`);
-      throw new Error(`chain verify failed: ${chain.error}`);
-    }
-
-    this.allSeeingEye.notify({
-      level: 'info',
-      source: 'intake',
-      code: 'TOKENIZATION_COMPLETE',
-      message: 'primary tokenization finished',
-      processId,
+      idempotencyKey:
+        input.idempotencyKey ??
+        `pipe-${input.processId ?? input.institutionId}-${input.holderId}-${input.valuation}`,
     });
 
     return {
-      processId,
-      assetId,
+      processId: r.processId,
+      assetId: r.assetId,
       documentPackageHash,
-      l1,
-      l2,
-      l3,
-      verdict,
-      mint,
-      settlement,
-      reserve,
-      asset: this.assets.get(assetId),
-      tokenSnapshot: this.token.snapshot(),
-      holderBalance: this.token.balanceOf(input.holderId),
-      chain,
+      l1: r.l1,
+      l2: r.l2,
+      l3: r.l3,
+      verdict: r.verdict,
+      mint: r.mint,
+      emission: r.emission,
+      settlement: r.settlement,
+      reserve: r.reserve,
+      reserveIndex: r.reserveIndex,
+      asset: r.asset,
+      tokenSnapshot: r.aroscoin,
+      holderBalance: r.holderBalance,
+      chain: r.chain,
       allSeeingEyeEvents: this.allSeeingEye.history().length,
-      tip: await this.nodechain.getTip(),
+      tip: r.tip,
       crypto: 'ed25519' as const,
       killSwitch: globalKillSwitch.isEngaged(),
+      steps: r.steps,
     };
   }
 
@@ -342,13 +215,13 @@ export class TokenizationPipeline {
     }
     await this.processes.markPotDone(processId, { potLedgerHeight: verdict.ledgerHeight });
 
-    const reval = await this.token.revalueAfterPot({
+    const emission = await this.emission.emitFromDeltaValue({
       processId,
       previousValue,
       newValue: input.newValue,
-      potVerified: 1,
       potLedgerHeight: verdict.ledgerHeight,
     });
+    const reval = emission.reval!;
     this.assets.applyRevaluation(input.assetId, input.newValue);
     await this.processes.markSettled(processId, { note: 'revaluation' });
     await this.processes.close(processId);
