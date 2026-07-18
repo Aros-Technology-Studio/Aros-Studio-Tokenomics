@@ -13,7 +13,7 @@
 | 09 | docs/layers/09_Governance | src/governance | done v1 |
 | 10 | docs/layers/10_AssetTokenization | src/intake | done v1 |
 
-Portal / Issuer UI: out of scope.
+Portal edge scaffold: `portal/` + `docs/portal/` (not SoT).
 
 ## Open backlog (must not drop)
 

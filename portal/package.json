@@ -1,0 +1,16 @@
+{
+  "name": "@ast/portal",
+  "version": "0.1.0",
+  "private": true,
+  "description": "AST Institutional Portal edge (Next.js + Nest + shared + OpenAPI)",
+  "scripts": {
+    "test:shared": "npm --prefix shared test",
+    "test:backend": "npm --prefix backend test",
+    "test": "npm run test:shared && npm run test:backend",
+    "dev:backend": "npm --prefix backend run start:dev",
+    "dev:frontend": "npm --prefix frontend run dev",
+    "build:shared": "npm --prefix shared run build",
+    "build:backend": "npm --prefix backend run build",
+    "build:frontend": "npm --prefix frontend run build"
+  }
+}

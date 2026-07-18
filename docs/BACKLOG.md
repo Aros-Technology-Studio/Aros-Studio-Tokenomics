@@ -19,9 +19,11 @@ GitHub Issues are the operational list; this file is the in-repo mirror so nothi
 - Kill-switch, verifyEveryN
 - Layers 01–10 pipeline (`demo:tokenize`)
 
-## Explicitly out of scope unless re-opened
+## Portal edge (re-opened scaffold)
 
-- Issuer Portal / UI
+- [x] Layout + OpenAPI + architecture (`portal/`, `docs/portal/`)  
+- [ ] Wire Nest edge → `TokenizationPipeline` / Orchestrator (live hand-off)  
+- [ ] Production institution auth (mTLS / cert), full КЭП verification  
 
 ---
 

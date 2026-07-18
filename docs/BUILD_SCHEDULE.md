@@ -10,7 +10,7 @@
 
 Order of work for AST. **Docs first**, then core. No freelanced code. No fake Done.
 
-**Out of scope:** portal, web UI, issuer frontends — do not plan, build, or mention as deliverables unless the owner explicitly re-opens that scope.
+**Portal:** owner re-opened as **edge scaffold** only (`portal/`, `docs/portal/`). Not Core SoT; no mint from portal.
 
 ---
 
@@ -53,7 +53,7 @@ Prior “Complete” checklists referred to removed scaffold and are **void**.
 - [ ] Fixed pipeline orchestrator
 - [ ] State recording into NodeChain
 - [ ] Idempotency / fail-closed
-- [ ] Core API **only if** needed for core (no portal)
+- [x] Institutional Portal edge scaffold (`portal/`) — OpenAPI + Nest + Next.js
 
 ### Phase 4 — Governance & Release
 - [ ] All-Seeing Eye (observe/notify only)
@@ -73,7 +73,7 @@ Prior “Complete” checklists referred to removed scaffold and are **void**.
 1. Canon wins.  
 2. Fail-closed.  
 3. Chat RU / repo EN.  
-4. **No portal.**  
+4. Portal is edge-only (no mint / no SoT rewrite).  
 5. Close work only when acceptance is real.
 
 ---

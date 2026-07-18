@@ -65,9 +65,21 @@ do
   fi
 done
 
-# Portal is out of scope — must not reappear as required layout
-if [ -d portal ] && [ ! -f docs/BACKLOG.md ]; then
-  echo "::warning::layout-scaffold-guard: portal/ present; product scope is portal-out"
+# Portal edge scaffold (owner re-opened) — architecture + OpenAPI required if portal/ exists
+if [ -d portal ]; then
+  for p in \
+    portal/README.md \
+    portal/openapi/openapi.yaml \
+    portal/shared/src/process-id.ts \
+    portal/backend/src/main.ts \
+    portal/frontend/app/page.tsx \
+    docs/portal/ARCHITECTURE.md
+  do
+    if [ ! -f "$p" ]; then
+      echo "::error::layout-scaffold-guard: portal present but missing $p"
+      fail=1
+    fi
+  done
 fi
 
 if [ "$fail" -ne 0 ]; then

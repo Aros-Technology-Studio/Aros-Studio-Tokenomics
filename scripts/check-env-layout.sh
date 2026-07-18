@@ -41,6 +41,10 @@ need docs/INTAKE.md
 need src/main.ts
 need src/app.module.ts
 need src/nodechain/nodechain.service.ts
+need portal/openapi/openapi.yaml
+need portal/backend/src/main.ts
+need portal/frontend/app/page.tsx
+need docs/portal/ARCHITECTURE.md
 
 if [ "$fail" -ne 0 ]; then
   echo "check-env-layout FAILED"

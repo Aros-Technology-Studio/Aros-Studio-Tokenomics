@@ -1,0 +1,289 @@
+openapi: 3.1.0
+info:
+  title: AST Institutional Portal Edge API
+  version: 0.1.0
+  description: |
+    Edge API for institutional process submission.
+    Aligns processId and idempotency with Core Orchestrator and Core Canon.
+    Does not mint; Core remains source of truth after hand-off.
+servers:
+  - url: http://localhost:3100
+    description: Local portal backend
+tags:
+  - name: health
+  - name: processes
+paths:
+  /v1/health:
+    get:
+      tags: [health]
+      operationId: getHealth
+      summary: Liveness
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/HealthResponse'
+
+  /v1/processes:
+    post:
+      tags: [processes]
+      operationId: createProcess
+      summary: Submit primary tokenization process (edge)
+      description: |
+        Requires institutional valuation (decimal string), document package evidence,
+        and qualified signature flag. Idempotency-Key mandatory.
+      parameters:
+        - $ref: '#/components/parameters/IdempotencyKey'
+        - $ref: '#/components/parameters/InstitutionId'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CreateProcessRequest'
+      responses:
+        '202':
+          description: Accepted for Core hand-off
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ProcessAccepted'
+        '400':
+          $ref: '#/components/responses/Error'
+        '409':
+          $ref: '#/components/responses/Error'
+        '422':
+          $ref: '#/components/responses/Error'
+
+  /v1/processes/{processId}:
+    get:
+      tags: [processes]
+      operationId: getProcess
+      summary: Get process edge status
+      parameters:
+        - $ref: '#/components/parameters/ProcessId'
+        - $ref: '#/components/parameters/InstitutionId'
+      responses:
+        '200':
+          description: Process status
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ProcessStatus'
+        '404':
+          $ref: '#/components/responses/Error'
+
+  /v1/processes/{processId}/documents:
+    post:
+      tags: [processes]
+      operationId: attachDocuments
+      summary: Attach document package metadata
+      parameters:
+        - $ref: '#/components/parameters/ProcessId'
+        - $ref: '#/components/parameters/IdempotencyKey'
+        - $ref: '#/components/parameters/InstitutionId'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/AttachDocumentsRequest'
+      responses:
+        '200':
+          description: Documents recorded on edge
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ProcessStatus'
+        '400':
+          $ref: '#/components/responses/Error'
+        '404':
+          $ref: '#/components/responses/Error'
+        '422':
+          $ref: '#/components/responses/Error'
+
+components:
+  parameters:
+    ProcessId:
+      name: processId
+      in: path
+      required: true
+      schema:
+        type: string
+        pattern: '^AST-[A-Za-z0-9]+-\d{8}-[A-Za-z0-9]+$'
+        example: AST-DEMO-20260719-a1b2c3d4e5f6
+    IdempotencyKey:
+      name: Idempotency-Key
+      in: header
+      required: true
+      schema:
+        type: string
+        minLength: 8
+        maxLength: 128
+      description: Mandatory; same key + payload must not open two processes
+    InstitutionId:
+      name: X-Institution-Id
+      in: header
+      required: true
+      schema:
+        type: string
+        minLength: 1
+        maxLength: 32
+
+  schemas:
+    HealthResponse:
+      type: object
+      required: [status, service]
+      properties:
+        status:
+          type: string
+          enum: [ok]
+        service:
+          type: string
+          example: portal-backend
+        coreHandOff:
+          type: string
+          enum: [stub, live]
+          description: stub until wired to TokenizationPipeline
+
+    CreateProcessRequest:
+      type: object
+      required:
+        - processType
+        - valuation
+        - holderId
+        - hasQualifiedSignature
+        - documentPackageHash
+      properties:
+        processId:
+          type: string
+          description: Optional client processId; must match AST-{INST}-{YYYYMMDD}-{suffix}
+          pattern: '^AST-[A-Za-z0-9]+-\d{8}-[A-Za-z0-9]+$'
+        processType:
+          type: string
+          enum: [primary_tokenization, revaluation, ownership_transfer]
+        valuation:
+          type: string
+          description: Institutional valuation as decimal string (max 9 fraction digits)
+          pattern: '^-?\d+(\.\d{1,9})?$'
+          example: '1000000.000000000'
+        holderId:
+          type: string
+        assetId:
+          type: string
+        hasQualifiedSignature:
+          type: boolean
+          description: Must be true — qualified institutional signature present
+        documentPackageHash:
+          type: string
+          description: SHA-256 hex of document package
+          pattern: '^[a-fA-F0-9]{64}$'
+        note:
+          type: string
+          maxLength: 512
+
+    AttachDocumentsRequest:
+      type: object
+      required:
+        - documentPackageHash
+        - hasQualifiedSignature
+      properties:
+        documentPackageHash:
+          type: string
+          pattern: '^[a-fA-F0-9]{64}$'
+        hasQualifiedSignature:
+          type: boolean
+        documentCount:
+          type: integer
+          minimum: 1
+
+    ProcessAccepted:
+      type: object
+      required:
+        - processId
+        - idempotencyKey
+        - status
+        - institutionId
+        - valuation
+        - hasQualifiedSignature
+      properties:
+        processId:
+          type: string
+        idempotencyKey:
+          type: string
+        status:
+          type: string
+          enum: [accepted, awaiting_core, duplicate]
+        institutionId:
+          type: string
+        valuation:
+          type: string
+        hasQualifiedSignature:
+          type: boolean
+        documentPackageHash:
+          type: string
+        message:
+          type: string
+          example: Accepted at edge; Core Orchestrator hand-off is stub in scaffold
+
+    ProcessStatus:
+      type: object
+      required: [processId, status, institutionId]
+      properties:
+        processId:
+          type: string
+        status:
+          type: string
+          enum:
+            - accepted
+            - awaiting_core
+            - documents_pending
+            - submitted_to_core
+            - rejected
+            - duplicate
+        institutionId:
+          type: string
+        valuation:
+          type: string
+        hasQualifiedSignature:
+          type: boolean
+        documentPackageHash:
+          type: string
+        idempotencyKey:
+          type: string
+        updatedAt:
+          type: string
+          format: date-time
+
+    ErrorBody:
+      type: object
+      required: [code, message]
+      properties:
+        code:
+          type: string
+          enum:
+            - VALIDATION_ERROR
+            - MISSING_VALUATION
+            - MISSING_QUALIFIED_SIGNATURE
+            - MISSING_DOCUMENTS
+            - INVALID_PROCESS_ID
+            - IDEMPOTENCY_REQUIRED
+            - IDEMPOTENCY_PAYLOAD_MISMATCH
+            - NOT_FOUND
+            - FORBIDDEN
+        message:
+          type: string
+        details:
+          type: array
+          items:
+            type: string
+
+  responses:
+    Error:
+      description: Error
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorBody'

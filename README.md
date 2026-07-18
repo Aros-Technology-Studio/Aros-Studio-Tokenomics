@@ -9,7 +9,7 @@ Institutional process token-economy: **NodeChain** is the sole source-of-truth j
 | Canon | `docs/AST-CORE-CANON.md` |
 | Layer specs | `docs/layers/01_NodeChain` full draft; 02–10 skeletons |
 | Code | **NodeChain journal live** — genesis + first record |
-| Portal | **Out of scope** |
+| Portal | **Edge scaffold** (`portal/`) — not SoT |
 
 ## Quick start
 
@@ -34,15 +34,29 @@ npm run cli -- journal verify --dir data/journal-rocks --engine rocksdb
 See [`docs/HARDENING.md`](docs/HARDENING.md).  
 **Next (tracked):** HSM keys · journal replication · L3 LLM adapters — [`docs/BACKLOG.md`](docs/BACKLOG.md) · issues #68 #69 #70.
 
-### Full layer path (no portal)
+### Full layer path
 
 L1 → L2 → process open/encode → PoT P1–P4 → L3 AI panel → mint → commission **70/30** → reserve → close.
+
+### Institutional Portal (edge)
+
+Scaffold: Next.js + Nest BFF + shared + OpenAPI under [`portal/`](portal/).  
+Architecture: [`docs/portal/ARCHITECTURE.md`](docs/portal/ARCHITECTURE.md).  
+Requires institutional valuation + qualified signature; **no mint** from portal.
+
+```bash
+cd portal/shared && npm i && npm test
+cd ../backend && npm i && npm test && npm run start:dev
+# separate terminal
+cd portal/frontend && npm i && npm run dev
+```
+
 ## Layers
 
 See [`docs/STRUCTURE.md`](docs/STRUCTURE.md) and [`docs/layers/`](docs/layers/).  
-Code under `src/nodechain`, `tx-encoding`, `processing`, `pot`, `token`, `commission`, `reserve`, `all-seeing-eye`, `governance`, `intake`.
+Code under `src/nodechain`, `tx-encoding`, `processing`, `pot`, `token`, `commission`, `reserve`, `all-seeing-eye`, `governance`, `intake`.  
+Portal edge under `portal/{shared,backend,frontend}`.
 
 ## Stack
 
-TypeScript, NestJS-ready modules, Jest, Node ≥ 20.  
-Portal / Issuer UI: **out of scope**.
+TypeScript, NestJS core + portal Nest edge, Next.js portal UI, Jest, Node ≥ 20.
