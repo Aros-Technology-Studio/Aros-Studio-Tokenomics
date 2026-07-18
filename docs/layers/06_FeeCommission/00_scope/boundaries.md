@@ -1,2 +1,6 @@
 # Boundaries
-Only if potVerified=1. AST share → Reserve layer.
+
+**In:** valuation, schedule, weights, potVerified  
+**Out:** commission_settled, payment_credited, astShare for Reserve  
+
+Does not mint tokens. Does not run PoT.

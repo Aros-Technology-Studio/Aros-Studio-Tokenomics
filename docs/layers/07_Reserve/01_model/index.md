@@ -1,5 +1,7 @@
 # Reserve index
+
 ```
-reserveIndex = log10(1 + totalProcessVolume)
+reserveIndex = log10(1 + totalProcessVolume_ARO)
 ```
-Monotonic non-decreasing as volume grows. Own balance accrues AST share only.
+
+`internalPriceHint = base × reserveIndex` — **informational only**, never mint basis.

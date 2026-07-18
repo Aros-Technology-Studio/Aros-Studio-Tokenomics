@@ -13,6 +13,8 @@ export const PROCESS_SCOPED_TYPES = new Set([
   'revaluation_fact',
   'commission_settled',
   'payment_credited',
+  'reserve_accrual',
+  'reserve_release',
 ]);
 
 export const KNOWN_TYPES = new Set([

@@ -1,2 +1,5 @@
 # Non-goals
-Not staking yield; not prepayment.
+
+- Prepayment / advances  
+- Staking or yield products  
+- Market-making fees  

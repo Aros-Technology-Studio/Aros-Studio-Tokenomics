@@ -1,2 +1,5 @@
 # Non-goals
-Not user wallets; not external reserve of client assets.
+
+- Custody of client/participant funds  
+- Using reserveIndex as market mint price  
+- Speculative treasury trading  
