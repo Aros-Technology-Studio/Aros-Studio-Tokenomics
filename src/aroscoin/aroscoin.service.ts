@@ -67,6 +67,17 @@ export class ArosCoinService {
     return this.token.burn(input);
   }
 
+  /** Remint remainder after partial-release burn (same process, PoT-gated). */
+  remintAfterPartialRelease(input: {
+    processId: string;
+    holderId: string;
+    amount: string;
+    potLedgerHeight: number;
+    claimId?: string;
+  }): Promise<MintResult> {
+    return this.token.remintAfterPartialRelease(input);
+  }
+
   transferAfterPot(input: {
     processId: string;
     fromHolderId: string;

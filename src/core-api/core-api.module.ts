@@ -4,6 +4,8 @@ import { CoreProcessesController } from './processes.controller';
 import { CoreNodesController } from './nodes.controller';
 import { CoreReleaseController } from './release.controller';
 import { CoreEyeController } from './eye.controller';
+import { CorePartialReleaseController } from './partial-release.controller';
+import { CoreOracleController } from './oracle.controller';
 
 @Module({
   imports: [LayersModule],
@@ -12,6 +14,8 @@ import { CoreEyeController } from './eye.controller';
     CoreNodesController,
     CoreReleaseController,
     CoreEyeController,
+    CorePartialReleaseController,
+    CoreOracleController,
   ],
 })
 export class CoreApiModule {}

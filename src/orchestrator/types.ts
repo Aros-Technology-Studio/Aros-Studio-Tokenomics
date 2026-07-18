@@ -1,9 +1,12 @@
+import type { OraclePackage } from '../oracle-gateway/types';
+
 export type OrchestratorStepId =
   | 'start'
   | 'docs'
   | 'l1'
   | 'l2'
   | 'process_open'
+  | 'oracle'
   | 'pot'
   | 'l3'
   | 'emission'
@@ -37,4 +40,11 @@ export interface OrchestratorPrimaryInput {
   hasDocuments?: boolean;
   hasQualifiedSignature?: boolean;
   documentPackageHash?: string;
+  /**
+   * Optional multi-oracle package. When set, orchestrator fail-closes on invalid quorum.
+   * When omitted, oracle step is skipped.
+   */
+  oracle?: OraclePackage;
+  /** When true, require oracle package (fail if missing). Default false. */
+  requireOracle?: boolean;
 }

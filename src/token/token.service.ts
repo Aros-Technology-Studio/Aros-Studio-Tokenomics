@@ -23,6 +23,7 @@ import {
 export class TokenService {
   private balances = new Map<string, bigint>();
   private mintedProcess = new Set<string>();
+  private remintedProcess = new Set<string>();
   private hydrated = false;
 
   constructor(private readonly nodechain: NodechainService) {}
@@ -166,6 +167,85 @@ export class TokenService {
         amount: formatAro(arx),
         potLedgerHeight,
         potVerified: 1,
+        criteriaResult: gate.criteriaResult,
+        okToEmit: true,
+      },
+      writerId: 'token',
+      writerRole: 'token',
+    });
+
+    return {
+      processId: input.processId,
+      claimId,
+      holderId: input.holderId,
+      amount: formatAro(arx),
+      potLedgerHeight,
+      ledgerHeight: r.height,
+      recordId: r.recordId,
+      totalSupply: this.totalSupply(),
+    };
+  }
+
+  /**
+   * Remint after partial-release burn on the same processId.
+   * Requires journal ok-to-emit + prior burn_fact; not a free mint.
+   */
+  async remintAfterPartialRelease(input: {
+    processId: string;
+    holderId: string;
+    amount: string;
+    potLedgerHeight: number;
+    claimId?: string;
+  }): Promise<MintResult> {
+    this.assertProcess(input.processId);
+    this.assertHolder(input.holderId);
+    let gate;
+    try {
+      gate = await resolveOkToEmit(this.nodechain, input.processId);
+    } catch (e) {
+      throw new TokenError(
+        TokenErrorCode.MINT_WITHOUT_POT,
+        e instanceof Error ? e.message : 'remint requires ok-to-emit',
+      );
+    }
+    await this.ensureHydrated();
+    const history = await this.nodechain.listByProcessId(input.processId);
+    const hasBurn = history.some((r) => r.recordType === 'burn_fact');
+    if (!hasBurn) {
+      throw new TokenError(
+        TokenErrorCode.INVALID_PROCESS,
+        'remint requires prior burn_fact on process',
+      );
+    }
+    if (
+      this.remintedProcess.has(input.processId) ||
+      history.some(
+        (r) => r.recordType === 'mint_fact' && r.payload?.kind === 'partial_release_remint',
+      )
+    ) {
+      throw new TokenError(TokenErrorCode.DOUBLE_MINT, 'double remint forbidden for process');
+    }
+    const arx = this.parsePositive(input.amount);
+    const claimId = input.claimId ?? `remint-${randomUUID()}`;
+    this.credit(input.holderId, arx);
+    this.remintedProcess.add(input.processId);
+
+    const potLedgerHeight =
+      input.potLedgerHeight >= 0 ? input.potLedgerHeight : gate.potLedgerHeight;
+    const r = await this.nodechain.append({
+      clientRecordId: `remint:${input.processId}`,
+      recordType: 'mint_fact',
+      processId: input.processId,
+      payload: {
+        schemaVersion: TOKEN_SCHEMA,
+        symbol: ARO_SYMBOL,
+        decimals: ARO_DECIMALS,
+        claimId,
+        holderId: input.holderId,
+        amount: formatAro(arx),
+        potLedgerHeight,
+        potVerified: 1,
+        kind: 'partial_release_remint',
         criteriaResult: gate.criteriaResult,
         okToEmit: true,
       },

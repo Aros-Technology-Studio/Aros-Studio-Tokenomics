@@ -53,6 +53,20 @@ const SCHEMAS: Record<string, ProcessTxSchema> = {
       { name: 'documentPackageHash', required: false, kind: 'hash' },
     ],
   },
+  partial_release: {
+    processType: 'partial_release',
+    allowExtraKeys: false,
+    fields: [
+      { name: 'institutionId', required: true, kind: 'string' },
+      { name: 'holderId', required: true, kind: 'string' },
+      { name: 'releaseAmount', required: true, kind: 'amount' },
+      { name: 'remintAmount', required: false, kind: 'amount' },
+      { name: 'assetId', required: false, kind: 'string' },
+      { name: 'parentProcessId', required: false, kind: 'string' },
+      { name: 'parentClaimId', required: false, kind: 'string' },
+      { name: 'documentPackageHash', required: false, kind: 'hash' },
+    ],
+  },
 };
 
 export function getSchema(processType: string): ProcessTxSchema {

@@ -23,6 +23,9 @@ import { MemoryJournalStore } from '../nodechain/memory.store';
 import { NodeRegistryService } from '../nodes/node-registry.service';
 import { NodeReputationService } from '../nodes/node-reputation.service';
 import { ReleaseDaemon } from '../release/release-daemon';
+import { OracleGatewayService } from '../oracle-gateway/oracle-gateway.service';
+import { PartialReleaseService } from '../partial-release/partial-release.service';
+import { OracleError } from '../oracle-gateway/errors';
 import { OrchestratorError, OrchestratorErrorCode } from './errors';
 import type {
   OrchestratorPrimaryInput,
@@ -32,7 +35,7 @@ import type {
 
 /**
  * Sole economic entry (P2 Orchestrator).
- * Fixed happy path: Start → Docs → L1/L2 → process_open → PoT → Emission →
+ * Happy path: Start → Docs → L1/L2 → process_open → [oracle?] → PoT → Emission →
  * Settlement → Reserve → State → End.
  * NodeChain is business truth; compensation only before verified=1 (abort path).
  */
@@ -50,6 +53,8 @@ export class OrchestratorService {
   readonly nodes: NodeRegistryService;
   readonly reputation: NodeReputationService;
   readonly release: ReleaseDaemon;
+  readonly oracle: OracleGatewayService;
+  readonly partialRelease: PartialReleaseService;
   readonly keys: KeyRegistry;
   readonly mirror: IndexMirror;
 
@@ -78,6 +83,18 @@ export class OrchestratorService {
     this.nodes.registerMany(['v1', 'v2', 'v3'], 'confirmer');
     this.reputation = new NodeReputationService();
     this.release = new ReleaseDaemon(nodechain, this.reserve, this.aroscoin);
+    this.oracle = new OracleGatewayService(this.keys, nodechain, { minOracles: 2 });
+    this.oracle.registerMany(['oracle-a', 'oracle-b', 'oracle-c']);
+    this.partialRelease = new PartialReleaseService(
+      nodechain,
+      this.processes,
+      this.pot,
+      this.aroscoin,
+      this.reserve,
+      this.keys,
+      this.release,
+      this.oracle,
+    );
     this.mirror = mirror ?? new MemoryIndexMirror();
     this.maxConcurrent = opts?.maxConcurrentPerInstitution ?? 10;
   }
@@ -232,6 +249,34 @@ export class OrchestratorService {
         documentPackageHash,
       });
 
+      // Optional multi-oracle step (fail-closed when provided or required)
+      let oracleResult: { ok: boolean; validOracleIds: string[] } | null = null;
+      if (input.requireOracle && !input.oracle) {
+        throw new OrchestratorError(
+          OrchestratorErrorCode.ORACLE_FAILED,
+          'oracle package required',
+        );
+      }
+      if (input.oracle) {
+        try {
+          const pkg = { ...input.oracle, processId: input.oracle.processId || processId };
+          const ov = this.oracle.require(pkg);
+          await this.oracle.journalReport(processId, ov);
+          oracleResult = { ok: true, validOracleIds: ov.validOracleIds };
+          log('oracle', true, ov.validOracleIds.join(','));
+          await this.journalStep(processId, 'oracle', {
+            ok: true,
+            validOracleIds: ov.validOracleIds,
+          });
+        } catch (e) {
+          const msg = e instanceof OracleError ? e.message : String(e);
+          log('oracle', false, msg);
+          throw new OrchestratorError(OrchestratorErrorCode.ORACLE_FAILED, msg);
+        }
+      } else {
+        log('oracle', true, 'skipped');
+      }
+
       const verdict = await this.pot.verify({
         process: proc,
         confirmers,
@@ -378,6 +423,7 @@ export class OrchestratorService {
         l1,
         l2,
         l3,
+        oracle: oracleResult,
         verdict,
         okToEmit,
         emission,

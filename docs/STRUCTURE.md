@@ -16,6 +16,8 @@
 | — | nodes | src/nodes | registry + reputation |
 | — | release | src/release | velocity + daemon + I8 gate |
 | — | core API | src/core-api | `/v1/core/*` for portal |
+| — | oracle-gateway | src/oracle-gateway | multi-oracle Ed25519 fail-closed |
+| — | partial-release | src/partial-release | burn + reserve child + remint |
 | 08 | docs/layers/08_AllSeeingEye | src/all-seeing-eye | done v1 |
 | 09 | docs/layers/09_Governance | src/governance | done v1 |
 | 10 | docs/layers/10_AssetTokenization | src/intake | done v1 |

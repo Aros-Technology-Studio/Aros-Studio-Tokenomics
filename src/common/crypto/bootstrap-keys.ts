@@ -12,6 +12,9 @@ export const PIPELINE_KEY_IDS = [
   'v1',
   'v2',
   'v3',
+  'oracle-a',
+  'oracle-b',
+  'oracle-c',
 ] as const;
 
 export function bootstrapPipelineKeys(registry: KeyRegistry = new KeyRegistry()): KeyRegistry {

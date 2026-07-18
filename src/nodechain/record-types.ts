@@ -17,6 +17,8 @@ export const PROCESS_SCOPED_TYPES = new Set([
   'reserve_accrual',
   'reserve_release',
   'orchestrator_step',
+  'oracle_report',
+  'partial_release_fact',
 ]);
 
 export const KNOWN_TYPES = new Set([

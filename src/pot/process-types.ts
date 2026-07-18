@@ -36,6 +36,14 @@ const RULES: Record<string, ProcessTypeRule> = {
     requireValuation: false,
     requireHolder: true,
   },
+  partial_release: {
+    processType: 'partial_release',
+    requiredStages: ['opened', 'documents', 'encoded'],
+    requireDocuments: true,
+    requireQualifiedSignature: true,
+    requireValuation: true,
+    requireHolder: true,
+  },
 };
 
 export function getProcessTypeRule(processType: string): ProcessTypeRule {
