@@ -1,0 +1,39 @@
+# Local ENV stack: AST core + Postgres index mirror
+services:
+  postgres:
+    image: postgres:16-alpine
+    environment:
+      POSTGRES_USER: ast
+      POSTGRES_PASSWORD: ast
+      POSTGRES_DB: ast_index
+    ports:
+      - "5432:5432"
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+      - ./docs/db/postgres-index-schema.sql:/docker-entrypoint-initdb.d/01-schema.sql:ro
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ast -d ast_index"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+
+  ast:
+    build: .
+    environment:
+      AST_JOURNAL_ENGINE: file
+      AST_JOURNAL_DIR: /data/journal
+      AST_REQUIRE_CRYPTO: "1"
+      DATABASE_URL: postgres://ast:ast@postgres:5432/ast_index
+      KILL_SWITCH: "false"
+      PORT: "3000"
+    ports:
+      - "3000:3000"
+    volumes:
+      - ast_journal:/data
+    depends_on:
+      postgres:
+        condition: service_healthy
+
+volumes:
+  pgdata:
+  ast_journal:

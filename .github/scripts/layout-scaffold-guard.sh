@@ -20,9 +20,22 @@ for path in \
   README.md \
   AGENTS.md \
   package.json \
+  nest-cli.json \
+  Dockerfile \
+  docker-compose.yml \
+  .env.example \
+  CONTRIBUTING.md \
+  SECURITY.md \
+  CHANGELOG.md \
+  docs/ROADMAP.md \
+  docs/INTAKE.md \
+  docs/db/postgres-index-schema.sql \
+  contracts/src/representation/ArosCoinView.sol \
+  rust/Cargo.toml \
   src/nodechain/nodechain.service.ts \
   src/intake/tokenization.pipeline.ts \
-  rules/AST_RULES.yaml
+  rules/AST_RULES.yaml \
+  .github/workflows/invariants.yml
 do
   if [ ! -f "$path" ]; then
     echo "::error::layout-scaffold-guard: missing required path $path"

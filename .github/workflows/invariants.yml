@@ -1,0 +1,37 @@
+# ENV #31 / CI #16 — two-level canon gate + firewall (named invariants.yml)
+name: invariants
+
+on:
+  pull_request:
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  firewall-and-canon:
+    name: invariants + firewall
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - name: Level 1 — vocabulary / firewall (canon-gate)
+        run: bash .github/scripts/canon-gate.sh
+      - name: Level 2 — domain + philosophy + pot/eye/token
+        run: |
+          set -e
+          bash .github/scripts/ast-philosophy-guard.sh
+          bash .github/scripts/token-protocol-guard.sh
+          bash .github/scripts/no-bypass-pot-nodechain.sh
+          bash .github/scripts/pot-criteria-guard.sh
+          bash .github/scripts/no-eye-executive-guard.sh
+          bash .github/scripts/domain-invariants-guard.sh
+      - name: Level 2b — layout + layers docs
+        run: |
+          bash .github/scripts/layout-scaffold-guard.sh
+          bash .github/scripts/component-docs-guard.sh
+      - name: Full matrix
+        run: bash .github/scripts/run-all-guards.sh

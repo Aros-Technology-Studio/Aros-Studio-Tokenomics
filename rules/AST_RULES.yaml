@@ -1,18 +1,90 @@
-# AST machine rules (v0.1) — expand with layers
-version: "0.1"
+# AST_RULES.yaml — machine-readable invariants + firewall (ENV #32 / RULES #15)
+# Law text: docs/AST-CORE-CANON.md
+# Commission ship default is 70/30 (Core Canon §XII) — not legacy 20/80.
+
+version: "1.1"
+semver_canon: "1.0"
+
 invariants:
-  - id: I3_NODECHAIN_RECORD
-    summary: Significant events require NodeChain record
-  - id: I1_POT_GATED
-    summary: Value requires PoT verified=1 (enforced when PoT layer lands)
+  - id: I1
+    summary: Value only when PoT verified=1
+    critical: true
+  - id: I2
+    summary: Emission/burn bound to confirmed process
+    critical: true
+  - id: I3
+    summary: Significant events recorded in NodeChain
+    critical: true
+  - id: I4
+    summary: Determinism same input → same result
+    critical: true
+  - id: I5
+    summary: Earned retained; no speculative holding/staking/farming
+    critical: true
+  - id: I6
+    summary: AST holds only own funds (selective custody)
+    critical: true
+  - id: I7
+    summary: Token reflects confirmed asset value
+    critical: true
+  - id: I8
+    summary: Pre-release circulation limited to internal roles
+    critical: true
+  - id: I9
+    summary: New emission pro-rata to holders
+    critical: true
+
+pot_criteria:
+  - id: P1
+    summary: Allowed architectural context (institution allowlist / cert)
+  - id: P2
+    summary: Execution stages completed
+  - id: P3
+    summary: Significant states on NodeChain
+  - id: P4
+    summary: Process-type rules satisfied
+
+# Banned term lists live only in CI guards (.github/scripts/canon-gate.sh).
+# Do not duplicate literal banned strings here (self-trigger).
 firewall:
-  banned_product_surfaces:
-    - staking_for_yield
+  enforced_by: .github/scripts/canon-gate.sh
+  banned_mechanics:
     - free_mint
+    - pre_mine
+    - staking_for_yield
+    - farming
     - third_party_custody
+    - eye_veto
+    - eye_rollback
+    - admin_mint
+    - mint_without_pot
+
 commission:
-  ship_default_nodes: 0.70
-  ship_default_ast: 0.30
+  # I-COMM ship default (amended from historical 0.20/0.80 proposals)
+  id: I-COMM-SHIP
+  nodes_share: 0.70
+  ast_share: 0.30
+  post_factum: true
+  currency: ARO
+
 nodechain:
-  primary_store: file_or_rocksdb
+  sole_source_of_truth: true
+  primary_engines: [rocksdb, file, memory]
+  index_mirror: postgres
   genesis_required: true
+  require_real_crypto_default: true
+
+eye:
+  mode: observe_notify
+  veto: false
+  rollback: false
+
+environments:
+  - local
+  - test
+  - sandbox
+  - prod
+
+kill_switch:
+  env: KILL_SWITCH
+  effect: read_only_fail_closed

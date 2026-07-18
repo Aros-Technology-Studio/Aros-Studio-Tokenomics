@@ -29,6 +29,9 @@ jobs:
       - name: Test
         run: npm test
 
+      - name: ENV layout (Docker, rules, contracts, rust, docs)
+        run: npm run check:env
+
       - name: Canon / domain guards
         run: npm run check:canon
 

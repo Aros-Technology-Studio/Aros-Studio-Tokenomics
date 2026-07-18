@@ -1,13 +1,23 @@
-/**
- * Nest entry placeholder. Primary journal path for v0.1 is CLI:
- *   npm run journal:first
- */
 import 'reflect-metadata';
+import { NestFactory } from '@nestjs/core';
+import { AppModule } from './app.module';
 
 async function bootstrap(): Promise<void> {
-  // HTTP API later; journal is usable via NodechainService + CLI.
+  if (process.env.KILL_SWITCH === 'true') {
+    // eslint-disable-next-line no-console
+    console.warn('KILL_SWITCH=true — starting in restricted mode (no HTTP write surface yet)');
+  }
+
+  const app = await NestFactory.create(AppModule, { logger: ['error', 'warn', 'log'] });
+  const port = Number(process.env.PORT ?? 3000);
+  await app.listen(port);
   // eslint-disable-next-line no-console
-  console.log('AST core — use: npm run journal:first');
+  console.log(`AST Nest core listening on :${port}`);
+  // eslint-disable-next-line no-console
+  console.log('Journal/CLI: npm run demo:tokenize | npm run cli -- journal tip');
 }
 
-void bootstrap();
+bootstrap().catch((err) => {
+  console.error(err);
+  process.exit(1);
+});

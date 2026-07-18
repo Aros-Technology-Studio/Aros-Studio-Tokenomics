@@ -21,6 +21,8 @@ EXCLUDES=(
   --exclude=MIGRATION_GATE.md
   --exclude=AST-CORE-CANON.md
   --exclude=rules.md
+  --exclude=AST_RULES.yaml
+  --exclude-dir=rules
 )
 
 # Case-sensitive: "ALB" matches only the literal epoch acronym, never words like "totalBurned".
