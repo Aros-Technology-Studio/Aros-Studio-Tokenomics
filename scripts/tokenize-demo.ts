@@ -25,6 +25,15 @@ async function main(): Promise<void> {
     institutionId: 'DEMO',
     valuation: '1000.000000000',
     holderId: 'holder-demo',
+    assetId: `asset-${processId}`,
+    documentPackage: {
+      documents: [
+        { name: 'institutional-valuation.pdf', contentHash: 'ab'.repeat(32) },
+        { name: 'title-extract.pdf', contentHash: 'cd'.repeat(32) },
+      ],
+      hasQualifiedSignature: true,
+      signerId: 'DEMO-KEP',
+    },
   });
 
   console.log(JSON.stringify({ engine, dir, ...result }, null, 2));

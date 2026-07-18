@@ -1,2 +1,7 @@
 # Non-goals
-No market price, no staking, no ERC as SoT.
+
+- Asset appraisal  
+- Market price / DEX  
+- Staking / farming  
+- Treating ERC balances as SoT  
+- Portal UI  
