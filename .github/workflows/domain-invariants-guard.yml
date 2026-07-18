@@ -1,0 +1,20 @@
+name: Domain invariants guard
+
+# Cross-cutting P0–P4 rules: defaults in CANON, no admin mint, no post-verified unverify, etc.
+
+on:
+  pull_request:
+  push:
+    branches: [main]
+
+permissions:
+  contents: read
+
+jobs:
+  domain-invariants:
+    name: cross-cutting rules
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Run domain-invariants-guard
+        run: bash .github/scripts/domain-invariants-guard.sh

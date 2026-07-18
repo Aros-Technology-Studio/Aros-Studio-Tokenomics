@@ -1,0 +1,24 @@
+name: AST guards (all)
+
+# Single matrix entry that runs every canon/domain guard script.
+# Individual workflows remain for clear PR check names.
+
+on:
+  pull_request:
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  all-guards:
+    name: run-all-guards
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - name: Run all guards
+        run: bash .github/scripts/run-all-guards.sh

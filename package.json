@@ -10,11 +10,13 @@
   "scripts": {
     "build": "tsc -p tsconfig.build.json",
     "test": "jest",
+    "check:canon": "bash .github/scripts/run-all-guards.sh",
     "cli": "tsx scripts/ast-cli.ts",
     "journal:genesis": "tsx scripts/ast-cli.ts journal genesis",
     "journal:first": "tsx scripts/ast-cli.ts journal first-record",
     "demo:tokenize": "tsx scripts/tokenize-demo.ts"
   },
+
   "dependencies": {
     "@nestjs/common": "^11.0.0",
     "@nestjs/core": "^11.0.0",

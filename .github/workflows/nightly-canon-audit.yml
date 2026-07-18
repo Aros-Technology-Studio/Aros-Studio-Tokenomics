@@ -1,0 +1,38 @@
+name: Nightly canon audit
+
+# Daily full guard suite + soft report of forbidden-concept keywords.
+
+on:
+  schedule:
+    - cron: '17 3 * * *'   # daily 03:17 UTC
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  audit:
+    name: full canon scan
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Run all hard guards
+        run: bash .github/scripts/run-all-guards.sh
+
+      - name: Forbidden-concept report (soft)
+        run: |
+          CONCEPTS='buyback|liquidity pool|price[ _-]?floor|price[ _-]?stabilit|velocity throttle|staking|security deposit|governance vote|maxSupply|pre-mine|vesting|\bBTC\b|\bETH\b'
+          hits="$(grep -RIniE "$CONCEPTS" . \
+            --exclude-dir=.git --exclude-dir=.github --exclude-dir=node_modules \
+            --exclude=README.md --exclude=PROJECT_STATUS.md --exclude=MIGRATION_REVIEW.md \
+            2>/dev/null || true)"
+          if [ -n "$hits" ]; then
+            echo "::warning::Forbidden-concept keywords present — confirm each is negation-only, not a live mechanic:"
+            echo "$hits"
+          else
+            echo "No forbidden-concept keywords found."
+          fi
