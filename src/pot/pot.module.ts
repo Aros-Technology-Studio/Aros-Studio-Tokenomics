@@ -5,6 +5,5 @@ import { PotService } from './pot.service';
 @Module({
   imports: [NodechainModule],
   providers: [PotService],
-  exports: [PotService],
-})
+  exports: [PotService] })
 export class PotModule {}

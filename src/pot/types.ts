@@ -74,8 +74,7 @@ export const defaultPotConfig: PotConfig = {
   timeoutMs: POT_TIMEOUT_MS,
   quorumRatio: 2 / 3,
   kMin: 3,
-  requiredStages: [...DEFAULT_REQUIRED_STAGES],
-};
+  requiredStages: [...DEFAULT_REQUIRED_STAGES] };
 
 export class PotError extends Error {
   constructor(

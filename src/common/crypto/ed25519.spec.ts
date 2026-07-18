@@ -1,8 +1,7 @@
 import {
   generateEd25519KeyPair,
   signContentHash,
-  verifyContentHash,
-} from './ed25519';
+  verifyContentHash } from './ed25519';
 import { createHash } from 'crypto';
 import { KeyRegistry } from './key-registry';
 

@@ -1,6 +1,6 @@
 # 03_crypto
 
-**Status:** placeholder
+**Status:** documented
 
 Encryption at rest, transport security, commitments, signatures on ledger records.
 

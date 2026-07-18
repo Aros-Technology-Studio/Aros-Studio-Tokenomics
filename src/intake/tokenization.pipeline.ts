@@ -48,10 +48,15 @@ export class TokenizationPipeline {
     feeRate?: number;
     confirmers?: string[];
     validators?: string[];
-    /** Require L2 committee (default true for hardening path). */
+    /** Require L2 committee (default true). */
     requireL2?: boolean;
-    /** Force L3 even below high-value threshold. */
+    /** Explicit L2 approver ids (required when requireL2). */
+    l2Approvers?: string[];
+    /** Force L3 hard-fail path when high-value or set. */
     requireL3?: boolean;
+    institutionAllowlisted?: boolean;
+    hasDocuments?: boolean;
+    hasQualifiedSignature?: boolean;
   }) {
     globalKillSwitch.assertWritable();
 
@@ -59,41 +64,48 @@ export class TokenizationPipeline {
     const validators = input.validators ?? ['v1', 'v2', 'v3'];
     const confirmers = input.confirmers ?? ['v1', 'v2', 'v3'];
     const requireL2 = input.requireL2 ?? true;
+    const l2Approvers = input.l2Approvers ?? ['committee-a', 'committee-b'];
+    const institutionAllowlisted = input.institutionAllowlisted ?? true;
+    const hasDocuments = input.hasDocuments ?? true;
+    const hasQualifiedSignature = input.hasQualifiedSignature ?? true;
 
     await this.nodechain.ensureGenesis('system');
 
     // --- L1 ---
     const l1 = this.governance.evaluateL1({
       processId: input.processId,
-      hasDocuments: true,
-      hasQualifiedSignature: true,
-      institutionAllowlisted: true,
-    });
+      hasDocuments,
+      hasQualifiedSignature,
+      institutionAllowlisted });
     this.eye.observe({
       level: l1.pass ? 'info' : 'critical',
       source: 'governance',
       code: l1.pass ? 'L1_PASS' : 'L1_FAIL',
       message: l1.pass ? 'L1 policy ok' : l1.reasonCodes.join(','),
-      processId: input.processId,
-    });
+      processId: input.processId });
     if (!l1.pass) throw new Error(`L1 failed: ${l1.reasonCodes.join(',')}`);
     await this.governance.recordGovernanceEvent(input.processId, 'L1_PASS', { reasonCodes: [] });
 
-    // --- L2 committee ---
+    // --- L2 committee (real multi-grant; approvers must be supplied) ---
     let l2: { complete: boolean; count: number; required: number } | null = null;
     if (requireL2) {
-      this.governance.openL2(input.processId, 2, 'committee');
-      this.governance.grantL2(input.processId, 'committee-a');
-      l2 = this.governance.grantL2(input.processId, 'committee-b');
+      if (!l2Approvers.length) {
+        throw new Error('L2 requires l2Approvers');
+      }
+      this.governance.openL2(input.processId, l2Approvers.length, 'committee');
+      for (const approver of l2Approvers) {
+        l2 = this.governance.grantL2(input.processId, approver);
+      }
       this.eye.observe({
-        level: l2.complete ? 'info' : 'critical',
+        level: l2!.complete ? 'info' : 'critical',
         source: 'governance',
-        code: l2.complete ? 'L2_PASS' : 'L2_FAIL',
-        message: `L2 ${l2.count}/${l2.required}`,
-        processId: input.processId,
-      });
-      if (!l2.complete) throw new Error('L2 committee incomplete');
-      await this.governance.recordGovernanceEvent(input.processId, 'L2_PASS', l2);
+        code: l2!.complete ? 'L2_PASS' : 'L2_FAIL',
+        message: `L2 ${l2!.count}/${l2!.required}`,
+        processId: input.processId });
+      if (!l2!.complete) throw new Error('L2 committee incomplete');
+      await this.governance.recordGovernanceEvent(input.processId, 'L2_PASS', {
+        ...l2!,
+        approvers: l2Approvers });
     }
 
     const proc = await this.processes.open({
@@ -102,17 +114,15 @@ export class TokenizationPipeline {
       institutionId: input.institutionId,
       valuation: input.valuation,
       holderId: input.holderId,
-      institutionAllowlisted: true,
-      hasDocuments: true,
-      hasQualifiedSignature: true,
-    });
+      institutionAllowlisted,
+      hasDocuments,
+      hasQualifiedSignature });
     this.eye.observe({
       level: 'info',
       source: 'processing',
       code: 'PROCESS_OPEN',
       message: 'process opened and encoded',
-      processId: input.processId,
-    });
+      processId: input.processId });
 
     const verdict = await this.pot.verify(proc, confirmers, validators);
     this.eye.observe({
@@ -125,9 +135,7 @@ export class TokenizationPipeline {
         reasonCodes: verdict.reasonCodes,
         criteriaResult: verdict.criteriaResult,
         evidenceHeight: verdict.evidenceHeight,
-        ledgerHeight: verdict.ledgerHeight,
-      },
-    });
+        ledgerHeight: verdict.ledgerHeight } });
     if (verdict.verified !== 1) {
       throw new Error(`PoT rejected: ${verdict.reasonCodes.join(',')}`);
     }
@@ -136,36 +144,29 @@ export class TokenizationPipeline {
     // --- L3 AI panel (after pot, before mint) ---
     const highValue =
       parseAro(input.valuation) >= parseAro(defaultHardeningConfig.highValueThreshold);
-    const requireL3 = input.requireL3 ?? highValue;
-    let l3 = null as ReturnType<GovernanceService['evaluateL3']> | null;
-    if (requireL3 || true) {
-      // Always run L3 panel; only hard-fail when required or high-value
-      l3 = this.governance.evaluateL3({
-        processId: input.processId,
-        valuation: input.valuation,
-        potVerified: 1,
-        institutionAllowlisted: true,
-        stagesCompleted: proc.stagesCompleted,
-        eyeCriticalCount: this.eye.history().filter((e) => e.level === 'critical').length,
-        highValue,
-      });
-      this.eye.observe({
-        level: l3.pass ? 'info' : 'warn',
-        source: 'governance',
-        code: l3.pass ? 'L3_PASS' : 'L3_WARN',
-        message: `L3 score=${l3.aggregateScore.toFixed(3)} agents=${l3.opinions.length}`,
-        processId: input.processId,
-        payload: { reasonCodes: l3.reasonCodes, opinions: l3.opinions },
-      });
-      await this.governance.recordGovernanceEvent(input.processId, 'L3_PANEL', {
-        pass: l3.pass,
-        aggregateScore: l3.aggregateScore,
-        reasonCodes: l3.reasonCodes,
-        opinions: l3.opinions,
-      });
-      if ((requireL3 || highValue) && !l3.pass) {
-        throw new Error(`L3 failed: ${l3.reasonCodes.join(',')}`);
-      }
+    const requireL3HardFail = input.requireL3 ?? highValue;
+    const l3 = await this.governance.evaluateL3({
+      processId: input.processId,
+      valuation: input.valuation,
+      potVerified: 1,
+      institutionAllowlisted,
+      stagesCompleted: proc.stagesCompleted,
+      eyeCriticalCount: this.eye.history().filter((e) => e.level === 'critical').length,
+      highValue });
+    this.eye.observe({
+      level: l3.pass ? 'info' : 'warn',
+      source: 'governance',
+      code: l3.pass ? 'L3_PASS' : 'L3_WARN',
+      message: `L3 score=${l3.aggregateScore.toFixed(3)} agents=${l3.opinions.length}`,
+      processId: input.processId,
+      payload: { reasonCodes: l3.reasonCodes, opinions: l3.opinions } });
+    await this.governance.recordGovernanceEvent(input.processId, 'L3_PANEL', {
+      pass: l3.pass,
+      aggregateScore: l3.aggregateScore,
+      reasonCodes: l3.reasonCodes,
+      opinions: l3.opinions });
+    if (requireL3HardFail && !l3.pass) {
+      throw new Error(`L3 failed: ${l3.reasonCodes.join(',')}`);
     }
 
     const mint = await this.token.mintAfterPot({
@@ -173,22 +174,19 @@ export class TokenizationPipeline {
       holderId: input.holderId,
       amount: input.valuation,
       potVerified: 1,
-      potLedgerHeight: verdict.ledgerHeight,
-    });
+      potLedgerHeight: verdict.ledgerHeight });
 
     const settlement = await this.commission.settle({
       processId: input.processId,
       valuation: input.valuation,
       feeRate,
       nodeWeights: { v1: 1, v2: 1, v3: 1 },
-      potVerified: 1,
-    });
+      potVerified: 1 });
 
     const reserve = await this.reserve.accrueFromCommission({
       processId: input.processId,
       astShare: settlement.astShare,
-      processValuation: input.valuation,
-    });
+      processValuation: input.valuation });
 
     await this.processes.close(input.processId);
 
@@ -203,8 +201,7 @@ export class TokenizationPipeline {
       source: 'intake',
       code: 'TOKENIZATION_COMPLETE',
       message: 'primary tokenization pipeline finished',
-      processId: input.processId,
-    });
+      processId: input.processId });
 
     return {
       processId: input.processId,
@@ -220,7 +217,6 @@ export class TokenizationPipeline {
       eyeEvents: this.eye.history().length,
       tip: await this.nodechain.getTip(),
       crypto: 'ed25519',
-      killSwitch: globalKillSwitch.isEngaged(),
-    };
+      killSwitch: globalKillSwitch.isEngaged() };
   }
 }

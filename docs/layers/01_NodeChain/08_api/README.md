@@ -1,6 +1,6 @@
 # 08_api
 
-**Status:** placeholder
+**Status:** documented
 
 Contracts of this layer only: append, query, snapshot, events out.
 

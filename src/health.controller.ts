@@ -9,8 +9,7 @@ export class HealthController {
       ok: true,
       service: 'aros-studio-tokenomics',
       killSwitch: globalKillSwitch.isEngaged(),
-      journalEngine: process.env.AST_JOURNAL_ENGINE ?? 'unset',
-    };
+      journalEngine: process.env.AST_JOURNAL_ENGINE ?? 'unset' };
   }
 
   @Get()
@@ -19,7 +18,6 @@ export class HealthController {
       name: 'AST',
       docs: 'docs/AST-CORE-CANON.md',
       layers: 'docs/layers/',
-      cli: 'npm run demo:tokenize',
-    };
+      cli: 'npm run demo:tokenize' };
   }
 }

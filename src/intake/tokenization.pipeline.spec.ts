@@ -13,16 +13,14 @@ describe('TokenizationPipeline (hardened 01–10)', () => {
     const keys = bootstrapPipelineKeys();
     const nc = new NodechainService(new MemoryJournalStore(), {
       keys,
-      requireRealCrypto: true,
-      verifyEveryN: 3,
-    });
+      
+      verifyEveryN: 3 });
     const pipe = new TokenizationPipeline(nc, keys);
     const r = await pipe.runPrimaryTokenization({
       processId: 'AST-DEMO-20260718-e2e1',
       institutionId: 'DEMO',
       valuation: '100.000000000',
-      holderId: 'holder-1',
-    });
+      holderId: 'holder-1' });
     expect(r.verdict.verified).toBe(1);
     expect(r.mint.amount).toBe('100.000000000');
     expect(r.holderBalance).toBe('100.000000000');
@@ -46,9 +44,7 @@ describe('TokenizationPipeline (hardened 01–10)', () => {
   it('refuses mint path when pot would fail (not allowlisted)', async () => {
     const keys = bootstrapPipelineKeys();
     const nc = new NodechainService(new MemoryJournalStore(), {
-      keys,
-      requireRealCrypto: true,
-    });
+      keys });
     await nc.ensureGenesis('system');
     const pipe = new TokenizationPipeline(nc, keys);
     const proc = await pipe.processes.open({
@@ -59,8 +55,7 @@ describe('TokenizationPipeline (hardened 01–10)', () => {
       holderId: 'h',
       institutionAllowlisted: false,
       hasDocuments: true,
-      hasQualifiedSignature: true,
-    });
+      hasQualifiedSignature: true });
     const v = await pipe.pot.verify(proc, ['v1', 'v2', 'v3']);
     expect(v.verified).toBe(0);
   });

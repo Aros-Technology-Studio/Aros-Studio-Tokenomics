@@ -1,6 +1,6 @@
 # 07_integrity_and_audit
 
-**Status:** placeholder
+**Status:** documented
 
 Replay, audit queries, failure codes.  
 Outbound hooks so ASE can **observe** — ASE does not own this folder.

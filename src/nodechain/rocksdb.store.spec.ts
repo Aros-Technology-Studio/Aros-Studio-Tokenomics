@@ -24,19 +24,18 @@ describe('RocksDbJournalStore', () => {
   it('persists genesis and first record across reopen', async () => {
     const keys = bootstrapPipelineKeys();
     const store1 = new RocksDbJournalStore(dir);
-    const nc1 = new NodechainService(store1, { keys, requireRealCrypto: true });
+    const nc1 = new NodechainService(store1, { keys });
     await nc1.ensureGenesis('system');
     await nc1.append({
       clientRecordId: 'r1',
       recordType: 'system_boot',
       payload: { n: 1 },
       writerId: 'system',
-      writerRole: 'system',
-    });
+      writerRole: 'system' });
     await store1.close();
 
     const store2 = new RocksDbJournalStore(dir);
-    const nc2 = new NodechainService(store2, { keys, requireRealCrypto: true });
+    const nc2 = new NodechainService(store2, { keys });
     const tip = await nc2.getTip();
     expect(tip?.height).toBe(1);
     const v = await nc2.verifyChain();

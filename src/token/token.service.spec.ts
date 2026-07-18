@@ -7,9 +7,7 @@ describe('TokenService (layer 05)', () => {
   async function setup() {
     const keys = bootstrapPipelineKeys();
     const nc = new NodechainService(new MemoryJournalStore(), {
-      keys,
-      requireRealCrypto: true,
-    });
+      keys });
     await nc.ensureGenesis('system');
     return { nc, token: new TokenService(nc) };
   }
@@ -22,8 +20,7 @@ describe('TokenService (layer 05)', () => {
         holderId: 'h1',
         amount: '10.000000000',
         potVerified: 0,
-        potLedgerHeight: 1,
-      }),
+        potLedgerHeight: 1 }),
     ).rejects.toThrow(/pot verified/);
   });
 
@@ -34,16 +31,14 @@ describe('TokenService (layer 05)', () => {
       holderId: 'h1',
       amount: '10.000000000',
       potVerified: 1,
-      potLedgerHeight: 2,
-    });
+      potLedgerHeight: 2 });
     await expect(
       token.mintAfterPot({
         processId: 'p2',
         holderId: 'h1',
         amount: '10.000000000',
         potVerified: 1,
-        potLedgerHeight: 3,
-      }),
+        potLedgerHeight: 3 }),
     ).rejects.toThrow(/double mint/);
     expect(token.balanceOf('h1')).toBe('10.000000000');
   });

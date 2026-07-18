@@ -36,14 +36,12 @@ export function encodeProcessTx(input: {
     schemaVersion: 'ast-tx-1',
     processId: input.processId,
     processType: input.processType,
-    body: input.body,
-  };
+    body: input.body };
   const encoded = canonicalEncode(wrapper);
   return {
     schemaVersion: 'ast-tx-1',
     processId: input.processId,
     processType: input.processType,
     encoded,
-    payloadHash: createHash('sha256').update(encoded).digest('hex'),
-  };
+    payloadHash: createHash('sha256').update(encoded).digest('hex') };
 }

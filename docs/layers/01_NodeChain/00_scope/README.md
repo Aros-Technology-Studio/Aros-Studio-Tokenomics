@@ -1,6 +1,6 @@
 # 00_scope — NodeChain boundaries
 
-**Status:** placeholder — write next with owner
+**Status:** documented
 
 ## Planned
 

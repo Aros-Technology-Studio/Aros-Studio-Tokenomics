@@ -6,8 +6,7 @@ import {
   type AppendRequest,
   type AppendResult,
   type JournalRecord,
-  type Tip,
-} from './types';
+  type Tip } from './types';
 import { computeContentHash, computeEnvelopeHash, verifyChainLink } from './hash';
 import { NodeChainError, NcErrorCode } from './errors';
 import { isProcessScoped, KNOWN_TYPES } from './record-types';
@@ -15,10 +14,8 @@ import type { KeyRegistry } from '../common/crypto/key-registry';
 import { globalKillSwitch } from '../hardening/kill-switch';
 
 export interface NodechainOptions {
-  /** Verify ed25519 signatures on every append. */
-  requireRealCrypto?: boolean;
-  /** Key registry for sign/verify. */
-  keys?: KeyRegistry;
+  /** Key registry for Ed25519 sign/verify (required). */
+  keys: KeyRegistry;
   /** Verify full chain every N appends (0=off). */
   verifyEveryN?: number;
 }
@@ -26,15 +23,16 @@ export interface NodechainOptions {
 export class NodechainService {
   private readOnly = false;
   private appendCount = 0;
-  private readonly requireRealCrypto: boolean;
-  private readonly keys?: KeyRegistry;
+  private readonly keys: KeyRegistry;
   private readonly verifyEveryN: number;
 
   constructor(
     private readonly store: JournalStore,
-    options: NodechainOptions = {},
+    options: NodechainOptions,
   ) {
-    this.requireRealCrypto = options.requireRealCrypto ?? false;
+    if (!options.keys) {
+      throw new NodeChainError(NcErrorCode.BAD_SIGNATURE, 'KeyRegistry is required');
+    }
     this.keys = options.keys;
     this.verifyEveryN = options.verifyEveryN ?? 0;
   }
@@ -74,17 +72,13 @@ export class NodechainService {
         return {
           ok: false,
           height: rec.height,
-          error: `chain break at height ${rec.height}`,
-        };
+          error: `chain break at height ${rec.height}` };
       }
-      if (this.requireRealCrypto && this.keys) {
-        if (!this.keys.verifyAll(rec.signatures, rec.contentHash)) {
-          return {
-            ok: false,
-            height: rec.height,
-            error: `bad signature at height ${rec.height}`,
-          };
-        }
+      if (!this.keys.verifyAll(rec.signatures, rec.contentHash)) {
+        return {
+          ok: false,
+          height: rec.height,
+          error: `bad signature at height ${rec.height}` };
       }
       prev = rec;
     }
@@ -101,8 +95,7 @@ export class NodechainService {
           height: g.height,
           envelopeHash: g.envelopeHash,
           timestampUtc: g.timestampUtc,
-          contentHash: g.contentHash,
-        };
+          contentHash: g.contentHash };
       }
       throw new NodeChainError(NcErrorCode.ALREADY_GENESIS, 'journal already has tip without genesis');
     }
@@ -114,11 +107,9 @@ export class NodechainService {
         layer: '01_NodeChain',
         schemaVersion: SCHEMA_VERSION,
         message: 'AST NodeChain genesis',
-        crypto: this.requireRealCrypto ? 'ed25519' : 'dev',
-      },
+        crypto: 'ed25519' },
       writerId,
-      writerRole: 'system',
-    });
+      writerRole: 'system' });
   }
 
   async append(req: AppendRequest): Promise<AppendResult> {
@@ -152,8 +143,7 @@ export class NodechainService {
           height: existing.height,
           envelopeHash: existing.envelopeHash,
           timestampUtc: existing.timestampUtc,
-          contentHash: existing.contentHash,
-        };
+          contentHash: existing.contentHash };
       }
     }
 
@@ -173,8 +163,7 @@ export class NodechainService {
       schemaVersion: SCHEMA_VERSION,
       recordType: req.recordType,
       processId,
-      payload,
-    });
+      payload });
 
     const envelopeHash = computeEnvelopeHash({
       recordId,
@@ -187,36 +176,24 @@ export class NodechainService {
       prevHash,
       contentHash,
       height,
-      payload,
-    });
+      payload });
 
-    let signatures = req.signatures ?? [];
-    if (signatures.length === 0 && this.keys?.hasPrivate(req.writerId)) {
-      signatures = [this.keys.sign(req.writerId, contentHash)];
+    // Ed25519 only — no pseudo/dev signatures.
+    if (!this.keys) {
+      throw new NodeChainError(NcErrorCode.BAD_SIGNATURE, 'key registry required');
     }
+    let signatures = req.signatures ?? [];
     if (signatures.length === 0) {
-      if (this.requireRealCrypto) {
+      if (!this.keys.hasPrivate(req.writerId)) {
         throw new NodeChainError(
           NcErrorCode.BAD_SIGNATURE,
-          `real crypto required; no signature for writer ${req.writerId}`,
+          `no private key for writer ${req.writerId}`,
         );
       }
-      signatures = [
-        {
-          signerId: req.writerId,
-          algorithm: 'dev-self-attest',
-          signature: contentHash.slice(0, 32),
-          signedOver: 'contentHash',
-        },
-      ];
+      signatures = [this.keys.sign(req.writerId, contentHash)];
     }
-
-    if (this.keys) {
-      if (!this.keys.verifyAll(signatures, contentHash)) {
-        throw new NodeChainError(NcErrorCode.BAD_SIGNATURE, 'signature verification failed');
-      }
-    } else if (this.requireRealCrypto) {
-      throw new NodeChainError(NcErrorCode.BAD_SIGNATURE, 'key registry required');
+    if (!this.keys.verifyAll(signatures, contentHash)) {
+      throw new NodeChainError(NcErrorCode.BAD_SIGNATURE, 'signature verification failed');
     }
 
     const record: JournalRecord = {
@@ -232,8 +209,7 @@ export class NodechainService {
       height,
       payload,
       signatures,
-      envelopeHash,
-    };
+      envelopeHash };
 
     await this.store.appendDurable(record, req.clientRecordId);
     this.appendCount += 1;
@@ -252,7 +228,6 @@ export class NodechainService {
       height,
       envelopeHash,
       timestampUtc,
-      contentHash,
-    };
+      contentHash };
   }
 }

@@ -6,7 +6,7 @@
 |---------|------|
 | Kill-switch | `src/hardening/kill-switch.ts` — blocks appends, engage on chain fail |
 | Periodic chain verify | `NodechainService` `verifyEveryN` |
-| Real crypto required | `requireRealCrypto` + KeyRegistry |
+| Real crypto required | `Ed25519 KeyRegistry` + KeyRegistry |
 | Payload deep-clone | append freezes history from caller mutation |
 | Double-mint guard | TokenService |
 | PoT before mint | TokenService + pipeline |
@@ -22,7 +22,6 @@
 | `AST_JOURNAL_DIR` | path for file/rocksdb |
 | `AST_REQUIRE_CRYPTO` | `1` force ed25519 |
 | `AST_VERIFY_EVERY_N` | chain verify interval |
-| `ALLOW_DEV_ATTEST` | allow legacy self-attest (tests only) |
 
 ## Must-not-forget (open)
 

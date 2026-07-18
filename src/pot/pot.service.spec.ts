@@ -10,9 +10,7 @@ describe('PotService (layer 04 full)', () => {
   async function setup(potConfig: ConstructorParameters<typeof PotService>[1] = {}) {
     const keys = bootstrapPipelineKeys();
     const nc = new NodechainService(new MemoryJournalStore(), {
-      keys,
-      requireRealCrypto: true,
-    });
+      keys });
     await nc.ensureGenesis('system');
     const processes = new ProcessService(nc);
     const pot = new PotService(nc, potConfig);
@@ -36,8 +34,7 @@ describe('PotService (layer 04 full)', () => {
       holderId: 'h1',
       institutionAllowlisted: flags.institutionAllowlisted ?? true,
       hasDocuments: flags.hasDocuments ?? true,
-      hasQualifiedSignature: flags.hasQualifiedSignature ?? true,
-    });
+      hasQualifiedSignature: flags.hasQualifiedSignature ?? true });
   }
 
   it('verified=1 when P1–P4 and quorum hold; evidence then verdict ordered', async () => {
@@ -108,8 +105,7 @@ describe('PotService (layer 04 full)', () => {
     await pot.verify(p, ['v1', 'v2', 'v3']);
     await expect(pot.verify(p, ['v1', 'v2', 'v3'])).rejects.toBeInstanceOf(PotError);
     await expect(pot.verify(p, ['v1', 'v2', 'v3'])).rejects.toMatchObject({
-      code: PotReason.POT_ALREADY_FINAL,
-    });
+      code: PotReason.POT_ALREADY_FINAL });
   });
 
   it('getFinalVerdict returns final after success', async () => {

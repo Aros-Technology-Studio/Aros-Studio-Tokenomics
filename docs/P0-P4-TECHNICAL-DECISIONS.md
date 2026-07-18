@@ -165,7 +165,7 @@ All four always; fail any → verified=0 + reason codes; formal text in Core Can
 | release_daemon | real |
 | velocity_tracker | real |
 | node_reputation | real |
-| resource_monitor | stub later |
+| resource_monitor | not in v1 scope |
 | ledger vs nodechain | one binary |
 | oracle_gateway | multi-oracle + signatures; fail-closed |
 | settlement | alias of commission |

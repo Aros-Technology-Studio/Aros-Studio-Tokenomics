@@ -21,5 +21,4 @@ export const NcErrorCode = {
   STORAGE: 'E_STORAGE',
   NOT_FOUND: 'E_NOT_FOUND',
   ALREADY_GENESIS: 'E_ALREADY_GENESIS',
-  NO_GENESIS: 'E_NO_GENESIS',
-} as const;
+  NO_GENESIS: 'E_NO_GENESIS' } as const;

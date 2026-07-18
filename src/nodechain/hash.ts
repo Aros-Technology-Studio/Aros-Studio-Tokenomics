@@ -35,8 +35,7 @@ export function computeContentHash(input: {
     schemaVersion: input.schemaVersion,
     recordType: input.recordType,
     processId: input.processId,
-    payload: input.payload,
-  });
+    payload: input.payload });
   return sha256Hex(material);
 }
 
@@ -69,8 +68,7 @@ export function computeEnvelopeHash(input: {
     prevHash: input.prevHash,
     contentHash: input.contentHash,
     height: input.height,
-    payload: input.payload,
-  });
+    payload: input.payload });
   return sha256Hex(material);
 }
 
@@ -96,8 +94,7 @@ export function verifyChainLink(
           contentHash: current.contentHash,
           height: current.height,
           payload: current.payload,
-          signatures: current.signatures,
-        })
+          signatures: current.signatures })
     );
   }
   return (
@@ -116,7 +113,6 @@ export function verifyChainLink(
         contentHash: current.contentHash,
         height: current.height,
         payload: current.payload,
-        signatures: current.signatures,
-      })
+        signatures: current.signatures })
   );
 }

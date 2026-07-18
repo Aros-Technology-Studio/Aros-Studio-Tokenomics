@@ -53,9 +53,7 @@ export class ProcessService {
       body: {
         institutionId: input.institutionId,
         valuation: input.valuation,
-        holderId: input.holderId,
-      },
-    });
+        holderId: input.holderId } });
 
     await this.nodechain.append({
       clientRecordId: `process-open:${input.processId}`,
@@ -69,11 +67,9 @@ export class ProcessService {
         payloadHash: encoded.payloadHash,
         institutionAllowlisted: input.institutionAllowlisted,
         hasDocuments: input.hasDocuments,
-        hasQualifiedSignature: input.hasQualifiedSignature,
-      },
+        hasQualifiedSignature: input.hasQualifiedSignature },
       writerId: 'orchestrator',
-      writerRole: 'orchestrator',
-    });
+      writerRole: 'orchestrator' });
 
     const state: ProcessState = {
       processId: input.processId,
@@ -83,8 +79,7 @@ export class ProcessService {
       stagesCompleted: ['opened', 'documents', 'encoded'],
       payloadHash: encoded.payloadHash,
       valuation: input.valuation,
-      holderId: input.holderId,
-    };
+      holderId: input.holderId };
     this.processes.set(input.processId, state);
 
     await this.nodechain.append({
@@ -93,8 +88,7 @@ export class ProcessService {
       processId: input.processId,
       payload: { stage: 'encoded', payloadHash: encoded.payloadHash },
       writerId: 'orchestrator',
-      writerRole: 'orchestrator',
-    });
+      writerRole: 'orchestrator' });
 
     return state;
   }
@@ -109,8 +103,7 @@ export class ProcessService {
       processId,
       payload: { stage: 'pot_done' },
       writerId: 'orchestrator',
-      writerRole: 'orchestrator',
-    });
+      writerRole: 'orchestrator' });
   }
 
   async close(processId: string): Promise<void> {
@@ -123,8 +116,7 @@ export class ProcessService {
       processId,
       payload: { stage: 'closed' },
       writerId: 'orchestrator',
-      writerRole: 'orchestrator',
-    });
+      writerRole: 'orchestrator' });
   }
 
   private require(processId: string): ProcessState {

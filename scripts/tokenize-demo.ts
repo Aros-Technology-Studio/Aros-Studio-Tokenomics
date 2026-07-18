@@ -15,7 +15,6 @@ async function main(): Promise<void> {
   const { store, nodechain, keys } = await createNodechainAsync({
     engine,
     dir,
-    requireRealCrypto: true,
     verifyEveryN: 5,
   });
 

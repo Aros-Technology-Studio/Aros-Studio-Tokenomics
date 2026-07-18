@@ -41,11 +41,9 @@ export class TokenService {
       payload: {
         holderId: input.holderId,
         amount: input.amount,
-        potLedgerHeight: input.potLedgerHeight,
-      },
+        potLedgerHeight: input.potLedgerHeight },
       writerId: 'token',
-      writerRole: 'token',
-    });
+      writerRole: 'token' });
 
     return { amount: input.amount, height: r.height };
   }
@@ -65,7 +63,6 @@ export class TokenService {
       processId: input.processId,
       payload: { holderId: input.holderId, amount: input.amount },
       writerId: 'token',
-      writerRole: 'token',
-    });
+      writerRole: 'token' });
   }
 }

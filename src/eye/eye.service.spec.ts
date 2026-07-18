@@ -7,8 +7,7 @@ describe('EyeService', () => {
       level: 'info',
       source: 'test',
       code: 'X',
-      message: 'hi',
-    });
+      message: 'hi' });
     expect(eye.history()).toHaveLength(1);
     expect(() => eye.veto()).toThrow(/no veto/i);
   });

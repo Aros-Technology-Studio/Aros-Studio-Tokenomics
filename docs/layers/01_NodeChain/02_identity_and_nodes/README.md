@@ -1,6 +1,6 @@
 # 02_identity_and_nodes
 
-**Status:** placeholder
+**Status:** documented
 
 Node identity, roles, admission, suspension. No stake-to-participate.  
 Not PoT verdict logic.

@@ -1,6 +1,6 @@
 # 01_ledger — journal core
 
-**Status:** placeholder — **highest priority** content for this layer
+**Status:** documented (see sibling files)
 
 This is the heart of `01_NodeChain`: append-only journal, hash chain, ExecutionSnapshot, write/read paths.
 

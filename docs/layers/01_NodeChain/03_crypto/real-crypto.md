@@ -6,7 +6,7 @@
 
 1. Default pipeline uses **Ed25519** signatures over `contentHash` (hex).  
 2. Algorithm id on record: `ed25519`.  
-3. `dev-self-attest` rejected when `requireRealCrypto=true` (default).  
+3. Only `ed25519` signatures accepted.  
 4. Writers auto-sign when KeyRegistry holds their private key.  
 5. Append verifies all signatures before durability.
 

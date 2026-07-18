@@ -7,9 +7,7 @@ describe('ProcessService (layer 03)', () => {
   it('opens process and writes process_open + stage', async () => {
     const keys = bootstrapPipelineKeys();
     const nc = new NodechainService(new MemoryJournalStore(), {
-      keys,
-      requireRealCrypto: true,
-    });
+      keys });
     await nc.ensureGenesis('system');
     const proc = new ProcessService(nc);
     const p = await proc.open({
@@ -20,8 +18,7 @@ describe('ProcessService (layer 03)', () => {
       holderId: 'h',
       institutionAllowlisted: true,
       hasDocuments: true,
-      hasQualifiedSignature: true,
-    });
+      hasQualifiedSignature: true });
     expect(p.stage).toBe('awaiting_pot');
     expect(p.payloadHash).toBeTruthy();
     const rows = await nc.listByProcessId('AST-PROC-1');

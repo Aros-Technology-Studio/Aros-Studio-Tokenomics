@@ -38,11 +38,9 @@ export class ReserveService {
         astShare: input.astShare,
         ownBalance: formatAro(this.ownArx),
         reserveIndex: this.reserveIndex(),
-        note: 'AST own funds only — no third-party custody',
-      },
+        note: 'AST own funds only — no third-party custody' },
       writerId: 'system',
-      writerRole: 'system',
-    });
+      writerRole: 'system' });
 
     return { ownBalance: formatAro(this.ownArx), reserveIndex: this.reserveIndex() };
   }

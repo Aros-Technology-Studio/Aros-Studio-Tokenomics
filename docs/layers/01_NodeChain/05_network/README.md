@@ -1,6 +1,6 @@
 # 05_network
 
-**Status:** placeholder
+**Status:** documented
 
 Replication of the **same** journal, ordering of appends, fault tolerance.  
 Quorum here = ledger write agreement if multi-writer — **not** PoT P1–P4.

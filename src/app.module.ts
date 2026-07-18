@@ -4,6 +4,5 @@ import { HealthController } from './health.controller';
 
 @Module({
   imports: [LayersModule],
-  controllers: [HealthController],
-})
+  controllers: [HealthController] })
 export class AppModule {}

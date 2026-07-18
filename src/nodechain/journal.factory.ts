@@ -3,7 +3,7 @@ import type { JournalStore } from './store.interface';
 import { MemoryJournalStore } from './memory.store';
 import { FileJournalStore } from './file.store';
 import { RocksDbJournalStore } from './rocksdb.store';
-import { NodechainService, type NodechainOptions } from './nodechain.service';
+import { NodechainService } from './nodechain.service';
 import { bootstrapPipelineKeys } from '../common/crypto/bootstrap-keys';
 import { loadOrCreateKeys } from '../common/crypto/key-persistence';
 import type { KeyRegistry } from '../common/crypto/key-registry';
@@ -29,7 +29,6 @@ export function createJournalStore(
 export async function createNodechainAsync(opts?: {
   engine?: JournalEngine;
   dir?: string;
-  requireRealCrypto?: boolean;
   keys?: KeyRegistry;
   verifyEveryN?: number;
 }): Promise<{ store: JournalStore; nodechain: NodechainService; keys: KeyRegistry }> {
@@ -41,14 +40,12 @@ export async function createNodechainAsync(opts?: {
     opts?.keys ??
     (engine === 'memory' ? bootstrapPipelineKeys() : await loadOrCreateKeys(dir));
   const store = createJournalStore(engine, dir);
-  const options: NodechainOptions = {
+  const nodechain = new NodechainService(store, {
     keys,
-    requireRealCrypto: opts?.requireRealCrypto ?? true,
     verifyEveryN:
       opts?.verifyEveryN ??
       (process.env.AST_VERIFY_EVERY_N ? Number(process.env.AST_VERIFY_EVERY_N) : 5),
-  };
-  const nodechain = new NodechainService(store, options);
+  });
   return { store, nodechain, keys };
 }
 
@@ -56,7 +53,6 @@ export async function createNodechainAsync(opts?: {
 export function createNodechain(opts?: {
   engine?: JournalEngine;
   dir?: string;
-  requireRealCrypto?: boolean;
   keys?: KeyRegistry;
   verifyEveryN?: number;
 }): { store: JournalStore; nodechain: NodechainService; keys: KeyRegistry } {
@@ -69,7 +65,6 @@ export function createNodechain(opts?: {
   const store = createJournalStore(engine, dir);
   const nodechain = new NodechainService(store, {
     keys,
-    requireRealCrypto: opts?.requireRealCrypto ?? true,
     verifyEveryN: opts?.verifyEveryN ?? 5,
   });
   return { store, nodechain, keys };

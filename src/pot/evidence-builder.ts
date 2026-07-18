@@ -4,8 +4,7 @@ import type { NodechainService } from '../nodechain/nodechain.service';
 import {
   DEFAULT_REQUIRED_STAGES,
   POT_EVIDENCE_SCHEMA,
-  type PotEvidencePackage,
-} from './types';
+  type PotEvidencePackage } from './types';
 
 export async function buildEvidence(
   nodechain: NodechainService,
@@ -52,8 +51,7 @@ export async function buildEvidence(
     openedAtUtc: open?.timestampUtc ?? null,
     evaluatedAtUtc: new Date().toISOString(),
     valuationPresent: !!(process.valuation && String(process.valuation).length > 0),
-    holderPresent: !!(process.holderId && String(process.holderId).length > 0),
-  };
+    holderPresent: !!(process.holderId && String(process.holderId).length > 0) };
 }
 
 function unique(xs: string[]): string[] {

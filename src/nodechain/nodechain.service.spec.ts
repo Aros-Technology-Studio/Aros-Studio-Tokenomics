@@ -9,9 +9,7 @@ describe('NodechainService', () => {
   beforeEach(() => {
     const keys = bootstrapPipelineKeys();
     nc = new NodechainService(new MemoryJournalStore(), {
-      keys,
-      requireRealCrypto: true,
-    });
+      keys });
   });
 
   it('writes genesis at height 0', async () => {
@@ -31,11 +29,9 @@ describe('NodechainService', () => {
       payload: {
         event: 'first_journal_record',
         layer: '01_NodeChain',
-        note: 'journal is live',
-      },
+        note: 'journal is live' },
       writerId: 'system',
-      writerRole: 'system',
-    });
+      writerRole: 'system' });
     expect(first.height).toBe(1);
     const rec = await nc.getByHeight(1);
     expect(rec?.recordType).toBe('system_boot');
@@ -52,8 +48,7 @@ describe('NodechainService', () => {
         recordType: 'process_open',
         payload: {},
         writerId: 'orchestrator',
-        writerRole: 'orchestrator',
-      }),
+        writerRole: 'orchestrator' }),
     ).rejects.toMatchObject({ code: NcErrorCode.PROCESS_REQUIRED });
   });
 
@@ -64,15 +59,13 @@ describe('NodechainService', () => {
       recordType: 'system_boot',
       payload: { n: 1 },
       writerId: 'system',
-      writerRole: 'system',
-    });
+      writerRole: 'system' });
     const b = await nc.append({
       clientRecordId: 'idem-1',
       recordType: 'system_boot',
       payload: { n: 1 },
       writerId: 'system',
-      writerRole: 'system',
-    });
+      writerRole: 'system' });
     expect(b.recordId).toBe(a.recordId);
     expect(b.height).toBe(a.height);
   });
@@ -83,8 +76,7 @@ describe('NodechainService', () => {
         recordType: 'system_boot',
         payload: {},
         writerId: 'system',
-        writerRole: 'system',
-      }),
+        writerRole: 'system' }),
     ).rejects.toBeInstanceOf(NodeChainError);
   });
 });

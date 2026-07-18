@@ -43,7 +43,6 @@ async function main(): Promise<void> {
   const { store, nodechain: nc } = await createNodechainAsync({
     engine,
     dir,
-    requireRealCrypto: true,
   });
 
   const close = async () => {

@@ -9,8 +9,7 @@ import {
   POT_VERDICT_SCHEMA,
   PotError,
   type PotConfig,
-  type PotVerdict,
-} from './types';
+  type PotVerdict } from './types';
 
 /**
  * Layer 04 — Proof of Transaction.
@@ -120,11 +119,9 @@ export class PotService {
         ...evidence,
         criteriaResult,
         reasonCodes: codes,
-        quorum,
-      },
+        quorum },
       writerId: 'pot',
-      writerRole: 'pot',
-    });
+      writerRole: 'pot' });
 
     const verdictWrite = await this.nodechain.append({
       clientRecordId: `pot-verdict:${process.processId}`,
@@ -143,11 +140,9 @@ export class PotService {
         tipHeight: evidence.tipHeight,
         tipHash: evidence.tipHash,
         final,
-        expired,
-      },
+        expired },
       writerId: 'pot',
-      writerRole: 'pot',
-    });
+      writerRole: 'pot' });
 
     return {
       processId: process.processId,
@@ -165,8 +160,7 @@ export class PotService {
       tipHeight: evidence.tipHeight,
       tipHash: evidence.tipHash,
       final,
-      expired,
-    };
+      expired };
   }
 
   private payloadToVerdict(
@@ -184,15 +178,13 @@ export class PotService {
         P1: false,
         P2: false,
         P3: false,
-        P4: false,
-      },
+        P4: false },
       quorum: (p.quorum as PotVerdict['quorum']) ?? {
         ok: false,
         K: 0,
         Q: 0,
         confirmerCount: 0,
-        reasonCodes: [],
-      },
+        reasonCodes: [] },
       evidenceRecordId: String(p.evidenceRecordId ?? ''),
       evidenceHeight: Number(p.evidenceHeight ?? -1),
       verdictRecordId: recordId,
@@ -202,7 +194,6 @@ export class PotService {
       tipHeight: Number(p.tipHeight ?? -1),
       tipHash: String(p.tipHash ?? ''),
       final: p.final === true,
-      expired: p.expired === true,
-    };
+      expired: p.expired === true };
   }
 }

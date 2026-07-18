@@ -16,8 +16,7 @@ export const PotReason = {
   POT_TIMEOUT: 'POT_TIMEOUT',
   POT_DOUBLE_CONFIRM: 'POT_DOUBLE_CONFIRM',
   POT_ALREADY_FINAL: 'POT_ALREADY_FINAL',
-  POT_INVALID_INPUT: 'POT_INVALID_INPUT',
-} as const;
+  POT_INVALID_INPUT: 'POT_INVALID_INPUT' } as const;
 
 export type PotReasonCode = (typeof PotReason)[keyof typeof PotReason] | string;
 

@@ -22,15 +22,19 @@ pub fn sha256_hex(data: &[u8]) -> String {
     hex::encode(h.finalize())
 }
 
-/// Content hash over canonical JSON fields (simplified; TS is authoritative for production).
-pub fn content_hash(record_type: &str, process_id: Option<&str>, payload_json: &str) -> String {
+/// Content hash aligned with TS `computeContentHash` (sorted keys):
+/// payload, processId, recordType, schemaVersion.
+pub fn content_hash(
+    schema_version: &str,
+    record_type: &str,
+    process_id: Option<&str>,
+    payload_json: &str,
+) -> String {
+    let process = process_id
+        .map(|p| format!("\"{p}\""))
+        .unwrap_or_else(|| "null".into());
     let material = format!(
-        "{{\"processId\":{},\"recordType\":\"{}\",\"payload\":{}}}",
-        process_id
-            .map(|p| format!("\"{p}\""))
-            .unwrap_or_else(|| "null".into()),
-        record_type,
-        payload_json
+        "{{\"payload\":{payload_json},\"processId\":{process},\"recordType\":\"{record_type}\",\"schemaVersion\":\"{schema_version}\"}}"
     );
     sha256_hex(material.as_bytes())
 }

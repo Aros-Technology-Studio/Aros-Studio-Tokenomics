@@ -12,9 +12,7 @@ describe('kill-switch', () => {
   it('blocks appends when engaged', async () => {
     const keys = bootstrapPipelineKeys();
     const nc = new NodechainService(new MemoryJournalStore(), {
-      keys,
-      requireRealCrypto: true,
-    });
+      keys });
     await nc.ensureGenesis('system');
     globalKillSwitch.engage('test');
     await expect(
@@ -22,8 +20,7 @@ describe('kill-switch', () => {
         recordType: 'system_boot',
         payload: {},
         writerId: 'system',
-        writerRole: 'system',
-      }),
+        writerRole: 'system' }),
     ).rejects.toMatchObject({ code: 'E_READ_ONLY' });
   });
 

@@ -22,8 +22,7 @@ function base(over: Partial<PotEvidencePackage> = {}): PotEvidencePackage {
     evaluatedAtUtc: new Date().toISOString(),
     valuationPresent: true,
     holderPresent: true,
-    ...over,
-  };
+    ...over };
 }
 
 describe('evaluateCriteria', () => {

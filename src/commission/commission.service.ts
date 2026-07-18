@@ -58,11 +58,9 @@ export class CommissionService {
         nodesPool,
         astShare,
         split: { nodes: 0.7, ast: 0.3 },
-        payments,
-      },
+        payments },
       writerId: 'settlement',
-      writerRole: 'settlement',
-    });
+      writerRole: 'settlement' });
 
     for (const [nodeId, amount] of Object.entries(payments)) {
       await this.nodechain.append({
@@ -71,8 +69,7 @@ export class CommissionService {
         processId: input.processId,
         payload: { nodeId, amount },
         writerId: 'settlement',
-        writerRole: 'settlement',
-      });
+        writerRole: 'settlement' });
     }
 
     return {
@@ -80,7 +77,6 @@ export class CommissionService {
       nodesPool,
       astShare,
       payments,
-      split: { nodes: 0.7, ast: 0.3 },
-    };
+      split: { nodes: 0.7, ast: 0.3 } };
   }
 }

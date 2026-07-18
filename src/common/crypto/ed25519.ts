@@ -5,8 +5,7 @@ import {
   createPrivateKey,
   createPublicKey,
   randomBytes,
-  createHash,
-} from 'crypto';
+  createHash } from 'crypto';
 
 export interface KeyPair {
   keyId: string;
@@ -20,8 +19,7 @@ export function generateEd25519KeyPair(keyId = randomBytes(8).toString('hex')): 
   return {
     keyId,
     publicKeyPem: publicKey.export({ type: 'spki', format: 'pem' }).toString(),
-    privateKeyPem: privateKey.export({ type: 'pkcs8', format: 'pem' }).toString(),
-  };
+    privateKeyPem: privateKey.export({ type: 'pkcs8', format: 'pem' }).toString() };
 }
 
 export function signContentHash(privateKeyPem: string, contentHashHex: string): string {

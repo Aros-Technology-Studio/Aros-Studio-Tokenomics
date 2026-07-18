@@ -1,6 +1,6 @@
 # 09_acceptance
 
-**Status:** placeholder
+**Status:** documented
 
 Layer is done only when acceptance criteria and tests pass — not when folders exist.
 

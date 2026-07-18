@@ -1,6 +1,6 @@
 # 06_storage
 
-**Status:** placeholder
+**Status:** documented
 
 Primary durable store for the journal; index mirrors are not SoT.
 
