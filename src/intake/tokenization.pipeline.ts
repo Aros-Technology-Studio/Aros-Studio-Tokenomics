@@ -179,9 +179,10 @@ export class TokenizationPipeline {
       },
     });
     if (verdict.verified !== 1) {
+      await this.processes.abort(processId, `PoT rejected: ${verdict.reasonCodes.join(',')}`);
       throw new Error(`PoT rejected: ${verdict.reasonCodes.join(',')}`);
     }
-    await this.processes.markPotDone(processId);
+    await this.processes.markPotDone(processId, { potLedgerHeight: verdict.ledgerHeight });
 
     const highValue =
       parseAro(input.valuation) >= parseAro(defaultHardeningConfig.highValueThreshold);
@@ -191,7 +192,7 @@ export class TokenizationPipeline {
       valuation: input.valuation,
       potVerified: 1,
       institutionAllowlisted,
-      stagesCompleted: proc.stagesCompleted,
+      stagesCompleted: this.processes.get(processId)?.stagesCompleted ?? proc.stagesCompleted,
       eyeCriticalCount: this.eye.history().filter((e) => e.level === 'critical').length,
       highValue,
     });
@@ -202,6 +203,7 @@ export class TokenizationPipeline {
       opinions: l3.opinions,
     });
     if (requireL3HardFail && !l3.pass) {
+      await this.processes.abort(processId, `L3 failed: ${l3.reasonCodes.join(',')}`);
       throw new Error(`L3 failed: ${l3.reasonCodes.join(',')}`);
     }
 
@@ -227,6 +229,7 @@ export class TokenizationPipeline {
       processValuation: input.valuation,
     });
 
+    await this.processes.markSettled(processId, { note: 'mint+commission+reserve' });
     await this.processes.close(processId);
     await this.mirror.replayFrom(this.nodechain);
 
@@ -334,9 +337,10 @@ export class TokenizationPipeline {
       keys: this.keys,
     });
     if (verdict.verified !== 1) {
+      await this.processes.abort(processId, `PoT rejected: ${verdict.reasonCodes.join(',')}`);
       throw new Error(`PoT rejected: ${verdict.reasonCodes.join(',')}`);
     }
-    await this.processes.markPotDone(processId);
+    await this.processes.markPotDone(processId, { potLedgerHeight: verdict.ledgerHeight });
 
     const reval = await this.token.revalueAfterPot({
       processId,
@@ -346,6 +350,7 @@ export class TokenizationPipeline {
       potLedgerHeight: verdict.ledgerHeight,
     });
     this.assets.applyRevaluation(input.assetId, input.newValue);
+    await this.processes.markSettled(processId, { note: 'revaluation' });
     await this.processes.close(processId);
     await this.mirror.replayFrom(this.nodechain);
 
@@ -427,9 +432,10 @@ export class TokenizationPipeline {
       keys: this.keys,
     });
     if (verdict.verified !== 1) {
+      await this.processes.abort(processId, `PoT rejected: ${verdict.reasonCodes.join(',')}`);
       throw new Error(`PoT rejected: ${verdict.reasonCodes.join(',')}`);
     }
-    await this.processes.markPotDone(processId);
+    await this.processes.markPotDone(processId, { potLedgerHeight: verdict.ledgerHeight });
 
     const transfer = await this.token.transferAfterPot({
       processId,
@@ -440,6 +446,7 @@ export class TokenizationPipeline {
       potLedgerHeight: verdict.ledgerHeight,
     });
     this.assets.applyTransfer(input.assetId, input.fromHolderId, input.toHolderId);
+    await this.processes.markSettled(processId, { note: 'ownership_transfer' });
     await this.processes.close(processId);
     await this.mirror.replayFrom(this.nodechain);
 
