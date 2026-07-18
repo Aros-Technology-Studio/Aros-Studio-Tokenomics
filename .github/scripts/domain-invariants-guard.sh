@@ -71,7 +71,9 @@ if [ -n "$hits" ]; then
 fi
 
 # 7) Kill switch must be planned (config key presence in docs or code)
-if ! grep -RInE 'KILL_SWITCH|killSwitch|kill-switch|read-?only|KillSwitch' docs src 2>/dev/null | head -1 >/dev/null; then
+# Use -q (no pipe to head): with pipefail, `grep | head -1` returns 141 (SIGPIPE) on Linux
+# when there are multiple matches, which incorrectly trips this check.
+if ! grep -RIqE 'KILL_SWITCH|killSwitch|kill-switch|read-?only|KillSwitch' docs src 2>/dev/null; then
   echo "::error::domain-invariants-guard: kill switch / read-only must be documented (P4)"
   fail=1
 fi
