@@ -1,5 +1,5 @@
 #!/usr/bin/env tsx
-import { createNodechain } from '../src/nodechain/journal.factory';
+import { createNodechainAsync } from '../src/nodechain/journal.factory';
 import { TokenizationPipeline } from '../src/intake/tokenization.pipeline';
 import type { RocksDbJournalStore } from '../src/nodechain/rocksdb.store';
 
@@ -12,7 +12,7 @@ async function main(): Promise<void> {
     | 'file'
     | 'rocksdb';
 
-  const { store, nodechain, keys } = createNodechain({
+  const { store, nodechain, keys } = await createNodechainAsync({
     engine,
     dir,
     requireRealCrypto: true,
@@ -28,19 +28,9 @@ async function main(): Promise<void> {
     holderId: 'holder-demo',
   });
 
-  console.log(
-    JSON.stringify(
-      {
-        engine,
-        dir,
-        ...result,
-      },
-      null,
-      2,
-    ),
-  );
+  console.log(JSON.stringify({ engine, dir, ...result }, null, 2));
 
-  if (engine === 'rocksdb' && store && 'close' in store) {
+  if (engine === 'rocksdb' && 'close' in store) {
     await (store as RocksDbJournalStore).close();
   }
 }

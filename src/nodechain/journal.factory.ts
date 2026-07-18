@@ -5,6 +5,7 @@ import { FileJournalStore } from './file.store';
 import { RocksDbJournalStore } from './rocksdb.store';
 import { NodechainService, type NodechainOptions } from './nodechain.service';
 import { bootstrapPipelineKeys } from '../common/crypto/bootstrap-keys';
+import { loadOrCreateKeys } from '../common/crypto/key-persistence';
 import type { KeyRegistry } from '../common/crypto/key-registry';
 
 export type JournalEngine = 'memory' | 'file' | 'rocksdb';
@@ -25,6 +26,33 @@ export function createJournalStore(
   }
 }
 
+export async function createNodechainAsync(opts?: {
+  engine?: JournalEngine;
+  dir?: string;
+  requireRealCrypto?: boolean;
+  keys?: KeyRegistry;
+  verifyEveryN?: number;
+}): Promise<{ store: JournalStore; nodechain: NodechainService; keys: KeyRegistry }> {
+  const engine =
+    opts?.engine ??
+    ((process.env.AST_JOURNAL_ENGINE as JournalEngine | undefined) || 'memory');
+  const dir = path.resolve(opts?.dir ?? process.env.AST_JOURNAL_DIR ?? 'data/journal');
+  const keys =
+    opts?.keys ??
+    (engine === 'memory' ? bootstrapPipelineKeys() : await loadOrCreateKeys(dir));
+  const store = createJournalStore(engine, dir);
+  const options: NodechainOptions = {
+    keys,
+    requireRealCrypto: opts?.requireRealCrypto ?? true,
+    verifyEveryN:
+      opts?.verifyEveryN ??
+      (process.env.AST_VERIFY_EVERY_N ? Number(process.env.AST_VERIFY_EVERY_N) : 5),
+  };
+  const nodechain = new NodechainService(store, options);
+  return { store, nodechain, keys };
+}
+
+/** Sync helper for tests (memory + ephemeral keys). */
 export function createNodechain(opts?: {
   engine?: JournalEngine;
   dir?: string;
@@ -32,25 +60,17 @@ export function createNodechain(opts?: {
   keys?: KeyRegistry;
   verifyEveryN?: number;
 }): { store: JournalStore; nodechain: NodechainService; keys: KeyRegistry } {
-  const engine =
-    opts?.engine ??
-    ((process.env.AST_JOURNAL_ENGINE as JournalEngine | undefined) || 'memory');
-  const dir = opts?.dir ?? process.env.AST_JOURNAL_DIR ?? 'data/journal';
+  const engine = opts?.engine ?? 'memory';
+  if (engine !== 'memory' && !opts?.keys) {
+    throw new Error('createNodechain sync requires keys for file/rocksdb; use createNodechainAsync');
+  }
   const keys = opts?.keys ?? bootstrapPipelineKeys();
+  const dir = opts?.dir ?? 'data/journal';
   const store = createJournalStore(engine, dir);
-  const options: NodechainOptions = {
+  const nodechain = new NodechainService(store, {
     keys,
-    requireRealCrypto: opts?.requireRealCrypto ?? process.env.AST_REQUIRE_CRYPTO === '1',
-    verifyEveryN: opts?.verifyEveryN ?? (process.env.AST_VERIFY_EVERY_N ? Number(process.env.AST_VERIFY_EVERY_N) : 5),
-  };
-  // default on for non-memory engines
-  if (opts?.requireRealCrypto === undefined && engine !== 'memory' && process.env.AST_REQUIRE_CRYPTO !== '0') {
-    options.requireRealCrypto = true;
-  }
-  if (opts?.requireRealCrypto === undefined && process.env.AST_REQUIRE_CRYPTO === undefined) {
-    // tests/demo: enable real crypto by default when keys present
-    options.requireRealCrypto = true;
-  }
-  const nodechain = new NodechainService(store, options);
+    requireRealCrypto: opts?.requireRealCrypto ?? true,
+    verifyEveryN: opts?.verifyEveryN ?? 5,
+  });
   return { store, nodechain, keys };
 }

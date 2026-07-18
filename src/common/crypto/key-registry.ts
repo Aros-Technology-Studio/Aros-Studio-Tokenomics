@@ -34,6 +34,10 @@ export class KeyRegistry {
     return this.keys.has(keyId);
   }
 
+  listKeyPairs(): KeyPair[] {
+    return [...this.keys.values()];
+  }
+
   getPublic(keyId: string): string | undefined {
     return this.pubOnly.get(keyId) ?? this.keys.get(keyId)?.publicKeyPem;
   }
