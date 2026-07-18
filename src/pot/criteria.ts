@@ -1,4 +1,5 @@
 import type { CriteriaResult, PotEvidencePackage } from './types';
+import { getProcessTypeRule } from './process-types';
 import { PotReason, stageMissing, type PotReasonCode } from './reason-codes';
 
 /**
@@ -10,11 +11,13 @@ export function evaluateCriteria(ev: PotEvidencePackage): {
   pass: boolean;
 } {
   const reasonCodes: PotReasonCode[] = [];
+  const rule = getProcessTypeRule(ev.processType);
 
   const P1 = ev.institutionAllowlisted === true;
   if (!P1) reasonCodes.push(PotReason.P1_INSTITUTION_NOT_ALLOWLISTED);
 
-  const missingStages = ev.requiredStages.filter((s) => !ev.stagesCompleted.includes(s));
+  const required = ev.requiredStages.length ? ev.requiredStages : rule.requiredStages;
+  const missingStages = required.filter((s) => !ev.stagesCompleted.includes(s));
   const P2 = missingStages.length === 0;
   if (!P2) {
     reasonCodes.push(PotReason.P2_STAGES_INCOMPLETE);
@@ -28,24 +31,21 @@ export function evaluateCriteria(ev: PotEvidencePackage): {
   }
 
   let P4 = true;
-  if (!ev.hasDocuments) {
+  if (rule.requireDocuments && !ev.hasDocuments) {
     P4 = false;
     reasonCodes.push(PotReason.P4_DOCUMENTS_MISSING);
   }
-  if (!ev.hasQualifiedSignature) {
+  if (rule.requireQualifiedSignature && !ev.hasQualifiedSignature) {
     P4 = false;
     reasonCodes.push(PotReason.P4_SIGNATURE_MISSING);
   }
-  if (!ev.valuationPresent) {
+  if (rule.requireValuation && !ev.valuationPresent) {
     P4 = false;
     reasonCodes.push(PotReason.P4_VALUATION_MISSING);
   }
-  if (!ev.holderPresent) {
+  if (rule.requireHolder && !ev.holderPresent) {
     P4 = false;
     reasonCodes.push(PotReason.P4_HOLDER_MISSING);
-  }
-  if (!P4 && !reasonCodes.some((c) => String(c).startsWith('P4_'))) {
-    reasonCodes.push(PotReason.P4_PROCESS_RULES_FAILED);
   }
 
   const criteriaResult: CriteriaResult = { P1, P2, P3, P4 };

@@ -124,7 +124,12 @@ export class TokenizationPipeline {
       message: 'process opened and encoded',
       processId: input.processId });
 
-    const verdict = await this.pot.verify(proc, confirmers, validators);
+    const verdict = await this.pot.verify({
+      process: proc,
+      confirmers,
+      validatorIds: validators,
+      keys: this.keys,
+    });
     this.eye.observe({
       level: verdict.verified === 1 ? 'info' : 'critical',
       source: 'pot',

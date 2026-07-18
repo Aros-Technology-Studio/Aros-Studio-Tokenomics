@@ -56,7 +56,12 @@ describe('TokenizationPipeline (hardened 01–10)', () => {
       institutionAllowlisted: false,
       hasDocuments: true,
       hasQualifiedSignature: true });
-    const v = await pipe.pot.verify(proc, ['v1', 'v2', 'v3']);
+    const v = await pipe.pot.verify({
+      process: proc,
+      confirmers: ['v1', 'v2', 'v3'],
+      validatorIds: ['v1', 'v2', 'v3'],
+      keys,
+    });
     expect(v.verified).toBe(0);
   });
 });

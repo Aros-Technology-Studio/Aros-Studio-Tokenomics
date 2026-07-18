@@ -13,9 +13,13 @@
 - [x] verify() with write-ahead evidence+verdict  
 - [x] Timeout 15m  
 - [x] Double-confirm / already-final guard  
+- [x] Ed25519 confirmer attestations  
+- [x] Validator registry (suspend excludes from quorum)  
+- [x] Process-type stage catalog  
+- [x] Pre-verdict challenge gate  
 - [x] No amount math in pot package  
-- [x] Unit tests for pass/fail/quorum/timeout/double  
-- [x] Pipeline still mints only after verified=1  
+- [x] Unit tests for pass/fail/quorum/timeout/double/challenge/attest  
+- [x] Pipeline mints only after verified=1  
 
 ## Commands
 

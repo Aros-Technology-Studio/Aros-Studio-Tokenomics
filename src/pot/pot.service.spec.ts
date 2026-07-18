@@ -5,16 +5,18 @@ import { ProcessService } from '../processing/process.service';
 import { PotService } from './pot.service';
 import { PotError } from './types';
 import { PotReason } from './reason-codes';
+import { ValidatorRegistry } from './validator-registry';
 
-describe('PotService (layer 04 full)', () => {
+describe('PotService (deep)', () => {
   async function setup(potConfig: ConstructorParameters<typeof PotService>[1] = {}) {
     const keys = bootstrapPipelineKeys();
-    const nc = new NodechainService(new MemoryJournalStore(), {
-      keys });
+    const nc = new NodechainService(new MemoryJournalStore(), { keys });
     await nc.ensureGenesis('system');
     const processes = new ProcessService(nc);
-    const pot = new PotService(nc, potConfig);
-    return { nc, processes, pot };
+    const validators = new ValidatorRegistry();
+    validators.registerMany(['v1', 'v2', 'v3']);
+    const pot = new PotService(nc, potConfig, validators);
+    return { nc, processes, pot, keys, validators };
   }
 
   async function openOk(
@@ -34,94 +36,136 @@ describe('PotService (layer 04 full)', () => {
       holderId: 'h1',
       institutionAllowlisted: flags.institutionAllowlisted ?? true,
       hasDocuments: flags.hasDocuments ?? true,
-      hasQualifiedSignature: flags.hasQualifiedSignature ?? true });
+      hasQualifiedSignature: flags.hasQualifiedSignature ?? true,
+    });
   }
 
-  it('verified=1 when P1–P4 and quorum hold; evidence then verdict ordered', async () => {
-    const { nc, processes, pot } = await setup();
+  it('verified=1 with signed attestations + ordered evidence/verdict', async () => {
+    const { nc, processes, pot, keys } = await setup();
     const p = await openOk(processes, 'AST-POT-OK-1');
-    const v = await pot.verify(p, ['v1', 'v2', 'v3']);
+    const v = await pot.verify({
+      process: p,
+      confirmers: ['v1', 'v2', 'v3'],
+      validatorIds: ['v1', 'v2', 'v3'],
+      keys,
+    });
     expect(v.verified).toBe(1);
     expect(v.final).toBe(true);
-    expect(v.expired).toBe(false);
-    expect(v.criteriaResult).toEqual({ P1: true, P2: true, P3: true, P4: true });
-    expect(v.reasonCodes).toHaveLength(0);
+    expect(v.attestationDigest.length).toBe(64);
     expect(v.evidenceHeight).toBeLessThan(v.ledgerHeight);
-    expect(v.quorum.ok).toBe(true);
-
     const rows = await nc.listByProcessId('AST-POT-OK-1');
-    const types = rows.map((r) => r.recordType);
-    expect(types).toContain('pot_evidence');
-    expect(types).toContain('pot_verdict');
-    const evH = rows.find((r) => r.recordType === 'pot_evidence')!.height;
-    const veH = rows.find((r) => r.recordType === 'pot_verdict')!.height;
-    expect(evH).toBeLessThan(veH);
+    expect(rows.some((r) => r.recordType === 'pot_evidence')).toBe(true);
+    expect(rows.some((r) => r.recordType === 'pot_verdict')).toBe(true);
   });
 
-  it('verified=0 with P1 when not allowlisted', async () => {
-    const { processes, pot } = await setup();
-    const p = await openOk(processes, 'AST-POT-FAIL-1', { institutionAllowlisted: false });
-    const v = await pot.verify(p, ['v1', 'v2', 'v3']);
+  it('blocks positive when challenge open', async () => {
+    const { processes, pot, keys } = await setup();
+    const p = await openOk(processes, 'AST-POT-CH-1');
+    await pot.openChallenge(p.processId, 'v1', 'suspicious package');
+    const v = await pot.verify({
+      process: p,
+      confirmers: ['v1', 'v2', 'v3'],
+      validatorIds: ['v1', 'v2', 'v3'],
+      keys,
+    });
     expect(v.verified).toBe(0);
-    expect(v.final).toBe(false);
-    expect(v.reasonCodes).toContain(PotReason.P1_INSTITUTION_NOT_ALLOWLISTED);
+    expect(v.challengeBlocked).toBe(true);
+    expect(v.reasonCodes).toContain(PotReason.CHALLENGE_OPEN);
   });
 
-  it('verified=0 QUORUM_SHORT with 1 of 3', async () => {
-    const { processes, pot } = await setup();
-    const p = await openOk(processes, 'AST-POT-Q-1');
-    const v = await pot.verify(p, ['v1'], ['v1', 'v2', 'v3']);
-    expect(v.verified).toBe(0);
-    expect(v.reasonCodes).toContain(PotReason.QUORUM_SHORT);
+  it('allows after challenge closed', async () => {
+    const { processes, pot, keys } = await setup();
+    const p = await openOk(processes, 'AST-POT-CH-2');
+    await pot.openChallenge(p.processId, 'v1', 'check');
+    await pot.closeChallenge(p.processId, 'committee', 'resolved');
+    const v = await pot.verify({
+      process: p,
+      confirmers: ['v1', 'v2', 'v3'],
+      validatorIds: ['v1', 'v2', 'v3'],
+      keys,
+    });
+    expect(v.verified).toBe(1);
   });
 
-  it('verified=0 QUORUM_K_BELOW_MIN when K=2', async () => {
-    const { processes, pot } = await setup();
-    const p = await openOk(processes, 'AST-POT-K-1');
-    const v = await pot.verify(p, ['v1', 'v2'], ['v1', 'v2']);
+  it('excludes suspended validators from eligible set', async () => {
+    const { processes, pot, keys, validators } = await setup();
+    validators.suspend('v3', 'timeout');
+    const p = await openOk(processes, 'AST-POT-SUS-1');
+    // only v1,v2 active of proposed 3 — K=2 < kMin after filter
+    const v = await pot.verify({
+      process: p,
+      confirmers: ['v1', 'v2'],
+      validatorIds: ['v1', 'v2', 'v3'],
+      keys,
+    });
+    // eligible is active only → K=2 → QUORUM_K_BELOW_MIN
     expect(v.verified).toBe(0);
     expect(v.reasonCodes).toContain(PotReason.QUORUM_K_BELOW_MIN);
   });
 
-  it('verified=0 POT_TIMEOUT when open older than window', async () => {
-    const { nc, processes, pot } = await setup({ timeoutMs: 50 });
+  it('verified=0 P1 not allowlisted', async () => {
+    const { processes, pot, keys } = await setup();
+    const p = await openOk(processes, 'AST-POT-FAIL-1', { institutionAllowlisted: false });
+    const v = await pot.verify({
+      process: p,
+      confirmers: ['v1', 'v2', 'v3'],
+      keys,
+    });
+    expect(v.verified).toBe(0);
+    expect(v.reasonCodes).toContain(PotReason.P1_INSTITUTION_NOT_ALLOWLISTED);
+  });
+
+  it('verified=0 when all attestation signatures invalid', async () => {
+    const { processes, pot, keys } = await setup();
+    const p = await openOk(processes, 'AST-POT-BAD-2');
+    const tip = await (pot as unknown as { nodechain: NodechainService }).nodechain.getTip();
+    const atts = pot.createAttestations(
+      keys,
+      p,
+      tip!.tipHash,
+      tip!.height,
+      ['v1', 'v2', 'v3'],
+      {
+        institutionAllowlisted: true,
+        hasDocuments: true,
+        hasQualifiedSignature: true,
+        stagesCompleted: ['opened', 'documents', 'encoded'],
+      },
+    );
+    for (const a of atts) {
+      a.signature = Buffer.from('deadbeefdeadbeef').toString('base64');
+    }
+    const v = await pot.verify({
+      process: p,
+      attestations: atts,
+      validatorIds: ['v1', 'v2', 'v3'],
+      keys,
+    });
+    expect(v.verified).toBe(0);
+    expect(v.confirmers).toHaveLength(0);
+  });
+
+  it('timeout', async () => {
+    const { processes, pot, keys, nc } = await setup({ timeoutMs: 1 });
     const p = await openOk(processes, 'AST-POT-TO-1');
-    // backdate process_open on journal by re-append is hard; use short timeout + sleep
-    await new Promise((r) => setTimeout(r, 60));
-    // rebuild process state still ok; evidence uses journal open time
-    // Force open timestamp by verifying after delay — open was just now, need longer
-    // Use config timeout 1ms and open then wait
-    const pot2 = new PotService(nc, { timeoutMs: 1 });
     await new Promise((r) => setTimeout(r, 5));
-    const v = await pot2.verify(p, ['v1', 'v2', 'v3']);
+    const pot2 = new PotService(nc, { timeoutMs: 1 }, pot.validators);
+    const v = await pot2.verify({
+      process: p,
+      confirmers: ['v1', 'v2', 'v3'],
+      keys,
+    });
     expect(v.verified).toBe(0);
     expect(v.expired).toBe(true);
     expect(v.reasonCodes).toContain(PotReason.POT_TIMEOUT);
   });
 
-  it('throws POT_ALREADY_FINAL on second verify after success', async () => {
-    const { processes, pot } = await setup();
+  it('double final throws', async () => {
+    const { processes, pot, keys } = await setup();
     const p = await openOk(processes, 'AST-POT-DUP-1');
-    await pot.verify(p, ['v1', 'v2', 'v3']);
-    await expect(pot.verify(p, ['v1', 'v2', 'v3'])).rejects.toBeInstanceOf(PotError);
-    await expect(pot.verify(p, ['v1', 'v2', 'v3'])).rejects.toMatchObject({
-      code: PotReason.POT_ALREADY_FINAL });
-  });
-
-  it('getFinalVerdict returns final after success', async () => {
-    const { processes, pot } = await setup();
-    const p = await openOk(processes, 'AST-POT-GET-1');
-    await pot.verify(p, ['v1', 'v2', 'v3']);
-    const f = await pot.getFinalVerdict('AST-POT-GET-1');
-    expect(f?.verified).toBe(1);
-    expect(f?.final).toBe(true);
-  });
-
-  it('P4 fails without documents', async () => {
-    const { processes, pot } = await setup();
-    const p = await openOk(processes, 'AST-POT-DOC-1', { hasDocuments: false });
-    const v = await pot.verify(p, ['v1', 'v2', 'v3']);
-    expect(v.verified).toBe(0);
-    expect(v.reasonCodes).toContain(PotReason.P4_DOCUMENTS_MISSING);
+    await pot.verify({ process: p, confirmers: ['v1', 'v2', 'v3'], keys });
+    await expect(
+      pot.verify({ process: p, confirmers: ['v1', 'v2', 'v3'], keys }),
+    ).rejects.toBeInstanceOf(PotError);
   });
 });

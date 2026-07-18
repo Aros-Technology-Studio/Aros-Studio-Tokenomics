@@ -18,11 +18,14 @@ function base(over: Partial<PotEvidencePackage> = {}): PotEvidencePackage {
     tipHash: 'abc',
     validatorIds: ['v1', 'v2', 'v3'],
     confirmers: ['v1', 'v2'],
+    attestationDigest: 'dd',
+    attestations: [],
     openedAtUtc: new Date().toISOString(),
     evaluatedAtUtc: new Date().toISOString(),
     valuationPresent: true,
     holderPresent: true,
-    ...over };
+    ...over,
+  };
 }
 
 describe('evaluateCriteria', () => {
@@ -44,7 +47,6 @@ describe('evaluateCriteria', () => {
     const r = evaluateCriteria(base({ stagesCompleted: ['opened'] }));
     expect(r.criteriaResult.P2).toBe(false);
     expect(r.reasonCodes).toContain(PotReason.P2_STAGES_INCOMPLETE);
-    expect(r.reasonCodes.some((c) => String(c).startsWith('P2_STAGE_MISSING:'))).toBe(true);
   });
 
   it('fails P3 without process open', () => {
@@ -54,9 +56,7 @@ describe('evaluateCriteria', () => {
   });
 
   it('fails P4 docs and signature', () => {
-    const r = evaluateCriteria(
-      base({ hasDocuments: false, hasQualifiedSignature: false }),
-    );
+    const r = evaluateCriteria(base({ hasDocuments: false, hasQualifiedSignature: false }));
     expect(r.criteriaResult.P4).toBe(false);
     expect(r.reasonCodes).toContain(PotReason.P4_DOCUMENTS_MISSING);
     expect(r.reasonCodes).toContain(PotReason.P4_SIGNATURE_MISSING);

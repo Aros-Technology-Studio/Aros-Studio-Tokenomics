@@ -59,6 +59,11 @@ PoT is the **only gate** for the origin and change of value: a binary `verified 
 | `src/pot/reason-codes.ts` | Stable reason code constants |
 | `src/pot/criteria.ts` | Pure P1–P4 evaluation |
 | `src/pot/quorum.ts` | M-of-N quorum |
+| `src/pot/attestation.ts` | Ed25519 confirmer attestations |
+| `src/pot/validator-registry.ts` | Active/suspended validators |
+| `src/pot/process-types.ts` | Per-process-type stage rules |
+| `src/pot/timeout.ts` | Pure timeout check |
+| `src/pot/challenge.ts` | Pre-verdict challenge open/close |
 | `src/pot/evidence-builder.ts` | Build evidence from journal + process |
 | `src/pot/pot.service.ts` | Orchestrate verify + journal writes |
 | `src/pot/pot.module.ts` | Nest export |
