@@ -119,9 +119,14 @@ export class TokenizationPipeline {
       level: verdict.verified === 1 ? 'info' : 'critical',
       source: 'pot',
       code: verdict.verified === 1 ? 'POT_VERIFIED' : 'POT_REJECTED',
-      message: `verified=${verdict.verified}`,
+      message: `verified=${verdict.verified} final=${verdict.final} quorum=${verdict.quorum.confirmerCount}/${verdict.quorum.Q}`,
       processId: input.processId,
-      payload: { reasonCodes: verdict.reasonCodes },
+      payload: {
+        reasonCodes: verdict.reasonCodes,
+        criteriaResult: verdict.criteriaResult,
+        evidenceHeight: verdict.evidenceHeight,
+        ledgerHeight: verdict.ledgerHeight,
+      },
     });
     if (verdict.verified !== 1) {
       throw new Error(`PoT rejected: ${verdict.reasonCodes.join(',')}`);
