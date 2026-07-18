@@ -79,4 +79,32 @@ describe('NodechainService', () => {
         writerRole: 'system' }),
     ).rejects.toBeInstanceOf(NodeChainError);
   });
+
+  it('memory ledger is append-only (no height overwrite, records frozen)', async () => {
+    await nc.ensureGenesis();
+    const a = await nc.append({
+      clientRecordId: 'append-only-1',
+      recordType: 'system_boot',
+      payload: { n: 1 },
+      writerId: 'system',
+      writerRole: 'system',
+    });
+    const rec = await nc.getByHeight(a.height);
+    expect(rec).toBeTruthy();
+    expect(Object.isFrozen(rec)).toBe(true);
+    expect(() => {
+      (rec as { recordType: string }).recordType = 'tamper';
+    }).toThrow();
+    // cannot re-append same height via store — chain tip advances only by append
+    const tip1 = await nc.getTip();
+    await nc.append({
+      clientRecordId: 'append-only-2',
+      recordType: 'system_boot',
+      payload: { n: 2 },
+      writerId: 'system',
+      writerRole: 'system',
+    });
+    const tip2 = await nc.getTip();
+    expect(tip2!.height).toBe(tip1!.height + 1);
+  });
 });

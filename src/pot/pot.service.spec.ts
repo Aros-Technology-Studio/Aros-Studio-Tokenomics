@@ -56,6 +56,14 @@ describe('PotService (deep)', () => {
     const rows = await nc.listByProcessId('AST-DEMO-20260718-potok1');
     expect(rows.some((r) => r.recordType === 'pot_evidence')).toBe(true);
     expect(rows.some((r) => r.recordType === 'pot_verdict')).toBe(true);
+
+    // ok-to-emit only after NodeChain P1–P4 + verified=1
+    const gate = await pot.okToEmit(p.processId);
+    expect(gate.okToEmit).toBe(true);
+    expect(gate.potLedgerHeight).toBe(v.ledgerHeight);
+    expect(gate.criteriaResult.P1 && gate.criteriaResult.P2 && gate.criteriaResult.P3 && gate.criteriaResult.P4).toBe(
+      true,
+    );
   });
 
   it('blocks positive when challenge open', async () => {

@@ -1,6 +1,7 @@
 import { randomUUID } from 'crypto';
 import { NodechainService } from '../nodechain/nodechain.service';
 import { parseAro, formatAro } from '../common/money';
+import { resolveOkToEmit } from '../invariants';
 import { TokenError, TokenErrorCode } from './errors';
 import { computeRevaluationSupply, proRataAllocate } from './supply';
 import {
@@ -122,12 +123,26 @@ export class TokenService {
   }): Promise<MintResult> {
     this.assertProcess(input.processId);
     this.assertHolder(input.holderId);
+    // Fail-closed: journal-backed ok-to-emit (P1–P4 + verified=1 + write-ahead), not caller trust alone
+    let gate;
+    try {
+      gate = await resolveOkToEmit(this.nodechain, input.processId);
+    } catch (e) {
+      throw new TokenError(
+        TokenErrorCode.MINT_WITHOUT_POT,
+        e instanceof Error ? e.message : 'mint forbidden: ok-to-emit failed',
+      );
+    }
     if (input.potVerified !== 1) {
       throw new TokenError(TokenErrorCode.MINT_WITHOUT_POT, 'mint forbidden: pot verified != 1');
     }
-    if (input.potLedgerHeight < 0) {
-      throw new TokenError(TokenErrorCode.POT_HEIGHT_REQUIRED, 'potLedgerHeight required');
+    if (input.potLedgerHeight >= 0 && input.potLedgerHeight !== gate.potLedgerHeight) {
+      throw new TokenError(
+        TokenErrorCode.POT_HEIGHT_REQUIRED,
+        `potLedgerHeight mismatch journal=${gate.potLedgerHeight} caller=${input.potLedgerHeight}`,
+      );
     }
+    const potLedgerHeight = gate.potLedgerHeight;
     await this.ensureHydrated();
     if (this.mintedProcess.has(input.processId) || (await this.journalHasMint(input.processId))) {
       throw new TokenError(TokenErrorCode.DOUBLE_MINT, 'double mint forbidden for process');
@@ -149,8 +164,10 @@ export class TokenService {
         claimId,
         holderId: input.holderId,
         amount: formatAro(arx),
-        potLedgerHeight: input.potLedgerHeight,
+        potLedgerHeight,
         potVerified: 1,
+        criteriaResult: gate.criteriaResult,
+        okToEmit: true,
       },
       writerId: 'token',
       writerRole: 'token',
@@ -161,7 +178,7 @@ export class TokenService {
       claimId,
       holderId: input.holderId,
       amount: formatAro(arx),
-      potLedgerHeight: input.potLedgerHeight,
+      potLedgerHeight,
       ledgerHeight: r.height,
       recordId: r.recordId,
       totalSupply: this.totalSupply(),

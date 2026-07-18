@@ -2,10 +2,12 @@
 
 | ID | Path | Code | Status |
 |----|------|------|--------|
-| 01 | docs/layers/01_NodeChain | src/nodechain | journal live |
+| 01 | docs/layers/01_NodeChain | src/nodechain | append-only journal (memory/file/rocksdb) |
+| — | Core Canon §XI | src/invariants | I1–I9 fail-closed + ok-to-emit |
+| — | common money / processId | src/common | decimal ARO + AST processId |
 | 02 | docs/layers/02_TxEncoding | src/tx-encoding | done v1 |
 | 03 | docs/layers/03_Processing | src/processing | done v1 |
-| 04 | docs/layers/04_ProofOfTransaction | src/pot | done v1 |
+| 04 | docs/layers/04_ProofOfTransaction | src/pot | P1–P4 + journal before ok-to-emit |
 | 05 | docs/layers/05_TokenManagement | src/token | done v1 |
 | 06 | docs/layers/06_FeeCommission | src/commission | done v1 |
 | 07 | docs/layers/07_Reserve | src/reserve | done v1 |

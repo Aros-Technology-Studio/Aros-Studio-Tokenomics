@@ -4,6 +4,34 @@ import { bootstrapPipelineKeys } from '../common/crypto/bootstrap-keys';
 import { TokenService } from './token.service';
 import { TokenError, TokenErrorCode } from './errors';
 
+async function journalOkToEmit(nc: NodechainService, processId: string): Promise<number> {
+  await nc.append({
+    clientRecordId: `pot-evidence:${processId}`,
+    recordType: 'pot_evidence',
+    processId,
+    payload: {
+      processId,
+      stagesCompleted: ['opened', 'documents', 'encoded'],
+    },
+    writerId: 'pot',
+    writerRole: 'pot',
+  });
+  const v = await nc.append({
+    clientRecordId: `pot-verdict:${processId}`,
+    recordType: 'pot_verdict',
+    processId,
+    payload: {
+      verified: 1,
+      final: true,
+      criteriaResult: { P1: true, P2: true, P3: true, P4: true },
+      okToEmit: true,
+    },
+    writerId: 'pot',
+    writerRole: 'pot',
+  });
+  return v.height;
+}
+
 describe('TokenService (layer 05 deep)', () => {
   async function setup() {
     const keys = bootstrapPipelineKeys();
@@ -12,35 +40,60 @@ describe('TokenService (layer 05 deep)', () => {
     return { nc, token: new TokenService(nc), keys };
   }
 
-  it('mints only after pot verified=1', async () => {
-    const { token } = await setup();
+  it('mints only after journal ok-to-emit (P1–P4 + verified=1)', async () => {
+    const { token, nc } = await setup();
     await expect(
       token.mintAfterPot({
-        processId: 'p1',
+        processId: 'AST-DEMO-20260719-mintfail1',
+        holderId: 'h1',
+        amount: '10.000000000',
+        potVerified: 1,
+        potLedgerHeight: 1,
+      }),
+    ).rejects.toMatchObject({ code: TokenErrorCode.MINT_WITHOUT_POT });
+
+    // verified=0 call also fails closed
+    await expect(
+      token.mintAfterPot({
+        processId: 'AST-DEMO-20260719-mintfail2',
         holderId: 'h1',
         amount: '10.000000000',
         potVerified: 0,
         potLedgerHeight: 1,
       }),
     ).rejects.toMatchObject({ code: TokenErrorCode.MINT_WITHOUT_POT });
-  });
 
-  it('prevents double mint per process via journal', async () => {
-    const { token } = await setup();
-    await token.mintAfterPot({
-      processId: 'p2',
+    const processId = 'AST-DEMO-20260719-mintok1';
+    const h = await journalOkToEmit(nc, processId);
+    const m = await token.mintAfterPot({
+      processId,
       holderId: 'h1',
       amount: '10.000000000',
       potVerified: 1,
-      potLedgerHeight: 2,
+      potLedgerHeight: h,
+    });
+    expect(m.amount).toBe('10.000000000');
+    expect(token.balanceOf('h1')).toBe('10.000000000');
+  });
+
+  it('prevents double mint per process via journal', async () => {
+    const { token, nc } = await setup();
+    const processId = 'AST-DEMO-20260719-dblmint';
+    const h = await journalOkToEmit(nc, processId);
+    await token.mintAfterPot({
+      processId,
+      holderId: 'h1',
+      amount: '10.000000000',
+      potVerified: 1,
+      potLedgerHeight: h,
     });
     await expect(
       token.mintAfterPot({
-        processId: 'p2',
+        processId,
         holderId: 'h1',
         amount: '10.000000000',
         potVerified: 1,
-        potLedgerHeight: 3,
+        potLedgerHeight: h,
       }),
     ).rejects.toMatchObject({ code: TokenErrorCode.DOUBLE_MINT });
     expect(token.balanceOf('h1')).toBe('10.000000000');
@@ -48,17 +101,19 @@ describe('TokenService (layer 05 deep)', () => {
   });
 
   it('transfers only after pot', async () => {
-    const { token } = await setup();
+    const { token, nc } = await setup();
+    const mintId = 'AST-DEMO-20260719-mintt';
+    const h = await journalOkToEmit(nc, mintId);
     await token.mintAfterPot({
-      processId: 'mint-t',
+      processId: mintId,
       holderId: 'a',
       amount: '20.000000000',
       potVerified: 1,
-      potLedgerHeight: 1,
+      potLedgerHeight: h,
     });
     await expect(
       token.transferAfterPot({
-        processId: 'xfer-1',
+        processId: 'AST-DEMO-20260719-xfer1',
         fromHolderId: 'a',
         toHolderId: 'b',
         amount: '5.000000000',
@@ -68,7 +123,7 @@ describe('TokenService (layer 05 deep)', () => {
     ).rejects.toBeInstanceOf(TokenError);
 
     const t = await token.transferAfterPot({
-      processId: 'xfer-2',
+      processId: 'AST-DEMO-20260719-xfer2',
       fromHolderId: 'a',
       toHolderId: 'b',
       amount: '5.000000000',
@@ -81,23 +136,27 @@ describe('TokenService (layer 05 deep)', () => {
   });
 
   it('revalues pro-rata on value increase', async () => {
-    const { token } = await setup();
+    const { token, nc } = await setup();
+    const m1 = 'AST-DEMO-20260719-m1';
+    const m2 = 'AST-DEMO-20260719-m2';
+    const h1 = await journalOkToEmit(nc, m1);
     await token.mintAfterPot({
-      processId: 'm1',
+      processId: m1,
       holderId: 'a',
       amount: '40.000000000',
       potVerified: 1,
-      potLedgerHeight: 1,
+      potLedgerHeight: h1,
     });
+    const h2 = await journalOkToEmit(nc, m2);
     await token.mintAfterPot({
-      processId: 'm2',
+      processId: m2,
       holderId: 'b',
       amount: '60.000000000',
       potVerified: 1,
-      potLedgerHeight: 2,
+      potLedgerHeight: h2,
     });
     const r = await token.revalueAfterPot({
-      processId: 'reval-1',
+      processId: 'AST-DEMO-20260719-reval1',
       previousValue: '100.000000000',
       newValue: '200.000000000',
       potVerified: 1,
@@ -110,12 +169,14 @@ describe('TokenService (layer 05 deep)', () => {
 
   it('hydrates balances from journal', async () => {
     const { nc, token } = await setup();
+    const processId = 'AST-DEMO-20260719-mh';
+    const h = await journalOkToEmit(nc, processId);
     await token.mintAfterPot({
-      processId: 'mh',
+      processId,
       holderId: 'h',
       amount: '7.000000000',
       potVerified: 1,
-      potLedgerHeight: 1,
+      potLedgerHeight: h,
     });
     const token2 = new TokenService(nc);
     await token2.hydrateFromJournal();
@@ -125,16 +186,22 @@ describe('TokenService (layer 05 deep)', () => {
 
   it('burns and journals burn_fact', async () => {
     const { token, nc } = await setup();
+    const processId = 'AST-DEMO-20260719-mb';
+    const h = await journalOkToEmit(nc, processId);
     await token.mintAfterPot({
-      processId: 'mb',
+      processId,
       holderId: 'h',
       amount: '10.000000000',
       potVerified: 1,
-      potLedgerHeight: 1,
+      potLedgerHeight: h,
     });
-    await token.burn({ processId: 'burn-p', holderId: 'h', amount: '3.000000000' });
+    await token.burn({
+      processId: 'AST-DEMO-20260719-burnp',
+      holderId: 'h',
+      amount: '3.000000000',
+    });
     expect(token.balanceOf('h')).toBe('7.000000000');
-    const rows = await nc.listByProcessId('burn-p');
+    const rows = await nc.listByProcessId('AST-DEMO-20260719-burnp');
     expect(rows.some((r) => r.recordType === 'burn_fact')).toBe(true);
   });
 });

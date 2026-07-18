@@ -21,6 +21,11 @@ import {
   type PotConfig,
   type PotVerdict,
 } from './types';
+import {
+  assertOkToEmitFromVerdict,
+  resolveOkToEmit,
+  type OkToEmit,
+} from '../invariants';
 
 export interface VerifyInput {
   process: ProcessState;
@@ -99,6 +104,15 @@ export class PotService {
       }
     }
     return null;
+  }
+
+  /**
+   * Ok-to-emit gate: reads NodeChain only.
+   * Requires pot_evidence then pot_verdict with verified=1 and P1–P4 all true.
+   * Fail-closed (throws InvariantError) if not journaled / criteria incomplete.
+   */
+  async okToEmit(processId: string): Promise<OkToEmit> {
+    return resolveOkToEmit(this.nodechain, processId);
   }
 
   async verify(input: VerifyInput): Promise<PotVerdict>;
@@ -340,12 +354,14 @@ export class PotService {
         final,
         expired: args.expired,
         challengeBlocked: args.challengeBlocked,
+        /** Explicit gate flag only when P1–P4 + verified=1 after journal write-ahead */
+        okToEmit: final && args.criteriaResult.P1 && args.criteriaResult.P2 && args.criteriaResult.P3 && args.criteriaResult.P4,
       },
       writerId: 'pot',
       writerRole: 'pot',
     });
 
-    return {
+    const verdict: PotVerdict = {
       processId: args.process.processId,
       schemaVersion: POT_VERDICT_SCHEMA,
       verified: args.verified,
@@ -365,6 +381,19 @@ export class PotService {
       expired: args.expired,
       challengeBlocked: args.challengeBlocked,
     };
+
+    // Fail-closed cross-check: if we claim verified=1, P1–P4 + write-ahead must hold
+    if (verdict.verified === 1) {
+      assertOkToEmitFromVerdict({
+        processId: verdict.processId,
+        verified: 1,
+        criteriaResult: verdict.criteriaResult,
+        evidenceHeight: verdict.evidenceHeight,
+        ledgerHeight: verdict.ledgerHeight,
+      });
+    }
+
+    return verdict;
   }
 
   private payloadToVerdict(

@@ -41,11 +41,17 @@ export class MemoryJournalStore implements JournalStore {
     if (this.byRecordId.has(record.recordId)) {
       throw new NodeChainError(NcErrorCode.STORAGE, `recordId exists`);
     }
-    this.byHeight.set(record.height, record);
-    this.byRecordId.set(record.recordId, record);
+    // Append-only: freeze stored records so callers cannot mutate journal history in place
+    const sealed = Object.freeze({
+      ...record,
+      payload: Object.freeze({ ...record.payload }),
+      signatures: Object.freeze([...(record.signatures ?? [])]),
+    }) as JournalRecord;
+    this.byHeight.set(sealed.height, sealed);
+    this.byRecordId.set(sealed.recordId, sealed);
     if (clientRecordId) {
-      this.byClientId.set(clientRecordId, record);
+      this.byClientId.set(clientRecordId, sealed);
     }
-    this.tip = { height: record.height, tipHash: record.envelopeHash };
+    this.tip = Object.freeze({ height: sealed.height, tipHash: sealed.envelopeHash });
   }
 }
