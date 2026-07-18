@@ -2,26 +2,31 @@
 /**
  * AST CLI — first tool: NodeChain journal genesis + first record.
  */
-import * as path from 'path';
-import { FileJournalStore } from '../src/nodechain/file.store';
-import { MemoryJournalStore } from '../src/nodechain/memory.store';
-import { NodechainService } from '../src/nodechain/nodechain.service';
+import { createNodechain } from '../src/nodechain/journal.factory';
+import type { NodechainService } from '../src/nodechain/nodechain.service';
 
 function usage(): void {
   console.log(`Usage:
-  npm run cli -- journal genesis [--dir data/journal]
-  npm run cli -- journal first-record [--dir data/journal]
+  npm run cli -- journal genesis [--dir data/journal] [--engine file|rocksdb|memory]
+  npm run cli -- journal first-record [--dir data/journal] [--engine rocksdb]
   npm run cli -- journal tip [--dir data/journal]
   npm run cli -- journal verify [--dir data/journal]
   npm run cli -- journal dump [--dir data/journal]
 `);
 }
 
-function makeService(dir?: string): NodechainService {
-  if (dir) {
-    return new NodechainService(new FileJournalStore(path.resolve(dir)));
-  }
-  return new NodechainService(new MemoryJournalStore());
+function parseEngine(args: string[]): 'memory' | 'file' | 'rocksdb' {
+  const i = args.indexOf('--engine');
+  if (i >= 0 && args[i + 1]) return args[i + 1] as 'memory' | 'file' | 'rocksdb';
+  return (process.env.AST_JOURNAL_ENGINE as 'memory' | 'file' | 'rocksdb') || 'file';
+}
+
+function makeService(dir?: string, engine: 'memory' | 'file' | 'rocksdb' = 'file'): NodechainService {
+  return createNodechain({
+    engine: dir || engine !== 'memory' ? engine : 'memory',
+    dir: dir ?? 'data/journal',
+    requireRealCrypto: true,
+  }).nodechain;
 }
 
 function parseDir(args: string[]): string | undefined {
@@ -39,13 +44,14 @@ async function main(): Promise<void> {
 
   const [domain, cmd] = args;
   const dir = parseDir(args) ?? 'data/journal';
+  const engine = parseEngine(args);
 
   if (domain !== 'journal') {
     usage();
     process.exit(1);
   }
 
-  const nc = makeService(dir);
+  const nc = makeService(dir, engine);
 
   if (cmd === 'genesis') {
     const r = await nc.ensureGenesis('system');

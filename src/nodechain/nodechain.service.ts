@@ -11,14 +11,40 @@ import {
 import { computeContentHash, computeEnvelopeHash, verifyChainLink } from './hash';
 import { NodeChainError, NcErrorCode } from './errors';
 import { isProcessScoped, KNOWN_TYPES } from './record-types';
+import type { KeyRegistry } from '../common/crypto/key-registry';
+import { globalKillSwitch } from '../hardening/kill-switch';
+
+export interface NodechainOptions {
+  /** Verify ed25519 signatures on every append. */
+  requireRealCrypto?: boolean;
+  /** Key registry for sign/verify. */
+  keys?: KeyRegistry;
+  /** Verify full chain every N appends (0=off). */
+  verifyEveryN?: number;
+}
 
 export class NodechainService {
   private readOnly = false;
+  private appendCount = 0;
+  private readonly requireRealCrypto: boolean;
+  private readonly keys?: KeyRegistry;
+  private readonly verifyEveryN: number;
 
-  constructor(private readonly store: JournalStore) {}
+  constructor(
+    private readonly store: JournalStore,
+    options: NodechainOptions = {},
+  ) {
+    this.requireRealCrypto = options.requireRealCrypto ?? false;
+    this.keys = options.keys;
+    this.verifyEveryN = options.verifyEveryN ?? 0;
+  }
 
   setReadOnly(value: boolean): void {
     this.readOnly = value;
+  }
+
+  isReadOnly(): boolean {
+    return this.readOnly || globalKillSwitch.isEngaged();
   }
 
   async getTip(): Promise<Tip | null> {
@@ -51,14 +77,20 @@ export class NodechainService {
           error: `chain break at height ${rec.height}`,
         };
       }
+      if (this.requireRealCrypto && this.keys) {
+        if (!this.keys.verifyAll(rec.signatures, rec.contentHash)) {
+          return {
+            ok: false,
+            height: rec.height,
+            error: `bad signature at height ${rec.height}`,
+          };
+        }
+      }
       prev = rec;
     }
     return { ok: true, height: prev!.height };
   }
 
-  /**
-   * Height 0 — genesis. Required before any other append.
-   */
   async ensureGenesis(writerId = 'system'): Promise<AppendResult> {
     const tip = await this.store.getTip();
     if (tip !== null) {
@@ -82,6 +114,7 @@ export class NodechainService {
         layer: '01_NodeChain',
         schemaVersion: SCHEMA_VERSION,
         message: 'AST NodeChain genesis',
+        crypto: this.requireRealCrypto ? 'ed25519' : 'dev',
       },
       writerId,
       writerRole: 'system',
@@ -89,8 +122,8 @@ export class NodechainService {
   }
 
   async append(req: AppendRequest): Promise<AppendResult> {
-    if (this.readOnly) {
-      throw new NodeChainError(NcErrorCode.READ_ONLY, 'journal is read-only');
+    if (this.isReadOnly()) {
+      throw new NodeChainError(NcErrorCode.READ_ONLY, 'journal is read-only / kill-switch');
     }
     if (!req.writerId) {
       throw new NodeChainError(NcErrorCode.UNAUTHENTICATED, 'writerId required');
@@ -109,7 +142,6 @@ export class NodechainService {
       throw new NodeChainError(NcErrorCode.PROCESS_REQUIRED, 'processId required for type');
     }
 
-    // Deep-freeze payload so later mutation of caller objects cannot rewrite history.
     const payload = JSON.parse(JSON.stringify(req.payload)) as Record<string, unknown>;
 
     if (req.clientRecordId) {
@@ -158,17 +190,34 @@ export class NodechainService {
       payload,
     });
 
-    const signatures =
-      req.signatures && req.signatures.length > 0
-        ? req.signatures
-        : [
-            {
-              signerId: req.writerId,
-              algorithm: 'dev-self-attest',
-              signature: contentHash.slice(0, 32),
-              signedOver: 'contentHash' as const,
-            },
-          ];
+    let signatures = req.signatures ?? [];
+    if (signatures.length === 0 && this.keys?.hasPrivate(req.writerId)) {
+      signatures = [this.keys.sign(req.writerId, contentHash)];
+    }
+    if (signatures.length === 0) {
+      if (this.requireRealCrypto) {
+        throw new NodeChainError(
+          NcErrorCode.BAD_SIGNATURE,
+          `real crypto required; no signature for writer ${req.writerId}`,
+        );
+      }
+      signatures = [
+        {
+          signerId: req.writerId,
+          algorithm: 'dev-self-attest',
+          signature: contentHash.slice(0, 32),
+          signedOver: 'contentHash',
+        },
+      ];
+    }
+
+    if (this.keys) {
+      if (!this.keys.verifyAll(signatures, contentHash)) {
+        throw new NodeChainError(NcErrorCode.BAD_SIGNATURE, 'signature verification failed');
+      }
+    } else if (this.requireRealCrypto) {
+      throw new NodeChainError(NcErrorCode.BAD_SIGNATURE, 'key registry required');
+    }
 
     const record: JournalRecord = {
       recordId,
@@ -187,6 +236,16 @@ export class NodechainService {
     };
 
     await this.store.appendDurable(record, req.clientRecordId);
+    this.appendCount += 1;
+
+    if (this.verifyEveryN > 0 && this.appendCount % this.verifyEveryN === 0) {
+      const v = await this.verifyChain();
+      if (!v.ok) {
+        this.setReadOnly(true);
+        globalKillSwitch.engage(`chain verify failed: ${v.error}`);
+        throw new NodeChainError(NcErrorCode.HASH_MISMATCH, v.error ?? 'chain broken');
+      }
+    }
 
     return {
       recordId,

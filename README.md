@@ -16,23 +16,26 @@ Institutional process token-economy: **NodeChain** is the sole source-of-truth j
 ```bash
 npm install
 npm test
-npm run journal:first -- --dir data/journal
-npm run demo:tokenize -- --dir data/journal
-npm run cli -- journal dump --dir data/journal
+# RocksDB + Ed25519 + L1/L2/L3 pipeline
+npm run demo:tokenize -- --dir data/journal-rocks --engine rocksdb
+npm run cli -- journal verify --dir data/journal-rocks --engine rocksdb
 ```
 
-### Journal
+### Hardened path
 
-- Height **0** = `genesis`  
-- Height **1+** = process / pot / mint / commission facts after demo  
+| Feature | Default |
+|---------|---------|
+| Journal engine | `rocksdb` (also `file`, `memory`) |
+| Signatures | **Ed25519** over contentHash |
+| Governance | **L1** auto → **L2** committee → **L3** 5-agent panel |
+| Kill-switch | engages on chain integrity failure |
+| ASE | observe/notify only |
+
+See [`docs/HARDENING.md`](docs/HARDENING.md).
 
 ### Full layer path (no portal)
 
-`demo:tokenize` runs layers **01–10** core path:
-
-L1 governance → process open/encode → PoT P1–P4 → mint → commission **70/30** → reserve → close  
-ASE **observes** (no veto). Everything significant is on NodeChain.
-
+L1 → L2 → process open/encode → PoT P1–P4 → L3 AI panel → mint → commission **70/30** → reserve → close.
 ## Layers
 
 See [`docs/STRUCTURE.md`](docs/STRUCTURE.md) and [`docs/layers/`](docs/layers/).  

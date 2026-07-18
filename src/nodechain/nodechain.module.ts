@@ -1,7 +1,6 @@
 import { Module } from '@nestjs/common';
 import { NodechainService } from './nodechain.service';
-import { MemoryJournalStore } from './memory.store';
-import { FileJournalStore } from './file.store';
+import { createJournalStore, createNodechain } from './journal.factory';
 import type { JournalStore } from './store.interface';
 
 export const JOURNAL_STORE = 'JOURNAL_STORE';
@@ -11,17 +10,14 @@ export const JOURNAL_STORE = 'JOURNAL_STORE';
     {
       provide: JOURNAL_STORE,
       useFactory: (): JournalStore => {
-        const dir = process.env.AST_JOURNAL_DIR;
-        if (dir) {
-          return new FileJournalStore(dir);
-        }
-        return new MemoryJournalStore();
+        const engine = (process.env.AST_JOURNAL_ENGINE as 'memory' | 'file' | 'rocksdb') || 'file';
+        const dir = process.env.AST_JOURNAL_DIR || 'data/journal';
+        return createJournalStore(engine, dir);
       },
     },
     {
       provide: NodechainService,
-      useFactory: (store: JournalStore) => new NodechainService(store),
-      inject: [JOURNAL_STORE],
+      useFactory: () => createNodechain().nodechain,
     },
   ],
   exports: [NodechainService, JOURNAL_STORE],

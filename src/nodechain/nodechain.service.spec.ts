@@ -1,12 +1,17 @@
 import { NodechainService } from './nodechain.service';
 import { MemoryJournalStore } from './memory.store';
 import { NodeChainError, NcErrorCode } from './errors';
+import { bootstrapPipelineKeys } from '../common/crypto/bootstrap-keys';
 
 describe('NodechainService', () => {
   let nc: NodechainService;
 
   beforeEach(() => {
-    nc = new NodechainService(new MemoryJournalStore());
+    const keys = bootstrapPipelineKeys();
+    nc = new NodechainService(new MemoryJournalStore(), {
+      keys,
+      requireRealCrypto: true,
+    });
   });
 
   it('writes genesis at height 0', async () => {
