@@ -1,9 +1,9 @@
 import { Module } from '@nestjs/common';
-import { NodechainModule } from './nodechain/nodechain.module';
+import { LayersModule } from './layers.module';
 import { HealthController } from './health.controller';
 
 @Module({
-  imports: [NodechainModule],
+  imports: [LayersModule],
   controllers: [HealthController],
 })
 export class AppModule {}
