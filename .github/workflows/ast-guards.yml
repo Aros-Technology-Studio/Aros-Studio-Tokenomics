@@ -1,6 +1,6 @@
 name: AST guards (all)
 
-# Single matrix entry that runs every canon/domain guard script.
+# Single entry that runs every canon/domain/layout/layer-docs guard script.
 # Individual workflows remain for clear PR check names.
 
 on:

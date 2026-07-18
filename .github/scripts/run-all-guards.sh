@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-# run-all-guards — single entry for local + CI matrix.
+# run-all-guards — single entry for local + CI matrix (layers architecture).
 set -uo pipefail
 ROOT="$(cd "$(dirname "$0")/../.." && pwd)"
 cd "$ROOT"

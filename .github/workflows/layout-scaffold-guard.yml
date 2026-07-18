@@ -1,18 +1,20 @@
 name: Layout scaffold guard
 
-# P4 must-haves: portal / nodechain / pot-engine scaffolds + protective workflows.
+# Layers architecture: docs/layers + core src + protective workflows.
+# Portal is not required by this gate.
 
 on:
   pull_request:
   push:
     branches: [main]
+  workflow_dispatch:
 
 permissions:
   contents: read
 
 jobs:
   layout-scaffold:
-    name: layout + workflows
+    name: layout + workflows (layers)
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4

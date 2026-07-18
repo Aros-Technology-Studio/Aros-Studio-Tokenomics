@@ -1,18 +1,19 @@
 name: Component docs guard
 
-# Every required component pack must have PURPOSE / MODEL / CONTRACT / ACCEPTANCE.
+# Layer docs under docs/layers/* (historical workflow name; not portal packs).
 
 on:
   pull_request:
   push:
     branches: [main]
+  workflow_dispatch:
 
 permissions:
   contents: read
 
 jobs:
   component-docs:
-    name: packs present
+    name: docs/layers packs
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4

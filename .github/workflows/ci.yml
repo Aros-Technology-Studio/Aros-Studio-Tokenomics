@@ -1,18 +1,23 @@
 name: AST CI
 
+# Merged pipeline: build → tests → env layout → canon guards → journal → RocksDB demo.
 on:
   push:
     branches: [main]
   pull_request:
+  workflow_dispatch:
 
 permissions:
   contents: read
 
 jobs:
-  build:
+  build-test-guards-demo:
+    name: build · test · canon · journal · tokenize
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
 
       - name: Use Node.js 20.x
         uses: actions/setup-node@v4
@@ -29,10 +34,10 @@ jobs:
       - name: Test
         run: npm test
 
-      - name: ENV layout (Docker, rules, contracts, rust, docs)
+      - name: ENV layout (Docker, rules, contracts, rust, layers — no portal gate)
         run: npm run check:env
 
-      - name: Canon / domain guards
+      - name: Canon / domain / layout / layer-docs guards
         run: npm run check:canon
 
       - name: Journal first record (file engine)

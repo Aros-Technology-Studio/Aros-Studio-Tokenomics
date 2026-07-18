@@ -14,6 +14,8 @@
     "test": "jest",
     "check:canon": "bash .github/scripts/run-all-guards.sh",
     "check:env": "bash scripts/check-env-layout.sh",
+    "check:layout": "bash .github/scripts/layout-scaffold-guard.sh",
+    "check:layers": "bash .github/scripts/component-docs-guard.sh",
     "cli": "tsx scripts/ast-cli.ts",
     "journal:genesis": "tsx scripts/ast-cli.ts journal genesis",
     "journal:first": "tsx scripts/ast-cli.ts journal first-record",

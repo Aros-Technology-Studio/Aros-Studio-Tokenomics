@@ -1,4 +1,4 @@
-# ENV #31 / CI #16 — two-level canon gate + firewall (named invariants.yml)
+# Two-level canon gate + firewall + layers layout (named invariants.yml)
 name: invariants
 
 on:
@@ -20,7 +20,7 @@ jobs:
           fetch-depth: 0
       - name: Level 1 — vocabulary / firewall (canon-gate)
         run: bash .github/scripts/canon-gate.sh
-      - name: Level 2 — domain + philosophy + pot/all-seeing-eye/token
+      - name: Level 2 — domain + philosophy + pot / All-Seeing Eye / token
         run: |
           set -e
           bash .github/scripts/ast-philosophy-guard.sh
@@ -29,8 +29,9 @@ jobs:
           bash .github/scripts/pot-criteria-guard.sh
           bash .github/scripts/no-all-seeing-eye-executive-guard.sh
           bash .github/scripts/domain-invariants-guard.sh
-      - name: Level 2b — layout + layers docs
+      - name: Level 2b — layout + docs/layers
         run: |
+          set -e
           bash .github/scripts/layout-scaffold-guard.sh
           bash .github/scripts/component-docs-guard.sh
       - name: Full matrix
