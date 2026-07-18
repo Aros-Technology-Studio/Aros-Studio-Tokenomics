@@ -1,11 +1,27 @@
 # Validator registry
 
-`ValidatorRegistry` tracks confirmer eligibility:
+Standing is **explicit registration**, not stake or ARO weight.
 
-- `register` / `suspend` / `restore`  
-- Active only for quorum eligibility  
-- No stake  
+## Status
 
-If registry is empty at first verify, proposed `validatorIds` are auto-registered (bootstrap). Production should pre-register validators.
+| Status | Effect |
+|--------|--------|
+| `active` | Eligible for PoT confirmer set |
+| `suspended` | Excluded from `resolveEligible` |
+
+## API
+
+```ts
+reg.register / registerMany
+reg.suspend(id, reason)
+reg.restore(id)
+reg.resolveEligible(proposedIds)  // active ∩ proposed
+```
+
+Empty registry = bootstrap mode (proposed ids used as-is) for tests only.
+
+## Integration
+
+`PotService` holds a `ValidatorRegistry`. Suspended validators shrink K; if K < kMin (default 3), quorum fails → `verified=0`.
 
 Code: `src/pot/validator-registry.ts`

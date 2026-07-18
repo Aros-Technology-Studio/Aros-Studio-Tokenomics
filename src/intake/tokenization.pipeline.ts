@@ -203,6 +203,7 @@ export class TokenizationPipeline {
 
     const confirmers = input.confirmers ?? ['v1', 'v2', 'v3'];
     const validators = input.validators ?? ['v1', 'v2', 'v3'];
+    // KeyRegistry required for Ed25519 confirmer attestations
     const verdict = await this.pot.verify({
       process: proc,
       confirmers,
@@ -298,6 +299,7 @@ export class TokenizationPipeline {
 
     const confirmers = input.confirmers ?? ['v1', 'v2', 'v3'];
     const validators = input.validators ?? ['v1', 'v2', 'v3'];
+    // KeyRegistry required for Ed25519 confirmer attestations
     const verdict = await this.pot.verify({
       process: proc,
       confirmers,

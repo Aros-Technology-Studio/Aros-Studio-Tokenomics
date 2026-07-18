@@ -1,11 +1,20 @@
-# Timeouts
+# PoT timeouts
 
-| Timer | Default | Effect |
-|-------|---------|--------|
-| PoT confirmation window | **15 minutes** (Core Canon §XII) | After `process_open.timestampUtc` + 15m, evaluation yields `verified=0`, `POT_TIMEOUT` |
+| Window | Default | Source |
+|--------|---------|--------|
+| Confirmation | **15 minutes** | Core Canon §XII |
 
-## Rules
+Evaluation: `now - process_open.timestampUtc > timeoutMs` → `expired=true`, `verified=0`, reason `POT_TIMEOUT`.
 
-- Clock: **UTC only**  
-- On timeout: journal verdict 0; client must open a **new processId** for retry  
-- Orchestrator step timeouts (5m) are outside PoT criteria but may abort upstream stages before PoT runs  
+## Module
+
+Pure function — no I/O:
+
+```ts
+evaluateTimeout(openedAtUtc, nowMs, timeoutMs)
+isWithinConfirmationWindow(openedAtUtc, nowMs?)
+```
+
+Configurable via `PotConfig.timeoutMs` on `PotService`.
+
+Code: `src/pot/timeout.ts`

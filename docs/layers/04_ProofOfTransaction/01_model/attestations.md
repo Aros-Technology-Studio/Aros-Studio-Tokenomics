@@ -1,28 +1,34 @@
-# Confirmer attestations
+# Confirmer attestations (Ed25519)
 
-Confirmers do not merely list ids — they **sign** a domain-separated digest.
+Confirmers sign a **domain-separated digest** over process identity + journal tip + stages + admission flags. Amounts are **not** in the digest (no amount math in PoT).
 
-## Digest (`AST-POT-ATTEST-v1`)
+## Digest material (`AST-POT-ATTEST-v1`)
 
-Canonical JSON fields (sorted):
+| Field | Source |
+|-------|--------|
+| processId | Processing |
+| processType | Processing |
+| tipHash / tipHeight | NodeChain tip at verify |
+| stagesCompleted | Process + journal (sorted) |
+| institutionAllowlisted | process_open payload |
+| hasDocuments | process_open payload |
+| hasQualifiedSignature | process_open payload |
 
-- processId, processType  
-- tipHash, tipHeight  
-- stagesCompleted (sorted)  
-- institutionAllowlisted, hasDocuments, hasQualifiedSignature  
-
-`attestationDigest = SHA-256(canonicalJson(...))`
+Digest = SHA-256 of canonical JSON of the above.
 
 ## Signature
 
-- Algorithm: **ed25519**  
-- Signed material: attestationDigest hex (as content hash bytes)  
-- Verified via KeyRegistry public keys  
+- Algorithm: **Ed25519 only**
+- `KeyRegistry.sign(validatorId, digest)` / `verify`
+- Pipeline and Orchestrator **must** pass `keys: KeyRegistry` into `pot.verify`
 
-## Quorum
+## Verification rules
 
-Only **valid** attestations from **eligible** validators count toward Q.
+1. Attestation validator must be in **eligible** set (active registry ∩ proposed)
+2. Bad signature → skip confirmer + reason code
+3. Duplicate validatorId → ignored with reason
+4. Zero valid attestations → cannot reach `verified=1` when `requireAttestations=true`
 
 ## Code
 
-`src/pot/attestation.ts`
+`src/pot/attestation.ts` — `attestationDigest`, `signAttestation`, `verifyAttestations`

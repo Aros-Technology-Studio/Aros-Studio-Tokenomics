@@ -176,4 +176,34 @@ describe('PotService (deep)', () => {
       pot.verify({ process: p, confirmers: ['v1', 'v2', 'v3'], keys }),
     ).rejects.toBeInstanceOf(PotError);
   });
+
+  it('journals pot_challenge_open/close record types', async () => {
+    const { nc, processes, pot } = await setup();
+    const p = await openOk(processes, 'AST-DEMO-20260719-potchrec');
+    await pot.openChallenge(p.processId, 'v1', 'probe');
+    const openRows = await nc.listByProcessId(p.processId);
+    expect(openRows.some((r) => r.recordType === 'pot_challenge_open')).toBe(true);
+    await pot.closeChallenge(p.processId, 'committee', 'ok');
+    const closed = await nc.listByProcessId(p.processId);
+    expect(closed.some((r) => r.recordType === 'pot_challenge_close')).toBe(true);
+  });
+
+  it('pipeline-style verify always receives KeyRegistry', async () => {
+    const { processes, pot, keys } = await setup();
+    const p = await openOk(processes, 'AST-DEMO-20260719-potkeys');
+    // Same contract as TokenizationPipeline / Orchestrator: keys required
+    await expect(
+      pot.verify({
+        process: p,
+        confirmers: ['v1', 'v2', 'v3'],
+        keys: undefined as unknown as typeof keys,
+      }),
+    ).rejects.toMatchObject({ code: PotReason.POT_INVALID_INPUT });
+    const v = await pot.verify({
+      process: p,
+      confirmers: ['v1', 'v2', 'v3'],
+      keys,
+    });
+    expect(v.verified).toBe(1);
+  });
 });

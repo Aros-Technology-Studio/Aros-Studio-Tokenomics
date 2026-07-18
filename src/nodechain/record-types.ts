@@ -7,6 +7,8 @@ export const PROCESS_SCOPED_TYPES = new Set([
   'process_abort',
   'pot_evidence',
   'pot_verdict',
+  'pot_challenge_open',
+  'pot_challenge_close',
   'mint_fact',
   'burn_fact',
   'transfer_fact',
