@@ -1,60 +1,71 @@
-# Institutional Portal (edge)
+# AST Institutional Portal
 
-Scaffold for the **institutional submission edge**: Next.js UI + Nest BFF + shared types + OpenAPI.
+Production-oriented **edge** for institutional clients: login, document hashing, primary tokenization submit, process status.
 
 ## Canon boundary
 
-- Portal **does not mint** and is **not** NodeChain SoT.
-- Requires **institutional valuation** (decimal string) and **qualified signature**.
-- `processId`: `AST-{INST}-{YYYYMMDD}-{suffix}` (aligned with Core Orchestrator).
-- `Idempotency-Key` **mandatory** on mutating calls.
+| Portal does | Portal does not |
+|-------------|-----------------|
+| Authenticate allowlisted institutions | Mint / burn ARO |
+| Collect valuation + document package hash + КЭП flag | Bypass PoT / NodeChain |
+| Hand off to Core Orchestrator | Hold third-party funds |
+| Show process status from Core | All-Seeing Eye veto |
 
-Architecture: [`docs/portal/ARCHITECTURE.md`](../docs/portal/ARCHITECTURE.md)  
-OpenAPI: [`openapi/openapi.yaml`](./openapi/openapi.yaml)
-
-## Layout
-
-```
-portal/
-  openapi/openapi.yaml
-  shared/     processId, idempotency, admission validate
-  backend/    Nest edge API (port 3100)
-  frontend/   Next.js UI (port 3000)
-```
-
-## Local run
+## Run (3 terminals)
 
 ```bash
-# shared + backend tests (Node built-in test runner)
-cd portal/shared && npm i && npm test
-cd ../backend && npm i && npm test && npm run start:dev
-
-# frontend (separate terminal)
-cd portal/frontend && npm i && npm run dev
-```
-
-Env:
-
-| Variable | Default | Meaning |
-|----------|---------|---------|
-| `PORTAL_PORT` | `3100` | Nest edge port |
-| `NEXT_PUBLIC_PORTAL_API_URL` | `http://localhost:3100` | Browser → edge API |
-
-## Core hand-off
-
-Portal validates admission, then calls Core:
-
-| Portal | Core |
-|--------|------|
-| `POST /v1/processes` | `POST /v1/core/processes` → Orchestrator |
-| `GET /v1/processes/:id` | `GET /v1/core/processes/:id` |
-
-```bash
-# terminal 1 — core
+# 1) Core
+cd /path/to/Aros-Studio-Tokenomics
 PORT=3000 npm run start:dev
 
-# terminal 2 — portal edge
-CORE_API_URL=http://localhost:3000 PORTAL_PORT=3100 npm --prefix portal/backend run start:dev
+# 2) Portal edge API
+CORE_API_URL=http://localhost:3000 \
+AST_INSTITUTION_TOKEN=demo-institution-token \
+PORTAL_PORT=3100 \
+npm --prefix portal/backend run start:dev
+
+# 3) Portal UI
+NEXT_PUBLIC_PORTAL_API_URL=http://localhost:3100 \
+npm --prefix portal/frontend run dev
+# → http://localhost:3200
 ```
 
-If Core is down, edge keeps `awaiting_core` (**no mint on portal**).
+### Dev login
+
+| Field | Value |
+|-------|--------|
+| Institution | `DEMO` |
+| Token | `demo-institution-token` |
+
+Also available: `ACME` / `acme-institution-token`.
+
+## API (edge)
+
+| Method | Path | Auth |
+|--------|------|------|
+| GET | `/v1/auth/institutions` | public |
+| POST | `/v1/auth/login` | public |
+| GET | `/v1/auth/me` | `X-Session-Id` |
+| POST | `/v1/documents/hash` | session |
+| GET | `/v1/processes` | session — list |
+| POST | `/v1/processes` | session + `Idempotency-Key` |
+| GET | `/v1/processes/:id` | session |
+
+## UI routes
+
+| Path | Page |
+|------|------|
+| `/` | Landing |
+| `/login` | Institution login |
+| `/dashboard` | Process list |
+| `/processes/new` | Primary tokenization wizard |
+| `/processes/[id]` | Status (edge + core) |
+
+## Tests
+
+```bash
+npm --prefix portal/shared test
+npm --prefix portal/backend test
+```
+
+Architecture: [`docs/portal/ARCHITECTURE.md`](../docs/portal/ARCHITECTURE.md)

@@ -1,7 +1,7 @@
 # Intake (institutional process)
 
 **ENV/DOC related:** process entry for asset tokenization.  
-**Portal edge (scaffold):** `portal/` + [`docs/portal/ARCHITECTURE.md`](./portal/ARCHITECTURE.md).
+**Portal edge (v1 institutional):** `portal/` + [`docs/portal/ARCHITECTURE.md`](./portal/ARCHITECTURE.md).
 
 ## Path (Core)
 
@@ -12,15 +12,18 @@
 5. PoT P1–P4 → mint → commission 70/30 → reserve  
 6. All-Seeing Eye observe/notify  
 
-## Portal edge path (scaffold)
+## Portal edge path (v1)
 
-1. Institution submits via portal frontend → Nest edge (`POST /v1/processes`)  
-2. Edge **requires** valuation (decimal string), `documentPackageHash`, `hasQualifiedSignature: true`, `Idempotency-Key`, `X-Institution-Id`  
-3. `processId` = `AST-{INST}-{YYYYMMDD}-{suffix}` (client or edge-generated)  
-4. Status `awaiting_core` — **stub** until wired to Orchestrator / `TokenizationPipeline`  
-5. **No mint** at edge; Core remains SoT  
+1. Institution logs in (`POST /v1/auth/login`) → session (`X-Session-Id`)  
+2. Hash document package (`POST /v1/documents/hash`) → SHA-256 hex  
+3. Submit via UI or edge (`POST /v1/processes`) with valuation, hash, `hasQualifiedSignature: true`, `Idempotency-Key`  
+4. Edge hands off to Core Orchestrator (`CORE_API_URL`); session institution binds process  
+5. `processId` = `AST-{INST}-{YYYYMMDD}-{suffix}`  
+6. Status: edge list + Core merge (`GET /v1/processes/:id`)  
+7. **No mint** at edge; Core remains SoT  
 
-OpenAPI: `portal/openapi/openapi.yaml`
+OpenAPI: `portal/openapi/openapi.yaml`  
+UI: `http://localhost:3200` (Next.js) · Edge: `:3100` · Core: `:3000`
 
 ## CLI (Core, no UI)
 

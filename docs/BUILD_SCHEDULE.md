@@ -52,7 +52,7 @@ Order of work for AST. **Docs first**, then core. No freelanced code. No fake Do
 - [x] State on NodeChain (`process_*`, `orchestrator_step`)
 - [x] Idempotency / fail-closed
 - [x] Core API `/v1/core/*`
-- [x] Portal edge scaffold + core hand-off client
+- [x] Portal institutional client (auth, hash, submit, status UI) + core hand-off
 
 ### Phase 4 — Governance & Release
 - [x] All-Seeing Eye (observe/notify only)

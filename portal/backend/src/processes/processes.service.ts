@@ -17,9 +17,8 @@ export interface CreateResult {
 }
 
 /**
- * Portal edge process service.
- * Validates institutional valuation + qualified signature, then hands off to Core
- * Orchestrator via /v1/core/processes when CORE_API_URL is reachable.
+ * Portal edge process service for institutional clients.
+ * Validates admission, tracks edge history, hands off to Core Orchestrator.
  */
 @Injectable()
 export class ProcessesService {
@@ -31,15 +30,23 @@ export class ProcessesService {
     this.core = core ?? new CoreApiClient();
   }
 
+  listForInstitution(institutionId: string): ProcessRecord[] {
+    const inst = institutionId.toUpperCase();
+    return [...this.byId.values()]
+      .filter((r) => r.institutionId.toUpperCase() === inst)
+      .sort((a, b) => b.createdAt.localeCompare(a.createdAt));
+  }
+
   async create(
     body: CreateProcessBody,
     institutionId: string | undefined,
     idempotencyKey: string | undefined,
+    institutionToken?: string,
   ): Promise<CreateResult> {
     const err = validateCreateProcess(body, idempotencyKey, institutionId);
     if (err) return this.error(err, err.code === 'FORBIDDEN' ? 403 : 422);
 
-    const inst = institutionId!.trim();
+    const inst = institutionId!.trim().toUpperCase();
     const key = idempotencyKey!.trim();
     const fingerprint = payloadFingerprint({
       processType: body.processType,
@@ -101,7 +108,6 @@ export class ProcessesService {
     this.byId.set(processId, rec);
     this.byIdem.set(idemScope, { processId, fingerprint });
 
-    // Hand-off to Core Orchestrator (sole economic entry)
     if (this.core.enabled) {
       const coreRes = await this.core.createProcess(
         {
@@ -116,7 +122,11 @@ export class ProcessesService {
           institutionAllowlisted: true,
           note: body.note,
         },
-        { institutionId: inst, idempotencyKey: key },
+        {
+          institutionId: inst,
+          idempotencyKey: key,
+          institutionToken,
+        },
       );
 
       if (coreRes.statusCode >= 200 && coreRes.statusCode < 300) {
@@ -127,12 +137,11 @@ export class ProcessesService {
           body: {
             ...this.toAccepted(rec, 'submitted_to_core'),
             core: coreRes.body,
-            message: 'Edge validated; Core Orchestrator completed primary path',
+            message: 'Submitted to Core Orchestrator — mint only after PoT on core',
           },
         };
       }
 
-      // Core down / error: keep edge record as awaiting_core (no mint at edge)
       rec.status = 'awaiting_core';
       rec.updatedAt = new Date().toISOString();
       return {
@@ -141,7 +150,7 @@ export class ProcessesService {
           ...this.toAccepted(rec, 'awaiting_core'),
           coreError: coreRes.body,
           message:
-            'Accepted at edge; Core hand-off failed or unavailable — no mint from portal',
+            'Accepted at edge; Core unavailable — no mint from portal (retry later)',
         },
       };
     }
@@ -152,10 +161,17 @@ export class ProcessesService {
     };
   }
 
-  async get(processId: string, institutionId: string | undefined): Promise<CreateResult> {
-    // Prefer Core status when available
+  async get(
+    processId: string,
+    institutionId: string | undefined,
+    institutionToken?: string,
+  ): Promise<CreateResult> {
     if (this.core.enabled) {
-      const coreRes = await this.core.getProcess(processId, institutionId);
+      const coreRes = await this.core.getProcess(
+        processId,
+        institutionId,
+        institutionToken,
+      );
       if (coreRes.statusCode === 200) {
         const edge = this.byId.get(processId);
         if (edge) {
@@ -167,19 +183,26 @@ export class ProcessesService {
           body: {
             ...coreRes.body,
             source: 'core',
+            edge: edge ? this.toStatus(edge) : undefined,
           },
         };
       }
       if (coreRes.statusCode === 404 && !this.byId.has(processId)) {
-        return this.error({ code: 'NOT_FOUND', message: `unknown process ${processId}` }, 404);
+        return this.error(
+          { code: 'NOT_FOUND', message: `unknown process ${processId}` },
+          404,
+        );
       }
     }
 
     const rec = this.byId.get(processId);
     if (!rec) {
-      return this.error({ code: 'NOT_FOUND', message: `unknown process ${processId}` }, 404);
+      return this.error(
+        { code: 'NOT_FOUND', message: `unknown process ${processId}` },
+        404,
+      );
     }
-    if (institutionId && rec.institutionId !== institutionId) {
+    if (institutionId && rec.institutionId.toUpperCase() !== institutionId.toUpperCase()) {
       return this.error({ code: 'FORBIDDEN', message: 'institution mismatch' }, 403);
     }
     return { statusCode: 200, body: { ...this.toStatus(rec), source: 'edge' } };
@@ -199,9 +222,12 @@ export class ProcessesService {
     }
     const rec = this.byId.get(processId);
     if (!rec) {
-      return this.error({ code: 'NOT_FOUND', message: `unknown process ${processId}` }, 404);
+      return this.error(
+        { code: 'NOT_FOUND', message: `unknown process ${processId}` },
+        404,
+      );
     }
-    if (institutionId && rec.institutionId !== institutionId) {
+    if (institutionId && rec.institutionId.toUpperCase() !== institutionId.toUpperCase()) {
       return this.error({ code: 'FORBIDDEN', message: 'institution mismatch' }, 403);
     }
     if (body.hasQualifiedSignature !== true) {
@@ -236,6 +262,7 @@ export class ProcessesService {
       status,
       institutionId: rec.institutionId,
       valuation: rec.valuation,
+      holderId: rec.holderId,
       hasQualifiedSignature: rec.hasQualifiedSignature,
       documentPackageHash: rec.documentPackageHash,
       message:
@@ -249,12 +276,17 @@ export class ProcessesService {
     return {
       processId: rec.processId,
       status: rec.status,
+      processType: rec.processType,
       institutionId: rec.institutionId,
       valuation: rec.valuation,
+      holderId: rec.holderId,
+      assetId: rec.assetId,
       hasQualifiedSignature: rec.hasQualifiedSignature,
       documentPackageHash: rec.documentPackageHash,
       idempotencyKey: rec.idempotencyKey,
+      createdAt: rec.createdAt,
       updatedAt: rec.updatedAt,
+      note: rec.note,
     };
   }
 

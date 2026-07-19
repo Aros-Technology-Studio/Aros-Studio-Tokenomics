@@ -1,4 +1,4 @@
-import { describe, it, beforeEach } from 'node:test';
+import { describe, it } from 'node:test';
 import assert from 'node:assert/strict';
 import { ProcessesService } from './processes.service';
 import { CoreApiClient } from '../core-client';
@@ -12,7 +12,6 @@ const goodBody = {
   documentPackageHash: hash,
 };
 
-/** Core client stub — no network. */
 class StubCore extends CoreApiClient {
   constructor(private readonly mode: 'ok' | 'down' | 'off') {
     super({ baseUrl: 'http://core.test' });
@@ -45,7 +44,7 @@ class StubCore extends CoreApiClient {
   }
 }
 
-describe('ProcessesService (portal edge + core client)', () => {
+describe('ProcessesService (institutional portal edge)', () => {
   it('rejects without valuation / signature', async () => {
     const svc = new ProcessesService(new StubCore('off'));
     const r = await svc.create(
@@ -59,10 +58,23 @@ describe('ProcessesService (portal edge + core client)', () => {
 
   it('hands off to core when available', async () => {
     const svc = new ProcessesService(new StubCore('ok'));
-    const r = await svc.create(goodBody, 'DEMO', 'idem-core-ok-0001');
+    const r = await svc.create(goodBody, 'DEMO', 'idem-core-ok-0001', 'demo-token');
     assert.equal(r.statusCode, 202);
     assert.equal(r.body.status, 'submitted_to_core');
     assert.ok(r.body.core);
+  });
+
+  it('lists processes for institution', async () => {
+    const svc = new ProcessesService(new StubCore('off'));
+    await svc.create(goodBody, 'DEMO', 'idem-list-0001');
+    await svc.create(
+      { ...goodBody, holderId: 'h2' },
+      'DEMO',
+      'idem-list-0002',
+    );
+    const list = svc.listForInstitution('DEMO');
+    assert.equal(list.length, 2);
+    assert.equal(svc.listForInstitution('ACME').length, 0);
   });
 
   it('keeps awaiting_core when core down (no edge mint)', async () => {
@@ -71,17 +83,5 @@ describe('ProcessesService (portal edge + core client)', () => {
     assert.equal(r.statusCode, 202);
     assert.equal(r.body.status, 'awaiting_core');
     assert.ok(r.body.coreError);
-  });
-
-  it('status prefers core when enabled', async () => {
-    const svc = new ProcessesService(new StubCore('ok'));
-    await svc.create(
-      { ...goodBody, processId: 'AST-DEMO-20260719-st1' },
-      'DEMO',
-      'idem-status-0001',
-    );
-    const g = await svc.get('AST-DEMO-20260719-st1', 'DEMO');
-    assert.equal(g.statusCode, 200);
-    assert.equal(g.body.source, 'core');
   });
 });

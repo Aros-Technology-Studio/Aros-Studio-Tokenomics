@@ -4,23 +4,75 @@ import {
   Get,
   Headers,
   HttpException,
+  Inject,
   Param,
   Post,
 } from '@nestjs/common';
 import type { AttachDocumentsBody, CreateProcessBody } from '../shared-bridge';
 import { ProcessesService } from './processes.service';
+import { AuthService } from '../auth/auth.service';
 
 @Controller('v1/processes')
 export class ProcessesController {
-  constructor(private readonly processes: ProcessesService) {}
+  constructor(
+    @Inject(ProcessesService) private readonly processes: ProcessesService,
+    @Inject(AuthService) private readonly auth: AuthService,
+  ) {}
+
+  private requireSession(sessionId: string | undefined) {
+    const s = this.auth.resolve(sessionId);
+    if (!s) {
+      throw new HttpException(
+        { code: 'AUTH_SESSION', message: 'login required — POST /v1/auth/login' },
+        401,
+      );
+    }
+    return s;
+  }
+
+  @Get()
+  list(@Headers('x-session-id') sessionId: string | undefined) {
+    const s = this.requireSession(sessionId);
+    const items = this.processes.listForInstitution(s.institutionId);
+    return {
+      institutionId: s.institutionId,
+      count: items.length,
+      processes: items.map((r) => ({
+        processId: r.processId,
+        status: r.status,
+        processType: r.processType,
+        valuation: r.valuation,
+        holderId: r.holderId,
+        createdAt: r.createdAt,
+        updatedAt: r.updatedAt,
+      })),
+    };
+  }
 
   @Post()
   async create(
     @Body() body: CreateProcessBody,
     @Headers('idempotency-key') idempotencyKey: string | undefined,
-    @Headers('x-institution-id') institutionId: string | undefined,
+    @Headers('x-session-id') sessionId: string | undefined,
+    @Headers('x-institution-id') institutionIdHeader: string | undefined,
   ) {
-    const result = await this.processes.create(body, institutionId, idempotencyKey);
+    const s = this.requireSession(sessionId);
+    // Session institution wins over header spoofing
+    if (
+      institutionIdHeader &&
+      institutionIdHeader.toUpperCase() !== s.institutionId
+    ) {
+      throw new HttpException(
+        { code: 'FORBIDDEN', message: 'institution header mismatch session' },
+        403,
+      );
+    }
+    const result = await this.processes.create(
+      body,
+      s.institutionId,
+      idempotencyKey,
+      s.token,
+    );
     if (result.statusCode >= 400) {
       throw new HttpException(result.body, result.statusCode);
     }
@@ -30,9 +82,10 @@ export class ProcessesController {
   @Get(':processId')
   async get(
     @Param('processId') processId: string,
-    @Headers('x-institution-id') institutionId: string | undefined,
+    @Headers('x-session-id') sessionId: string | undefined,
   ) {
-    const result = await this.processes.get(processId, institutionId);
+    const s = this.requireSession(sessionId);
+    const result = await this.processes.get(processId, s.institutionId, s.token);
     if (result.statusCode >= 400) {
       throw new HttpException(result.body, result.statusCode);
     }
@@ -44,12 +97,13 @@ export class ProcessesController {
     @Param('processId') processId: string,
     @Body() body: AttachDocumentsBody,
     @Headers('idempotency-key') idempotencyKey: string | undefined,
-    @Headers('x-institution-id') institutionId: string | undefined,
+    @Headers('x-session-id') sessionId: string | undefined,
   ) {
+    const s = this.requireSession(sessionId);
     const result = await this.processes.attachDocuments(
       processId,
       body,
-      institutionId,
+      s.institutionId,
       idempotencyKey,
     );
     if (result.statusCode >= 400) {

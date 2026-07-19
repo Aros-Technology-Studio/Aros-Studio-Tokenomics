@@ -1,16 +1,19 @@
 openapi: 3.1.0
 info:
   title: AST Institutional Portal Edge API
-  version: 0.1.0
+  version: 1.0.0
   description: |
-    Edge API for institutional process submission.
+    Edge API for institutional clients.
+    Login → document package hash → primary tokenization submit → status.
     Aligns processId and idempotency with Core Orchestrator and Core Canon.
-    Does not mint; Core remains source of truth after hand-off.
+    Does **not** mint; Core remains source of truth after hand-off.
 servers:
   - url: http://localhost:3100
     description: Local portal backend
 tags:
   - name: health
+  - name: auth
+  - name: documents
   - name: processes
 paths:
   /v1/health:
@@ -26,17 +29,150 @@ paths:
               schema:
                 $ref: '#/components/schemas/HealthResponse'
 
+  /v1/auth/institutions:
+    get:
+      tags: [auth]
+      operationId: listInstitutions
+      summary: Public list of allowlisted institutions (ids + display names only)
+      responses:
+        '200':
+          description: Institutions
+          content:
+            application/json:
+              schema:
+                type: object
+                required: [institutions]
+                properties:
+                  institutions:
+                    type: array
+                    items:
+                      type: object
+                      required: [institutionId, displayName]
+                      properties:
+                        institutionId:
+                          type: string
+                        displayName:
+                          type: string
+
+  /v1/auth/login:
+    post:
+      tags: [auth]
+      operationId: login
+      summary: Institution login (allowlisted token)
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [institutionId, token]
+              properties:
+                institutionId:
+                  type: string
+                  example: DEMO
+                token:
+                  type: string
+                  example: demo-institution-token
+      responses:
+        '200':
+          description: Session issued
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/LoginResponse'
+        '401':
+          $ref: '#/components/responses/Error'
+
+  /v1/auth/me:
+    get:
+      tags: [auth]
+      operationId: me
+      summary: Current session
+      parameters:
+        - $ref: '#/components/parameters/SessionId'
+      responses:
+        '200':
+          description: Session info
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SessionInfo'
+        '401':
+          $ref: '#/components/responses/Error'
+
+  /v1/auth/logout:
+    post:
+      tags: [auth]
+      operationId: logout
+      summary: Invalidate session
+      parameters:
+        - $ref: '#/components/parameters/SessionId'
+      responses:
+        '200':
+          description: Logged out
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  ok:
+                    type: boolean
+
+  /v1/documents/hash:
+    post:
+      tags: [documents]
+      operationId: hashDocuments
+      summary: SHA-256 document package at the edge
+      description: |
+        Does not store documents as SoT. Returns 64-hex hash for process submit.
+      parameters:
+        - $ref: '#/components/parameters/SessionId'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/HashDocumentsRequest'
+      responses:
+        '200':
+          description: Hash computed
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/HashDocumentsResponse'
+        '401':
+          $ref: '#/components/responses/Error'
+        '422':
+          $ref: '#/components/responses/Error'
+
   /v1/processes:
+    get:
+      tags: [processes]
+      operationId: listProcesses
+      summary: List edge-tracked processes for the session institution
+      parameters:
+        - $ref: '#/components/parameters/SessionId'
+      responses:
+        '200':
+          description: Process list
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ProcessList'
+        '401':
+          $ref: '#/components/responses/Error'
     post:
       tags: [processes]
       operationId: createProcess
       summary: Submit primary tokenization process (edge)
       description: |
-        Requires institutional valuation (decimal string), document package evidence,
+        Requires session, institutional valuation (decimal string), document package hash,
         and qualified signature flag. Idempotency-Key mandatory.
+        Session institution overrides spoofed X-Institution-Id.
       parameters:
         - $ref: '#/components/parameters/IdempotencyKey'
-        - $ref: '#/components/parameters/InstitutionId'
+        - $ref: '#/components/parameters/SessionId'
+        - $ref: '#/components/parameters/InstitutionIdOptional'
       requestBody:
         required: true
         content:
@@ -52,6 +188,10 @@ paths:
                 $ref: '#/components/schemas/ProcessAccepted'
         '400':
           $ref: '#/components/responses/Error'
+        '401':
+          $ref: '#/components/responses/Error'
+        '403':
+          $ref: '#/components/responses/Error'
         '409':
           $ref: '#/components/responses/Error'
         '422':
@@ -61,10 +201,10 @@ paths:
     get:
       tags: [processes]
       operationId: getProcess
-      summary: Get process edge status
+      summary: Get process status (merge edge + Core when available)
       parameters:
         - $ref: '#/components/parameters/ProcessId'
-        - $ref: '#/components/parameters/InstitutionId'
+        - $ref: '#/components/parameters/SessionId'
       responses:
         '200':
           description: Process status
@@ -72,6 +212,10 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/ProcessStatus'
+        '401':
+          $ref: '#/components/responses/Error'
+        '403':
+          $ref: '#/components/responses/Error'
         '404':
           $ref: '#/components/responses/Error'
 
@@ -79,11 +223,11 @@ paths:
     post:
       tags: [processes]
       operationId: attachDocuments
-      summary: Attach document package metadata
+      summary: Attach / replace document package metadata on edge
       parameters:
         - $ref: '#/components/parameters/ProcessId'
         - $ref: '#/components/parameters/IdempotencyKey'
-        - $ref: '#/components/parameters/InstitutionId'
+        - $ref: '#/components/parameters/SessionId'
       requestBody:
         required: true
         content:
@@ -97,7 +241,7 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/ProcessStatus'
-        '400':
+        '401':
           $ref: '#/components/responses/Error'
         '404':
           $ref: '#/components/responses/Error'
@@ -123,14 +267,23 @@ components:
         minLength: 8
         maxLength: 128
       description: Mandatory; same key + payload must not open two processes
-    InstitutionId:
-      name: X-Institution-Id
+    SessionId:
+      name: X-Session-Id
       in: header
       required: true
       schema:
         type: string
+        minLength: 16
+      description: Session from POST /v1/auth/login
+    InstitutionIdOptional:
+      name: X-Institution-Id
+      in: header
+      required: false
+      schema:
+        type: string
         minLength: 1
         maxLength: 32
+      description: Optional; must match session institution if present
 
   schemas:
     HealthResponse:
@@ -145,8 +298,70 @@ components:
           example: portal-backend
         coreHandOff:
           type: string
-          enum: [stub, live]
-          description: stub until wired to TokenizationPipeline
+          enum: [live, disabled]
+        coreApiUrl:
+          type: string
+
+    LoginResponse:
+      type: object
+      required: [sessionId, institutionId, displayName, expiresAt]
+      properties:
+        sessionId:
+          type: string
+        institutionId:
+          type: string
+        displayName:
+          type: string
+        expiresAt:
+          type: string
+          format: date-time
+
+    SessionInfo:
+      type: object
+      required: [institutionId, displayName, expiresAt]
+      properties:
+        institutionId:
+          type: string
+        displayName:
+          type: string
+        expiresAt:
+          type: string
+          format: date-time
+
+    HashDocumentsRequest:
+      type: object
+      properties:
+        rawPackage:
+          type: string
+          description: Pre-concatenated package string
+        parts:
+          type: array
+          items:
+            type: object
+            required: [name, content]
+            properties:
+              name:
+                type: string
+              content:
+                type: string
+              encoding:
+                type: string
+                enum: [utf8, base64]
+                default: utf8
+
+    HashDocumentsResponse:
+      type: object
+      required: [documentPackageHash, institutionId]
+      properties:
+        documentPackageHash:
+          type: string
+          pattern: '^[a-fA-F0-9]{64}$'
+        institutionId:
+          type: string
+        byteLength:
+          type: integer
+        partCount:
+          type: integer
 
     CreateProcessRequest:
       type: object
@@ -215,7 +430,7 @@ components:
           type: string
         status:
           type: string
-          enum: [accepted, awaiting_core, duplicate]
+          enum: [accepted, awaiting_core, submitted_to_core, duplicate]
         institutionId:
           type: string
         valuation:
@@ -226,23 +441,56 @@ components:
           type: string
         message:
           type: string
-          example: Accepted at edge; Core Orchestrator hand-off is stub in scaffold
+        core:
+          type: object
+          additionalProperties: true
+        coreError:
+          type: object
+          additionalProperties: true
+
+    ProcessList:
+      type: object
+      required: [institutionId, count, processes]
+      properties:
+        institutionId:
+          type: string
+        count:
+          type: integer
+        processes:
+          type: array
+          items:
+            type: object
+            properties:
+              processId:
+                type: string
+              status:
+                type: string
+              processType:
+                type: string
+              valuation:
+                type: string
+              holderId:
+                type: string
+              createdAt:
+                type: string
+                format: date-time
+              updatedAt:
+                type: string
+                format: date-time
 
     ProcessStatus:
       type: object
-      required: [processId, status, institutionId]
+      required: [processId]
       properties:
         processId:
           type: string
         status:
           type: string
-          enum:
-            - accepted
-            - awaiting_core
-            - documents_pending
-            - submitted_to_core
-            - rejected
-            - duplicate
+        source:
+          type: string
+          enum: [edge, core]
+        processType:
+          type: string
         institutionId:
           type: string
         valuation:
@@ -256,6 +504,9 @@ components:
         updatedAt:
           type: string
           format: date-time
+        edge:
+          type: object
+          additionalProperties: true
 
     ErrorBody:
       type: object
@@ -273,6 +524,11 @@ components:
             - IDEMPOTENCY_PAYLOAD_MISMATCH
             - NOT_FOUND
             - FORBIDDEN
+            - AUTH_REQUIRED
+            - AUTH_INVALID
+            - AUTH_NOT_ALLOWLISTED
+            - AUTH_SESSION
+            - EMPTY_PACKAGE
         message:
           type: string
         details:

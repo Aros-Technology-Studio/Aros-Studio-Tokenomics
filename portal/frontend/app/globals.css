@@ -1,14 +1,16 @@
 :root {
   color-scheme: light dark;
-  --bg: #0f1419;
-  --fg: #e7ecf1;
+  --bg: #0b0f14;
+  --fg: #e8eef4;
   --muted: #8b9aab;
   --accent: #3d8bfd;
-  --card: #1a222c;
-  --border: #2a3542;
+  --accent2: #5b6cff;
+  --card: #141b24;
+  --border: #243041;
   --danger: #f07178;
   --ok: #7fd99a;
-  font-family: ui-sans-serif, system-ui, -apple-system, Segoe UI, sans-serif;
+  --warn: #e6c07b;
+  font-family: 'Segoe UI', ui-sans-serif, system-ui, -apple-system, sans-serif;
 }
 
 * {
@@ -17,49 +19,105 @@
 
 body {
   margin: 0;
-  background: var(--bg);
+  background: radial-gradient(1200px 600px at 10% -10%, #1a2740 0%, var(--bg) 55%);
   color: var(--fg);
   min-height: 100vh;
 }
 
-.banner {
-  display: flex;
-  gap: 1rem;
-  align-items: baseline;
-  padding: 1rem 1.5rem;
-  border-bottom: 1px solid var(--border);
+a {
+  color: var(--accent);
+  text-decoration: none;
+}
+a:hover {
+  text-decoration: underline;
 }
 
-.muted {
+.shell {
+  max-width: 960px;
+  margin: 0 auto;
+  padding: 0 1.25rem 3rem;
+}
+
+.topbar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+  padding: 1rem 0;
+  border-bottom: 1px solid var(--border);
+  margin-bottom: 1.5rem;
+}
+
+.brand {
+  font-weight: 700;
+  letter-spacing: 0.02em;
+}
+
+.brand span {
   color: var(--muted);
+  font-weight: 500;
+  margin-left: 0.5rem;
   font-size: 0.9rem;
 }
 
-.main {
-  max-width: 720px;
-  margin: 0 auto;
-  padding: 1.5rem;
+.nav {
+  display: flex;
+  gap: 1rem;
+  align-items: center;
+  flex-wrap: wrap;
+}
+
+.nav a,
+.nav button.linkish {
+  color: var(--fg);
+  font-size: 0.95rem;
+}
+
+button.linkish {
+  background: none;
+  border: none;
+  cursor: pointer;
+  padding: 0;
+  font: inherit;
+  color: var(--muted);
 }
 
 .card {
   background: var(--card);
   border: 1px solid var(--border);
-  border-radius: 12px;
-  padding: 1.25rem;
+  border-radius: 14px;
+  padding: 1.35rem;
   margin-bottom: 1rem;
+  box-shadow: 0 10px 40px rgba(0, 0, 0, 0.25);
+}
+
+h1 {
+  font-size: 1.45rem;
+  margin: 0 0 0.4rem;
+}
+
+h2 {
+  font-size: 1.1rem;
+  margin: 0 0 0.75rem;
+}
+
+.lead {
+  color: var(--muted);
+  line-height: 1.5;
+  margin-top: 0;
 }
 
 label {
   display: block;
-  font-size: 0.85rem;
+  font-size: 0.82rem;
   color: var(--muted);
-  margin-bottom: 0.25rem;
+  margin-bottom: 0.3rem;
 }
 
 input,
 select,
 textarea,
-button {
+button.primary {
   font: inherit;
 }
 
@@ -67,31 +125,27 @@ input,
 select,
 textarea {
   width: 100%;
-  padding: 0.55rem 0.65rem;
-  margin-bottom: 0.85rem;
-  border-radius: 8px;
+  padding: 0.6rem 0.7rem;
+  margin-bottom: 0.9rem;
+  border-radius: 9px;
   border: 1px solid var(--border);
-  background: #0c1015;
+  background: #0c1118;
   color: var(--fg);
 }
 
-button {
-  background: var(--accent);
+button.primary {
+  background: linear-gradient(135deg, var(--accent), var(--accent2));
   color: #fff;
   border: none;
-  border-radius: 8px;
-  padding: 0.65rem 1rem;
+  border-radius: 9px;
+  padding: 0.7rem 1.15rem;
   cursor: pointer;
   font-weight: 600;
 }
 
-button:disabled {
+button.primary:disabled {
   opacity: 0.5;
   cursor: not-allowed;
-}
-
-.field {
-  margin-bottom: 0.25rem;
 }
 
 .err {
@@ -106,20 +160,68 @@ button:disabled {
   font-size: 0.9rem;
 }
 
-h1 {
-  font-size: 1.35rem;
-  margin: 0 0 0.5rem;
+.muted {
+  color: var(--muted);
+  font-size: 0.88rem;
 }
 
-p.lead {
+.table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 0.92rem;
+}
+
+.table th,
+.table td {
+  text-align: left;
+  padding: 0.55rem 0.4rem;
+  border-bottom: 1px solid var(--border);
+}
+
+.badge {
+  display: inline-block;
+  padding: 0.15rem 0.5rem;
+  border-radius: 999px;
+  font-size: 0.75rem;
+  border: 1px solid var(--border);
   color: var(--muted);
-  margin-top: 0;
-  line-height: 1.45;
+}
+
+.badge.ok {
+  color: var(--ok);
+  border-color: #2d5a3d;
+}
+
+.badge.warn {
+  color: var(--warn);
+  border-color: #5a4a2d;
+}
+
+.grid2 {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 0.75rem 1rem;
+}
+
+@media (max-width: 720px) {
+  .grid2 {
+    grid-template-columns: 1fr;
+  }
 }
 
 code {
   font-size: 0.85em;
-  background: #0c1015;
+  background: #0c1118;
   padding: 0.1rem 0.35rem;
   border-radius: 4px;
+}
+
+pre.result {
+  background: #0c1118;
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  padding: 0.85rem;
+  overflow: auto;
+  font-size: 0.8rem;
+  line-height: 1.4;
 }

@@ -169,7 +169,7 @@ All four always; fail any → verified=0 + reason codes; formal text in Core Can
 | ledger vs nodechain | one binary |
 | oracle_gateway | multi-oracle + signatures; fail-closed |
 | settlement | alias of commission |
-| portal | **edge scaffold** under `portal/` (Next.js + Nest + OpenAPI); not SoT; owner re-opened |
+| portal | **institutional edge v1** under `portal/` (Next.js UI + Nest BFF + OpenAPI); session auth, hash, Core hand-off; not SoT |
 
 ### Cross-cutting defaults (also Core Canon §XII)
 

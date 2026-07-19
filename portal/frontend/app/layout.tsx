@@ -1,22 +1,22 @@
 import type { Metadata } from 'next';
 import type { ReactNode } from 'react';
 import './globals.css';
+import { AppHeader } from './app-header';
 
 export const metadata: Metadata = {
   title: 'AST Institutional Portal',
   description:
-    'Institutional process submission edge for Aros Studio Tokenomics — valuation and qualified signatures only; Core remains SoT',
+    'Institutional client portal for Aros Studio Tokenomics — submit primary tokenization to Core Orchestrator',
 };
 
 export default function RootLayout({ children }: { children: ReactNode }) {
   return (
     <html lang="en">
       <body>
-        <header className="banner">
-          <strong>AST Institutional Portal</strong>
-          <span className="muted">edge · mint only after Core PoT · Core Canon SoT</span>
-        </header>
-        <main className="main">{children}</main>
+        <div className="shell">
+          <AppHeader />
+          {children}
+        </div>
       </body>
     </html>
   );

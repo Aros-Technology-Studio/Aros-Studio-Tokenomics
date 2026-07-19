@@ -24,7 +24,8 @@ GitHub Issues are the operational list; this file is the in-repo mirror.
 
 - [x] Layout + OpenAPI + architecture  
 - [x] Wire Nest edge → Core Orchestrator (`CoreApiClient`)  
-- [x] Institution token auth (`X-Institution-Token`) + optional Ed25519 package signature  
+- [x] Institution session auth (login / `X-Session-Id`) + Core `X-Institution-Token` hand-off  
+- [x] Document package hash API + primary tokenization UI (dashboard / new / status)  
 - [ ] Full X.509 chain / production mTLS (ops deploy)
 
 ## Later (owner-driven)
