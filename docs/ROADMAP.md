@@ -1,6 +1,6 @@
 # ROADMAP
 
-## Done (v1 core + ENV foundation + institutional portal)
+## Done — v1.0.0 public release
 
 - Core Canon + P0–P4 decisions  
 - Layers 01–10 documentation map  
@@ -9,6 +9,7 @@
 - ENV: Docker, Postgres schema, Solidity view, Rust companion, CI  
 - Hardening #68–#70 (HSM, replication, L3 LLM adapters)  
 - **Institutional portal** edge (`portal/`): login, document hash, submit, status UI → Core  
+- **Release packaging:** Docker Compose full stack, GHCR images, tag `v1.0.0`  
 
 ## Next (owner-driven)
 
@@ -16,7 +17,7 @@
 |----------|------|
 | A | Production mTLS / OIDC for institutions |
 | B | Full X.509 КЭП chain validation |
-| B | Production deploy / monitoring |
+| B | Hosted multi-tenant deploy / monitoring |
 | C | External audit |
 
 ## Later

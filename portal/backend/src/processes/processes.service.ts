@@ -291,6 +291,6 @@ export class ProcessesService {
   }
 
   private error(body: PortalErrorBody, statusCode: number): CreateResult {
-    return { statusCode, body };
+    return { statusCode, body: { ...body } };
   }
 }

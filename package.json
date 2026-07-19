@@ -1,7 +1,7 @@
 {
   "name": "aros-studio-tokenomics",
-  "version": "0.1.0",
-  "private": true,
+  "version": "1.0.0",
+  "private": false,
   "description": "AST — Aros Studio Tokenomics (NodeChain journal first)",
   "license": "UNLICENSED",
   "engines": {

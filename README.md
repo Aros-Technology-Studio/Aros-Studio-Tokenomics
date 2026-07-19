@@ -2,61 +2,79 @@
 
 Institutional process token-economy: **NodeChain** is the sole source-of-truth journal; value gates through **PoT**; AST holds only its own funds.
 
+**Release:** [v1.0.0](https://github.com/Aros-Technology-Studio/Aros-Studio-Tokenomics/releases/tag/v1.0.0) · [Release notes](docs/RELEASE.md) · [Changelog](CHANGELOG.md)
+
 ## Status
 
 | Area | State |
 |------|--------|
 | Canon | `docs/AST-CORE-CANON.md` |
-| Layer specs | `docs/layers/01_NodeChain` full draft; 02–10 skeletons |
-| Code | **NodeChain journal live** — genesis + first record |
-| Portal | **Edge scaffold** (`portal/`) — not SoT |
+| Core | Full economic path (NodeChain → PoT → mint → commission → reserve) |
+| Portal | **Institutional client edge** (`portal/`) — login, hash, submit, status |
+| Ops | Docker Compose + GHCR images |
 
-## Quick start
+## Quick start (Docker)
 
 ```bash
-npm install
-npm test
-# RocksDB + Ed25519 + L1/L2/L3 pipeline
+docker compose up --build
+# Portal UI  → http://localhost:3200
+# Portal API → http://localhost:3100
+# Core       → http://localhost:3000
+```
+
+**Demo login:** institution `DEMO` / token `demo-institution-token`
+
+## Quick start (local)
+
+```bash
+npm install && npm test
+npm run build && PORT=3000 npm start
+
+# separate terminals
+CORE_API_URL=http://localhost:3000 PORTAL_PORT=3100 \
+  npm --prefix portal/backend install && npm --prefix portal/backend run start:dev
+
+NEXT_PUBLIC_PORTAL_API_URL=http://localhost:3100 \
+  npm --prefix portal/frontend install && npm --prefix portal/frontend run dev
+```
+
+RocksDB demo journal:
+
+```bash
 npm run demo:tokenize -- --dir data/journal-rocks --engine rocksdb
 npm run cli -- journal verify --dir data/journal-rocks --engine rocksdb
 ```
 
-### Hardened path
+## Architecture (one line)
+
+```
+Browser → Portal UI (:3200) → Portal Edge (:3100) → Core Orchestrator (:3000) → NodeChain SoT
+```
+
+Portal **never** mints. See [`docs/portal/ARCHITECTURE.md`](docs/portal/ARCHITECTURE.md).
+
+## Hardened path
 
 | Feature | Default |
 |---------|---------|
 | Journal engine | `rocksdb` (also `file`, `memory`) |
 | Signatures | **Ed25519** over contentHash |
-| Governance | **L1** auto → **L2** committee → **L3** 5-agent panel |
+| Governance | **L1** → **L2** committee → **L3** policy / LLM panel |
 | Kill-switch | engages on chain integrity failure |
 | All-Seeing Eye | observe/notify only |
+| Keys | `AST_KEY_PROVIDER=memory\|file\|hsm` |
 
-See [`docs/HARDENING.md`](docs/HARDENING.md).  
-**Next (tracked):** HSM keys · journal replication · L3 LLM adapters — [`docs/BACKLOG.md`](docs/BACKLOG.md) · issues #68 #69 #70.
-
-### Full layer path
-
-L1 → L2 → process open/encode → PoT P1–P4 → L3 AI panel → mint → commission **70/30** → reserve → close.
-
-### Institutional Portal (edge)
-
-Scaffold: Next.js + Nest BFF + shared + OpenAPI under [`portal/`](portal/).  
-Architecture: [`docs/portal/ARCHITECTURE.md`](docs/portal/ARCHITECTURE.md).  
-Requires institutional valuation + qualified signature; **no mint** from portal.
-
-```bash
-cd portal/shared && npm i && npm test
-cd ../backend && npm i && npm test && npm run start:dev
-# separate terminal
-cd portal/frontend && npm i && npm run dev
-```
+See [`docs/HARDENING.md`](docs/HARDENING.md).
 
 ## Layers
 
 See [`docs/STRUCTURE.md`](docs/STRUCTURE.md) and [`docs/layers/`](docs/layers/).  
-Code under `src/nodechain`, `tx-encoding`, `processing`, `pot`, `token`, `commission`, `reserve`, `all-seeing-eye`, `governance`, `intake`.  
-Portal edge under `portal/{shared,backend,frontend}`.
+Code under `src/` (core) and `portal/` (edge only).
 
 ## Stack
 
-TypeScript, NestJS core + portal Nest edge, Next.js portal UI, Jest, Node ≥ 20.
+TypeScript · NestJS core + portal BFF · Next.js portal UI · Jest · Node ≥ 20 · Docker
+
+## License
+
+UNLICENSED — Aros Technology Studio. Contact for commercial use.

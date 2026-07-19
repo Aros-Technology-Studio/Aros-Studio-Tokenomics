@@ -1,7 +1,10 @@
-# Local ENV stack: AST core + Postgres index mirror
+# AST v1 stack — Core + Institutional Portal + optional Postgres index mirror
+# Usage: docker compose up --build
+# UI: http://localhost:3200  Edge: :3100  Core: :3000
 services:
   postgres:
     image: postgres:16-alpine
+    profiles: ["with-postgres"]
     environment:
       POSTGRES_USER: ast
       POSTGRES_PASSWORD: ast
@@ -17,22 +20,66 @@ services:
       timeout: 5s
       retries: 10
 
-  ast:
+  core:
     build: .
+    image: ghcr.io/aros-technology-studio/ast-core:latest
     environment:
+      NODE_ENV: production
       AST_JOURNAL_ENGINE: file
       AST_JOURNAL_DIR: /data/journal
       AST_REQUIRE_CRYPTO: "1"
-      DATABASE_URL: postgres://ast:ast@postgres:5432/ast_index
+      AST_KEY_PROVIDER: memory
       KILL_SWITCH: "false"
       PORT: "3000"
+      # Demo institution token (override in real deploy)
+      AST_INSTITUTION_TOKEN: ${AST_INSTITUTION_TOKEN:-demo-institution-token}
+      AST_REQUIRE_INSTITUTION_AUTH: ${AST_REQUIRE_INSTITUTION_AUTH:-0}
     ports:
       - "3000:3000"
     volumes:
       - ast_journal:/data
+    healthcheck:
+      test:
+        [
+          "CMD",
+          "node",
+          "-e",
+          "fetch('http://127.0.0.1:3000/health').then(r=>process.exit(r.ok?0:1)).catch(()=>process.exit(1))",
+        ]
+      interval: 15s
+      timeout: 5s
+      retries: 5
+      start_period: 25s
+
+  portal-edge:
+    build: ./portal/backend
+    image: ghcr.io/aros-technology-studio/ast-portal-edge:latest
+    environment:
+      NODE_ENV: production
+      PORTAL_PORT: "3100"
+      CORE_API_URL: http://core:3000
+      PORTAL_CORE_HANDOFF: "true"
+      AST_INSTITUTION_TOKEN: ${AST_INSTITUTION_TOKEN:-demo-institution-token}
+    ports:
+      - "3100:3100"
     depends_on:
-      postgres:
+      core:
         condition: service_healthy
+
+  portal-ui:
+    build:
+      context: ./portal/frontend
+      args:
+        # Browser calls edge on host-mapped port (local compose)
+        NEXT_PUBLIC_PORTAL_API_URL: ${NEXT_PUBLIC_PORTAL_API_URL:-http://localhost:3100}
+    image: ghcr.io/aros-technology-studio/ast-portal-ui:latest
+    environment:
+      PORT: "3200"
+      HOSTNAME: 0.0.0.0
+    ports:
+      - "3200:3200"
+    depends_on:
+      - portal-edge
 
 volumes:
   pgdata:

@@ -23,7 +23,8 @@ Order of work for AST. **Docs first**, then core. No freelanced code. No fake Do
 | 2 | Token & Emission | **Done** |
 | 3 | Orchestration | **Done** |
 | 4 | Governance & Release | **Done** (L3 LLM optional via env) |
-| 5 | Hardening | **In progress → Done for #68–#70** |
+| 5 | Hardening | **Done** (#68–#70) |
+| 6 | First public release (v1.0.0) | **Done** |
 
 ---
 
