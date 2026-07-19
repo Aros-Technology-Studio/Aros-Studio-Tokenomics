@@ -3,6 +3,8 @@ dist/
 coverage/
 .next/
 **/.next/
+.home-run/
+
 .env
 .env.*
 !.env.example

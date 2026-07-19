@@ -2,7 +2,12 @@
 
 import Link from 'next/link';
 import { useEffect, useState } from 'react';
-import { clearSession, loadSession, type PortalSession } from '../lib/session';
+import {
+  clearSession,
+  loadSession,
+  portalFetch,
+  type PortalSession,
+} from '../lib/session';
 import { useRouter } from 'next/navigation';
 
 export function AppHeader() {
@@ -16,10 +21,10 @@ export function AppHeader() {
   function logout() {
     const s = loadSession();
     if (s) {
-      void fetch(
-        `${process.env.NEXT_PUBLIC_PORTAL_API_URL ?? 'http://localhost:3100'}/v1/auth/logout`,
-        { method: 'POST', headers: { 'X-Session-Id': s.sessionId } },
-      );
+      void portalFetch('/v1/auth/logout', {
+        method: 'POST',
+        sessionId: s.sessionId,
+      });
     }
     clearSession();
     setSession(null);

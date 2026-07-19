@@ -13,6 +13,15 @@ Institutional process token-economy: **NodeChain** is the sole source-of-truth j
 | Portal | **Institutional client edge** (`portal/`) — login, hash, submit, status |
 | Ops | Docker Compose + GHCR images |
 
+## Home access (through your house)
+
+```bash
+bash scripts/home-up.sh          # Core + edge + UI on this machine
+bash scripts/home-tunnel.sh      # public HTTPS URL via Cloudflare (no domain)
+```
+
+See [`docs/HOME-ACCESS.md`](docs/HOME-ACCESS.md). LAN: `http://<your-LAN-IP>:3200`.
+
 ## Quick start (Docker)
 
 ```bash

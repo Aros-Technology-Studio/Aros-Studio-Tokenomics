@@ -31,8 +31,17 @@ export function clearSession(): void {
   localStorage.removeItem(KEY);
 }
 
+/**
+ * API base for browser calls.
+ * - empty / "same" → same-origin (Next rewrites /v1 → portal edge) — home / tunnel
+ * - absolute URL → direct edge (local split ports)
+ */
 export function apiBase(): string {
-  return process.env.NEXT_PUBLIC_PORTAL_API_URL ?? 'http://localhost:3100';
+  const env = process.env.NEXT_PUBLIC_PORTAL_API_URL;
+  if (env === undefined || env === '' || env === 'same' || env === 'same-origin') {
+    return '';
+  }
+  return env.replace(/\/$/, '');
 }
 
 export async function portalFetch(
@@ -44,5 +53,7 @@ export async function portalFetch(
   h.set('content-type', 'application/json');
   if (sessionId) h.set('X-Session-Id', sessionId);
   if (idempotencyKey) h.set('Idempotency-Key', idempotencyKey);
-  return fetch(`${apiBase()}${path}`, { ...rest, headers: h });
+  const base = apiBase();
+  const url = path.startsWith('http') ? path : `${base}${path}`;
+  return fetch(url, { ...rest, headers: h });
 }
