@@ -54,9 +54,15 @@ export default function LoginPage() {
   }
 
   return (
-    <div className="card" style={{ maxWidth: 440, margin: '2rem auto' }}>
+    <div className="card" style={{ maxWidth: 460, margin: '1.5rem auto' }}>
+      <p className="muted" style={{ marginTop: 0 }}>
+        Secure access
+      </p>
       <h1>Institution login</h1>
-      <p className="lead">Allowlisted institutions only. Token is never used to mint on the edge.</p>
+      <p className="lead">
+        Allowlisted institutions only. Your session binds all process submissions — the edge
+        never mints ARO.
+      </p>
       <form onSubmit={onSubmit}>
         <label htmlFor="inst">Institution</label>
         {institutions.length > 0 ? (
@@ -77,6 +83,7 @@ export default function LoginPage() {
             value={institutionId}
             onChange={(e) => setInstitutionId(e.target.value)}
             required
+            autoComplete="username"
           />
         )}
         <label htmlFor="token">Institution token</label>
@@ -88,11 +95,15 @@ export default function LoginPage() {
           required
           autoComplete="current-password"
         />
-        <button className="primary" type="submit" disabled={busy}>
-          {busy ? 'Signing in…' : 'Sign in'}
+        <button className="primary" type="submit" disabled={busy} style={{ width: '100%' }}>
+          {busy ? 'Signing in…' : 'Sign in to portal'}
         </button>
         {error && <p className="err">{error}</p>}
       </form>
+      <div className="callout" style={{ marginBottom: 0, marginTop: '1.1rem' }}>
+        <strong>Canon boundary.</strong> Portal is admission edge only. Economic finality is Core
+        + NodeChain after PoT.
+      </div>
     </div>
   );
 }

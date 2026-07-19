@@ -4,9 +4,12 @@ import './globals.css';
 import { AppHeader } from './app-header';
 
 export const metadata: Metadata = {
-  title: 'AST Institutional Portal',
+  title: {
+    default: 'Aros Financial Core — Institutional Portal',
+    template: '%s · Aros Financial Core',
+  },
   description:
-    'Institutional client portal for Aros Studio Tokenomics — submit primary tokenization to Core Orchestrator',
+    'Institutional client portal for primary tokenization. Edge admission → Core Orchestrator. No mint on the portal.',
 };
 
 export default function RootLayout({ children }: { children: ReactNode }) {
@@ -15,7 +18,11 @@ export default function RootLayout({ children }: { children: ReactNode }) {
       <body>
         <div className="shell">
           <AppHeader />
-          {children}
+          <main className="shell-main">{children}</main>
+          <footer className="footer">
+            <span>Aros Financial Core · AST Institutional Portal</span>
+            <span>Edge only · NodeChain remains source of truth</span>
+          </footer>
         </div>
       </body>
     </html>

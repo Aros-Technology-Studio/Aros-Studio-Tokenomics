@@ -77,6 +77,16 @@ describe('ProcessesService (institutional portal edge)', () => {
     assert.equal(svc.listForInstitution('ACME').length, 0);
   });
 
+  it('stats and status filter', async () => {
+    const svc = new ProcessesService(new StubCore('off'));
+    await svc.create(goodBody, 'DEMO', 'idem-stats-0001');
+    const st = svc.statsForInstitution('DEMO');
+    assert.equal(st.total, 1);
+    assert.ok(st.awaitingCore >= 1);
+    assert.equal(svc.listForInstitution('DEMO', { status: 'awaiting_core' }).length, 1);
+    assert.equal(svc.listForInstitution('DEMO', { status: 'submitted_to_core' }).length, 0);
+  });
+
   it('keeps awaiting_core when core down (no edge mint)', async () => {
     const svc = new ProcessesService(new StubCore('down'));
     const r = await svc.create(goodBody, 'DEMO', 'idem-core-down-01');

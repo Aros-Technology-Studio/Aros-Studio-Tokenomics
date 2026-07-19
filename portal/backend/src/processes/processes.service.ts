@@ -30,11 +30,46 @@ export class ProcessesService {
     this.core = core ?? new CoreApiClient();
   }
 
-  listForInstitution(institutionId: string): ProcessRecord[] {
+  listForInstitution(
+    institutionId: string,
+    opts?: { status?: string; limit?: number },
+  ): ProcessRecord[] {
     const inst = institutionId.toUpperCase();
-    return [...this.byId.values()]
+    let rows = [...this.byId.values()]
       .filter((r) => r.institutionId.toUpperCase() === inst)
       .sort((a, b) => b.createdAt.localeCompare(a.createdAt));
+    if (opts?.status?.trim()) {
+      const st = opts.status.trim().toLowerCase();
+      rows = rows.filter((r) => r.status.toLowerCase() === st);
+    }
+    if (opts?.limit && opts.limit > 0) {
+      rows = rows.slice(0, opts.limit);
+    }
+    return rows;
+  }
+
+  /** Dashboard KPIs for the institution (edge-tracked only). */
+  statsForInstitution(institutionId: string): {
+    institutionId: string;
+    total: number;
+    byStatus: Record<string, number>;
+    lastSubmittedAt: string | null;
+    submittedToCore: number;
+    awaitingCore: number;
+  } {
+    const rows = this.listForInstitution(institutionId);
+    const byStatus: Record<string, number> = {};
+    for (const r of rows) {
+      byStatus[r.status] = (byStatus[r.status] ?? 0) + 1;
+    }
+    return {
+      institutionId: institutionId.toUpperCase(),
+      total: rows.length,
+      byStatus,
+      lastSubmittedAt: rows[0]?.createdAt ?? null,
+      submittedToCore: byStatus['submitted_to_core'] ?? 0,
+      awaitingCore: byStatus['awaiting_core'] ?? 0,
+    };
   }
 
   async create(

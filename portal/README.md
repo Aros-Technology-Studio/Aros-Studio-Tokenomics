@@ -1,6 +1,14 @@
-# AST Institutional Portal
+# Aros Financial Core — Institutional Portal
 
-Production-oriented **edge** for institutional clients: login, document hashing, primary tokenization submit, process status.
+Product **edge UI + BFF** for institutional clients: branded login, dashboard KPIs, document hashing wizard, primary tokenization submit, process status pipeline.
+
+## Product surfaces
+
+| Surface | Stack | Port |
+|---------|-------|------|
+| UI | Next.js App Router | 3200 |
+| Edge API (BFF) | NestJS | 3100 |
+| Core (SoT path) | NestJS Orchestrator | 3000 |
 
 ## Canon boundary
 

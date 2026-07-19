@@ -7,6 +7,7 @@ import {
   Inject,
   Param,
   Post,
+  Query,
 } from '@nestjs/common';
 import type { AttachDocumentsBody, CreateProcessBody } from '../shared-bridge';
 import { ProcessesService } from './processes.service';
@@ -30,10 +31,24 @@ export class ProcessesController {
     return s;
   }
 
-  @Get()
-  list(@Headers('x-session-id') sessionId: string | undefined) {
+  @Get('stats')
+  stats(@Headers('x-session-id') sessionId: string | undefined) {
     const s = this.requireSession(sessionId);
-    const items = this.processes.listForInstitution(s.institutionId);
+    return this.processes.statsForInstitution(s.institutionId);
+  }
+
+  @Get()
+  list(
+    @Headers('x-session-id') sessionId: string | undefined,
+    @Query('status') status?: string,
+    @Query('limit') limitRaw?: string,
+  ) {
+    const s = this.requireSession(sessionId);
+    const limit = limitRaw ? Number(limitRaw) : undefined;
+    const items = this.processes.listForInstitution(s.institutionId, {
+      status,
+      limit: Number.isFinite(limit) ? limit : undefined,
+    });
     return {
       institutionId: s.institutionId,
       count: items.length,
@@ -43,6 +58,7 @@ export class ProcessesController {
         processType: r.processType,
         valuation: r.valuation,
         holderId: r.holderId,
+        documentPackageHash: r.documentPackageHash,
         createdAt: r.createdAt,
         updatedAt: r.updatedAt,
       })),
