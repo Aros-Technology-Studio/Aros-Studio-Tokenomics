@@ -52,18 +52,10 @@ export class AssetsController {
       );
     }
     return {
-      claimId: claim.processId,
-      processId: claim.processId,
-      status: claim.status,
-      processType: claim.processType,
-      valuation: claim.valuation,
-      holderId: claim.holderId,
-      assetId: claim.assetId,
-      documentPackageHash: claim.documentPackageHash,
-      hasQualifiedSignature: claim.hasQualifiedSignature,
-      createdAt: claim.createdAt,
-      updatedAt: claim.updatedAt,
-      note: claim.note,
+      ...claim,
+      processHistory: [],
+      ownership: [],
     };
   }
 }
+

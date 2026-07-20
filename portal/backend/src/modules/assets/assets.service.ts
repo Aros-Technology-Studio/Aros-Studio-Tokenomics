@@ -18,7 +18,10 @@ export class AssetsService {
       processId: r.processId,
       status: r.status,
       processType: r.processType,
+      assetType: extractAssetType(r.note),
+      currentValuation: r.valuation,
       valuation: r.valuation,
+      tokenSupply: null as string | null,
       holderId: r.holderId,
       assetId: r.assetId,
       documentPackageHash: r.documentPackageHash,
@@ -28,7 +31,14 @@ export class AssetsService {
   }
 
   getClaim(institutionId: string, claimId: string) {
-    const rows = this.processes.listForInstitution(institutionId);
-    return rows.find((r) => r.processId === claimId) ?? null;
+    const rows = this.listClaims(institutionId);
+    return rows.find((r) => r.claimId === claimId) ?? null;
   }
 }
+
+function extractAssetType(note?: string): string | undefined {
+  if (!note) return undefined;
+  const m = note.match(/assetType=([a-z_]+)/i);
+  return m?.[1];
+}
+

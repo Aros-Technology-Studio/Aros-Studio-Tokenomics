@@ -1,25 +1,43 @@
 openapi: 3.1.0
 info:
-  title: AST Institutional Portal Edge API
+  title: AST Institutional Portal API
   version: 1.0.0
   description: |
-    Edge API for institutional clients.
-    Login → document package hash → primary tokenization submit → status.
-    Aligns processId and idempotency with Core Orchestrator and Core Canon.
-    Does **not** mint; Core remains source of truth after hand-off.
+    Edge API for the institutional portal (AFC-side admission).
+
+    **Canon alignment (AST-CORE-CANON):**
+    - Portal does **not** mint, burn, or hold third-party funds.
+    - `processId` = `AST-{INST}-{YYYYMMDD}-{suffix}` (not UUID).
+    - Institutional valuation is accepted as given (decimal string); portal does not appraise.
+    - Document evidence: package hash + qualified signature attestation (full X.509 chain = follow-on).
+    - Economic finality only after Core Orchestrator + PoT on NodeChain.
+
+    **Auth (v1):** session after login (`X-Session-Id`).  
+    **Target:** Bearer JWT + mutual TLS (documented; not required in local demo).
+
 servers:
   - url: http://localhost:3100
-    description: Local portal backend
+    description: Local portal edge (BFF)
+  - url: https://api.arosfinancialcore.com
+    description: Production portal edge (when deployed)
+
 tags:
-  - name: health
   - name: auth
+  - name: health
+  - name: tokenization
   - name: documents
   - name: processes
+  - name: assets
+
+security:
+  - SessionAuth: []
+
 paths:
   /v1/health:
     get:
       tags: [health]
       operationId: getHealth
+      security: []
       summary: Liveness
       responses:
         '200':
@@ -29,11 +47,26 @@ paths:
               schema:
                 $ref: '#/components/schemas/HealthResponse'
 
+  /v1/health/ready:
+    get:
+      tags: [health]
+      operationId: getReady
+      security: []
+      summary: Readiness including Core reachability
+      responses:
+        '200':
+          description: Ready probe
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/HealthResponse'
+
   /v1/auth/institutions:
     get:
       tags: [auth]
       operationId: listInstitutions
-      summary: Public list of allowlisted institutions (ids + display names only)
+      security: []
+      summary: Allowlisted institutions (public ids)
       responses:
         '200':
           description: Institutions
@@ -46,33 +79,20 @@ paths:
                   institutions:
                     type: array
                     items:
-                      type: object
-                      required: [institutionId, displayName]
-                      properties:
-                        institutionId:
-                          type: string
-                        displayName:
-                          type: string
+                      $ref: '#/components/schemas/InstitutionPublic'
 
   /v1/auth/login:
     post:
       tags: [auth]
       operationId: login
-      summary: Institution login (allowlisted token)
+      security: []
+      summary: Institution login (allowlisted token) → session
       requestBody:
         required: true
         content:
           application/json:
             schema:
-              type: object
-              required: [institutionId, token]
-              properties:
-                institutionId:
-                  type: string
-                  example: DEMO
-                token:
-                  type: string
-                  example: demo-institution-token
+              $ref: '#/components/schemas/LoginRequest'
       responses:
         '200':
           description: Session issued
@@ -81,15 +101,13 @@ paths:
               schema:
                 $ref: '#/components/schemas/LoginResponse'
         '401':
-          $ref: '#/components/responses/Error'
+          $ref: '#/components/responses/Unauthorized'
 
   /v1/auth/me:
     get:
       tags: [auth]
       operationId: me
       summary: Current session
-      parameters:
-        - $ref: '#/components/parameters/SessionId'
       responses:
         '200':
           description: Session info
@@ -98,33 +116,140 @@ paths:
               schema:
                 $ref: '#/components/schemas/SessionInfo'
         '401':
-          $ref: '#/components/responses/Error'
+          $ref: '#/components/responses/Unauthorized'
 
   /v1/auth/logout:
     post:
       tags: [auth]
       operationId: logout
       summary: Invalidate session
+      responses:
+        '200':
+          description: Logged out
+
+  /v1/tokenization/start:
+    post:
+      tags: [tokenization]
+      operationId: startTokenization
+      summary: Start primary tokenization (edge admission)
+      description: |
+        Creates edge process and hands off to Core when available.
+        Requires Idempotency-Key. Does not mint.
+      parameters:
+        - $ref: '#/components/parameters/IdempotencyKey'
+        - $ref: '#/components/parameters/SessionId'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/StartTokenizationRequest'
+      responses:
+        '201':
+          description: Process accepted / submitted
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ProcessResponse'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '409':
+          $ref: '#/components/responses/Conflict'
+        '422':
+          $ref: '#/components/responses/Unprocessable'
+
+  /v1/processes:
+    get:
+      tags: [processes]
+      operationId: listProcesses
+      summary: List edge-tracked processes for session institution
+      parameters:
+        - $ref: '#/components/parameters/SessionId'
+        - name: status
+          in: query
+          schema:
+            $ref: '#/components/schemas/EdgeProcessStatus'
+        - name: limit
+          in: query
+          schema:
+            type: integer
+            minimum: 1
+      responses:
+        '200':
+          description: Process list
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ProcessList'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+    post:
+      tags: [processes]
+      operationId: createProcess
+      summary: Submit process (legacy path; same as tokenization/start)
+      parameters:
+        - $ref: '#/components/parameters/IdempotencyKey'
+        - $ref: '#/components/parameters/SessionId'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CreateProcessRequest'
+      responses:
+        '202':
+          description: Accepted
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ProcessResponse'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '422':
+          $ref: '#/components/responses/Unprocessable'
+
+  /v1/processes/stats:
+    get:
+      tags: [processes]
+      operationId: processStats
+      summary: Dashboard KPIs for institution
       parameters:
         - $ref: '#/components/parameters/SessionId'
       responses:
         '200':
-          description: Logged out
+          description: Stats
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+
+  /v1/processes/{processId}:
+    get:
+      tags: [processes]
+      operationId: getProcess
+      summary: Process status (edge + Core merge when available)
+      parameters:
+        - $ref: '#/components/parameters/ProcessId'
+        - $ref: '#/components/parameters/SessionId'
+      responses:
+        '200':
+          description: Current process state
           content:
             application/json:
               schema:
-                type: object
-                properties:
-                  ok:
-                    type: boolean
+                $ref: '#/components/schemas/ProcessResponse'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '404':
+          $ref: '#/components/responses/NotFound'
 
   /v1/documents/hash:
     post:
       tags: [documents]
       operationId: hashDocuments
       summary: SHA-256 document package at the edge
-      description: |
-        Does not store documents as SoT. Returns 64-hex hash for process submit.
       parameters:
         - $ref: '#/components/parameters/SessionId'
       requestBody:
@@ -141,123 +266,127 @@ paths:
               schema:
                 $ref: '#/components/schemas/HashDocumentsResponse'
         '401':
-          $ref: '#/components/responses/Error'
+          $ref: '#/components/responses/Unauthorized'
         '422':
-          $ref: '#/components/responses/Error'
+          $ref: '#/components/responses/Unprocessable'
 
-  /v1/processes:
-    get:
-      tags: [processes]
-      operationId: listProcesses
-      summary: List edge-tracked processes for the session institution
-      parameters:
-        - $ref: '#/components/parameters/SessionId'
-      responses:
-        '200':
-          description: Process list
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/ProcessList'
-        '401':
-          $ref: '#/components/responses/Error'
+  /v1/documents/upload:
     post:
-      tags: [processes]
-      operationId: createProcess
-      summary: Submit primary tokenization process (edge)
+      tags: [documents]
+      operationId: uploadDocument
+      summary: Upload document evidence with signature attestation
       description: |
-        Requires session, institutional valuation (decimal string), document package hash,
-        and qualified signature flag. Idempotency-Key mandatory.
-        Session institution overrides spoofed X-Institution-Id.
+        Accepts file content (or precomputed hash) plus signature material.
+        v1 verifies non-empty signature attestation + computes SHA-256 package hash.
+        Full X.509 КЭП chain validation is follow-on.
       parameters:
-        - $ref: '#/components/parameters/IdempotencyKey'
         - $ref: '#/components/parameters/SessionId'
-        - $ref: '#/components/parameters/InstitutionIdOptional'
+        - $ref: '#/components/parameters/IdempotencyKeyOptional'
       requestBody:
         required: true
         content:
           application/json:
             schema:
-              $ref: '#/components/schemas/CreateProcessRequest'
+              $ref: '#/components/schemas/DocumentUploadRequest'
+          multipart/form-data:
+            schema:
+              type: object
+              required: [processId, signature]
+              properties:
+                file:
+                  type: string
+                  format: binary
+                processId:
+                  type: string
+                  description: AST processId
+                signature:
+                  type: string
+                  description: Base64-encoded signature material (КЭП attestation)
+                fileName:
+                  type: string
       responses:
-        '202':
-          description: Accepted for Core hand-off
+        '200':
+          description: Document package recorded on edge
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/ProcessAccepted'
+                $ref: '#/components/schemas/DocumentUploadResponse'
         '400':
-          $ref: '#/components/responses/Error'
+          $ref: '#/components/responses/BadRequest'
         '401':
-          $ref: '#/components/responses/Error'
-        '403':
-          $ref: '#/components/responses/Error'
-        '409':
-          $ref: '#/components/responses/Error'
+          $ref: '#/components/responses/Unauthorized'
+        '404':
+          $ref: '#/components/responses/NotFound'
         '422':
-          $ref: '#/components/responses/Error'
+          $ref: '#/components/responses/Unprocessable'
 
-  /v1/processes/{processId}:
+  /v1/assets:
     get:
-      tags: [processes]
-      operationId: getProcess
-      summary: Get process status (merge edge + Core when available)
+      tags: [assets]
+      operationId: listAssets
+      summary: Claims / packages for current institution (read-only)
+      description: Not a wallet. Projection of edge-tracked processes / claims.
       parameters:
-        - $ref: '#/components/parameters/ProcessId'
         - $ref: '#/components/parameters/SessionId'
       responses:
         '200':
-          description: Process status
+          description: Asset claims
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/ProcessStatus'
+                $ref: '#/components/schemas/AssetList'
         '401':
-          $ref: '#/components/responses/Error'
-        '403':
-          $ref: '#/components/responses/Error'
-        '404':
-          $ref: '#/components/responses/Error'
+          $ref: '#/components/responses/Unauthorized'
 
-  /v1/processes/{processId}/documents:
-    post:
-      tags: [processes]
-      operationId: attachDocuments
-      summary: Attach / replace document package metadata on edge
+  /v1/assets/{claimId}:
+    get:
+      tags: [assets]
+      operationId: getAsset
+      summary: Claim detail
       parameters:
-        - $ref: '#/components/parameters/ProcessId'
-        - $ref: '#/components/parameters/IdempotencyKey'
+        - name: claimId
+          in: path
+          required: true
+          schema:
+            type: string
+            description: Usually equals processId
         - $ref: '#/components/parameters/SessionId'
-      requestBody:
-        required: true
-        content:
-          application/json:
-            schema:
-              $ref: '#/components/schemas/AttachDocumentsRequest'
       responses:
         '200':
-          description: Documents recorded on edge
+          description: Claim detail
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/ProcessStatus'
+                $ref: '#/components/schemas/AssetDetail'
         '401':
-          $ref: '#/components/responses/Error'
+          $ref: '#/components/responses/Unauthorized'
         '404':
-          $ref: '#/components/responses/Error'
-        '422':
-          $ref: '#/components/responses/Error'
+          $ref: '#/components/responses/NotFound'
 
 components:
+  securitySchemes:
+    SessionAuth:
+      type: apiKey
+      in: header
+      name: X-Session-Id
+      description: Session from POST /v1/auth/login (v1 demo / local)
+    BearerAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT
+      description: Target production institution OIDC/JWT
+    MutualTLS:
+      type: mutualTLS
+      description: Target production institution mTLS
+
   parameters:
-    ProcessId:
-      name: processId
-      in: path
+    SessionId:
+      name: X-Session-Id
+      in: header
       required: true
       schema:
         type: string
-        pattern: '^AST-[A-Za-z0-9]+-\d{8}-[A-Za-z0-9]+$'
-        example: AST-DEMO-20260719-a1b2c3d4e5f6
+        minLength: 16
     IdempotencyKey:
       name: Idempotency-Key
       in: header
@@ -266,40 +395,41 @@ components:
         type: string
         minLength: 8
         maxLength: 128
-      description: Mandatory; same key + payload must not open two processes
-    SessionId:
-      name: X-Session-Id
-      in: header
-      required: true
-      schema:
-        type: string
-        minLength: 16
-      description: Session from POST /v1/auth/login
-    InstitutionIdOptional:
-      name: X-Institution-Id
+    IdempotencyKeyOptional:
+      name: Idempotency-Key
       in: header
       required: false
       schema:
         type: string
-        minLength: 1
-        maxLength: 32
-      description: Optional; must match session institution if present
+        minLength: 8
+        maxLength: 128
+    ProcessId:
+      name: processId
+      in: path
+      required: true
+      schema:
+        type: string
+        pattern: '^AST-[A-Za-z0-9]+-\d{8}-[A-Za-z0-9]+$'
+        example: AST-DEMO-20260720-a1b2c3d4e5f6
 
   schemas:
-    HealthResponse:
+    InstitutionPublic:
       type: object
-      required: [status, service]
+      required: [institutionId, displayName]
       properties:
-        status:
+        institutionId:
           type: string
-          enum: [ok]
-        service:
+        displayName:
           type: string
-          example: portal-backend
-        coreHandOff:
+
+    LoginRequest:
+      type: object
+      required: [institutionId, token]
+      properties:
+        institutionId:
           type: string
-          enum: [live, disabled]
-        coreApiUrl:
+          example: DEMO
+        token:
           type: string
 
     LoginResponse:
@@ -327,41 +457,96 @@ components:
         expiresAt:
           type: string
           format: date-time
-
-    HashDocumentsRequest:
-      type: object
-      properties:
-        rawPackage:
+        product:
           type: string
-          description: Pre-concatenated package string
-        parts:
-          type: array
-          items:
-            type: object
-            required: [name, content]
-            properties:
-              name:
-                type: string
-              content:
-                type: string
-              encoding:
-                type: string
-                enum: [utf8, base64]
-                default: utf8
+        capabilities:
+          type: object
+          properties:
+            primaryTokenization:
+              type: boolean
+            documentHash:
+              type: boolean
+            coreHandOff:
+              type: boolean
+            mintOnEdge:
+              type: boolean
+              enum: [false]
 
-    HashDocumentsResponse:
+    HealthResponse:
       type: object
-      required: [documentPackageHash, institutionId]
       properties:
+        status:
+          type: string
+        service:
+          type: string
+        product:
+          type: string
+        version:
+          type: string
+        coreHandOff:
+          type: string
+        coreApiUrl:
+          type: string
+        core:
+          type: object
+          additionalProperties: true
+
+    EdgeProcessStatus:
+      type: string
+      enum:
+        - accepted
+        - awaiting_core
+        - documents_pending
+        - submitted_to_core
+        - rejected
+        - duplicate
+        - created
+        - pot_pending
+        - completed
+        - failed
+        - expired
+
+    AssetType:
+      type: string
+      enum: [real_estate, bond, investment_package, other]
+
+    StartTokenizationRequest:
+      type: object
+      required:
+        - institutionalValuation
+        - holderId
+        - hasQualifiedSignature
+        - documentPackageHash
+      properties:
+        assetType:
+          $ref: '#/components/schemas/AssetType'
+        institutionalValuation:
+          type: string
+          description: Official institutional valuation as decimal string (ARO, max 9 fraction digits)
+          pattern: '^-?\d+(\.\d{1,9})?$'
+          example: '1000000.000000000'
+        currency:
+          type: string
+          description: Original valuation currency label (metadata). Mint path uses ARO process unit.
+          example: GEL
+        holderId:
+          type: string
+        assetId:
+          type: string
+        hasQualifiedSignature:
+          type: boolean
         documentPackageHash:
           type: string
           pattern: '^[a-fA-F0-9]{64}$'
-        institutionId:
+        processId:
           type: string
-        byteLength:
-          type: integer
-        partCount:
-          type: integer
+          pattern: '^AST-[A-Za-z0-9]+-\d{8}-[A-Za-z0-9]+$'
+        metadata:
+          type: object
+          additionalProperties: true
+        note:
+          type: string
+          maxLength: 512
 
     CreateProcessRequest:
       type: object
@@ -372,73 +557,62 @@ components:
         - hasQualifiedSignature
         - documentPackageHash
       properties:
-        processId:
-          type: string
-          description: Optional client processId; must match AST-{INST}-{YYYYMMDD}-{suffix}
-          pattern: '^AST-[A-Za-z0-9]+-\d{8}-[A-Za-z0-9]+$'
         processType:
           type: string
           enum: [primary_tokenization, revaluation, ownership_transfer]
         valuation:
           type: string
-          description: Institutional valuation as decimal string (max 9 fraction digits)
           pattern: '^-?\d+(\.\d{1,9})?$'
-          example: '1000000.000000000'
         holderId:
           type: string
         assetId:
           type: string
         hasQualifiedSignature:
           type: boolean
-          description: Must be true — qualified institutional signature present
         documentPackageHash:
           type: string
-          description: SHA-256 hex of document package
           pattern: '^[a-fA-F0-9]{64}$'
+        processId:
+          type: string
         note:
           type: string
-          maxLength: 512
 
-    AttachDocumentsRequest:
+    ProcessResponse:
       type: object
-      required:
-        - documentPackageHash
-        - hasQualifiedSignature
-      properties:
-        documentPackageHash:
-          type: string
-          pattern: '^[a-fA-F0-9]{64}$'
-        hasQualifiedSignature:
-          type: boolean
-        documentCount:
-          type: integer
-          minimum: 1
-
-    ProcessAccepted:
-      type: object
-      required:
-        - processId
-        - idempotencyKey
-        - status
-        - institutionId
-        - valuation
-        - hasQualifiedSignature
       properties:
         processId:
           type: string
-        idempotencyKey:
+          example: AST-DEMO-20260720-a1b2c3d4e5f6
+        claimId:
           type: string
+          nullable: true
+          description: Claim id (v1 equals processId)
         status:
+          $ref: '#/components/schemas/EdgeProcessStatus'
+        currentStep:
           type: string
-          enum: [accepted, awaiting_core, submitted_to_core, duplicate]
+          description: Human/pipeline step label
         institutionId:
           type: string
         valuation:
           type: string
-        hasQualifiedSignature:
-          type: boolean
+        holderId:
+          type: string
+        assetType:
+          $ref: '#/components/schemas/AssetType'
         documentPackageHash:
           type: string
+        idempotencyKey:
+          type: string
+        createdAt:
+          type: string
+          format: date-time
+        updatedAt:
+          type: string
+          format: date-time
+        source:
+          type: string
+          enum: [edge, core]
         message:
           type: string
         core:
@@ -459,54 +633,133 @@ components:
         processes:
           type: array
           items:
-            type: object
-            properties:
-              processId:
-                type: string
-              status:
-                type: string
-              processType:
-                type: string
-              valuation:
-                type: string
-              holderId:
-                type: string
-              createdAt:
-                type: string
-                format: date-time
-              updatedAt:
-                type: string
-                format: date-time
+            $ref: '#/components/schemas/ProcessResponse'
 
-    ProcessStatus:
+    HashDocumentsRequest:
       type: object
-      required: [processId]
       properties:
-        processId:
+        rawPackage:
           type: string
-        status:
-          type: string
-        source:
-          type: string
-          enum: [edge, core]
-        processType:
+        parts:
+          type: array
+          items:
+            type: object
+            required: [name, content]
+            properties:
+              name:
+                type: string
+              content:
+                type: string
+              encoding:
+                type: string
+                enum: [utf8, base64]
+
+    HashDocumentsResponse:
+      type: object
+      required: [documentPackageHash, institutionId]
+      properties:
+        documentPackageHash:
           type: string
         institutionId:
           type: string
-        valuation:
+        byteLength:
+          type: integer
+        partCount:
+          type: integer
+
+    DocumentUploadRequest:
+      type: object
+      required: [processId, signature]
+      properties:
+        processId:
           type: string
-        hasQualifiedSignature:
-          type: boolean
+        signature:
+          type: string
+          description: Base64 signature material or attestation token
+        fileName:
+          type: string
+        contentBase64:
+          type: string
+          description: Optional file bytes as base64; used to compute package hash
         documentPackageHash:
           type: string
-        idempotencyKey:
+          description: Optional precomputed SHA-256 hex (64 chars)
+        hasQualifiedSignature:
+          type: boolean
+          default: true
+
+    DocumentUploadResponse:
+      type: object
+      properties:
+        documentId:
           type: string
-        updatedAt:
+        processId:
           type: string
-          format: date-time
-        edge:
-          type: object
-          additionalProperties: true
+        documentPackageHash:
+          type: string
+        status:
+          type: string
+          enum: [accepted, rejected]
+        rejectionReason:
+          type: string
+          nullable: true
+
+    AssetSummary:
+      type: object
+      properties:
+        claimId:
+          type: string
+        processId:
+          type: string
+        assetType:
+          type: string
+        currentValuation:
+          type: string
+        tokenSupply:
+          type: string
+          description: Only when Core returns mint amount; null/omit if not settled
+          nullable: true
+        status:
+          type: string
+        holderId:
+          type: string
+
+    AssetDetail:
+      allOf:
+        - $ref: '#/components/schemas/AssetSummary'
+        - type: object
+          properties:
+            documentPackageHash:
+              type: string
+            createdAt:
+              type: string
+              format: date-time
+            updatedAt:
+              type: string
+              format: date-time
+            processHistory:
+              type: array
+              items:
+                type: object
+                additionalProperties: true
+            ownership:
+              type: array
+              items:
+                type: object
+                additionalProperties: true
+
+    AssetList:
+      type: object
+      required: [institutionId, count, claims]
+      properties:
+        institutionId:
+          type: string
+        count:
+          type: integer
+        claims:
+          type: array
+          items:
+            $ref: '#/components/schemas/AssetSummary'
 
     ErrorBody:
       type: object
@@ -514,21 +767,6 @@ components:
       properties:
         code:
           type: string
-          enum:
-            - VALIDATION_ERROR
-            - MISSING_VALUATION
-            - MISSING_QUALIFIED_SIGNATURE
-            - MISSING_DOCUMENTS
-            - INVALID_PROCESS_ID
-            - IDEMPOTENCY_REQUIRED
-            - IDEMPOTENCY_PAYLOAD_MISMATCH
-            - NOT_FOUND
-            - FORBIDDEN
-            - AUTH_REQUIRED
-            - AUTH_INVALID
-            - AUTH_NOT_ALLOWLISTED
-            - AUTH_SESSION
-            - EMPTY_PACKAGE
         message:
           type: string
         details:
@@ -537,8 +775,38 @@ components:
             type: string
 
   responses:
-    Error:
-      description: Error
+    BadRequest:
+      description: Bad request
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorBody'
+    Unauthorized:
+      description: Authentication required
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorBody'
+    Forbidden:
+      description: Forbidden
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorBody'
+    NotFound:
+      description: Not found
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorBody'
+    Conflict:
+      description: Conflict (idempotency / duplicate)
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorBody'
+    Unprocessable:
+      description: Validation failed
       content:
         application/json:
           schema:
