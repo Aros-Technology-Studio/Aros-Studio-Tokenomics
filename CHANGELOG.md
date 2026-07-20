@@ -1,36 +1,25 @@
 # Changelog
 
-## 1.0.0 — 2026-07-19
+## 1.1.0 — 2026-07-20
 
-First public release of Aros Studio Tokenomics (AST).
+**Production portal release (no demo defaults).**
 
-### Core
-- NodeChain journal (memory / file / RocksDB) with Ed25519
-- PoT P1–P4, M-of-N, attestations, challenges
-- Encoding, Processing FSM, Token / Emission / Commission 70/30 / Reserve
-- Orchestrator + Core API `/v1/core/*`
-- Governance L1–L3 (policy + optional LLM adapters)
-- All-Seeing Eye (observe/notify only)
-- Release daemon, oracle gateway, partial-release
-- Hardening: kill-switch, HSM KeyProvider, JournalReplicator, institution auth
+### Breaking / operational
+- Production (`NODE_ENV=production`) does **not** load DEMO/ACME unless `AST_ALLOW_DEMO=1`
+- Real institutions: **`AST_INSTITUTION_SECRETS_JSON` only**
+- Login UI: no pre-filled demo credentials
+- `docker-compose.prod.yml` + `.env.production.example`
 
-### Institutional Portal (edge)
-- Nest BFF: login/session, document package SHA-256, process list/create/status
-- Next.js UI: login, dashboard, new primary tokenization, status
-- Hand-off to Core Orchestrator — **no mint on edge**
-- OpenAPI `portal/openapi/openapi.yaml`
+### Portal product
+- Public site: about, system boundaries, explore (no auth)
+- Cabinet: dashboard, tokenization, assets, history
+- OpenAPI product paths: `/v1/tokenization/start`, `/v1/documents/upload`, `/v1/public/*`
+- Module layout under `portal/backend/src/modules/*`
 
 ### Ops
-- Production Docker images (core, portal-edge, portal-ui)
-- `docker compose` full stack
-- GitHub Actions release → GHCR on `v*` tags
-- Release runbook: `docs/RELEASE.md`
+- `scripts/release-check.sh`
+- GHCR images tag `1.1.0` on `v1.1.0` release workflow
 
-## Prior (pre-1.0)
+## 1.0.0 — 2026-07-19
 
-### Environment
-- NestJS/TS workspace, Docker + compose, Postgres index schema
-- Solidity representation workspace (Foundry)
-- Optional Rust companion crates
-- Full AST guard workflows + `invariants.yml`
-- Expanded `rules/AST_RULES.yaml` (I1–I9, 70/30, firewall)
+First public release: core economic path + portal edge scaffold/product path with demo credentials for local try-out.

@@ -6,8 +6,8 @@ import { apiBase, loadSession, saveSession } from '../../../lib/auth';
 
 export default function LoginPage() {
   const router = useRouter();
-  const [institutionId, setInstitutionId] = useState('DEMO');
-  const [token, setToken] = useState('demo-institution-token');
+  const [institutionId, setInstitutionId] = useState('');
+  const [token, setToken] = useState('');
   const [error, setError] = useState<string | null>(null);
   const [busy, setBusy] = useState(false);
   const [institutions, setInstitutions] = useState<
@@ -70,7 +70,11 @@ export default function LoginPage() {
             id="inst"
             value={institutionId}
             onChange={(e) => setInstitutionId(e.target.value)}
+            required
           >
+            <option value="" disabled>
+              Select institution…
+            </option>
             {institutions.map((i) => (
               <option key={i.institutionId} value={i.institutionId}>
                 {i.displayName} ({i.institutionId})
@@ -84,6 +88,7 @@ export default function LoginPage() {
             onChange={(e) => setInstitutionId(e.target.value)}
             required
             autoComplete="username"
+            placeholder="Institution id"
           />
         )}
         <label htmlFor="token">Institution token</label>
@@ -94,15 +99,21 @@ export default function LoginPage() {
           onChange={(e) => setToken(e.target.value)}
           required
           autoComplete="current-password"
+          placeholder="Provided by operator"
         />
         <button className="primary" type="submit" disabled={busy} style={{ width: '100%' }}>
           {busy ? 'Signing in…' : 'Sign in to portal'}
         </button>
         {error && <p className="err">{error}</p>}
+        {institutions.length === 0 && (
+          <p className="muted" style={{ marginTop: '0.75rem' }}>
+            No public institution list (production). Enter credentials issued by the operator.
+          </p>
+        )}
       </form>
       <div className="callout" style={{ marginBottom: 0, marginTop: '1.1rem' }}>
         <strong>Canon boundary.</strong> Portal is admission edge only. Economic finality is Core
-        + NodeChain after PoT.
+        + NodeChain after PoT. No demo credentials on this form.
       </div>
     </div>
   );

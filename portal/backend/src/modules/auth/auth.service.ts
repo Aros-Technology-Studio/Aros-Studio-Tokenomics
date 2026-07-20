@@ -4,7 +4,7 @@ import { createHash, randomBytes, timingSafeEqual } from 'crypto';
 export interface InstitutionAccount {
   institutionId: string;
   displayName: string;
-  /** Shared secret (dev). Prod: mTLS / OIDC. */
+  /** Shared secret (v1). Prod target: mTLS / OIDC + secrets store. */
   token: string;
   allowlisted: boolean;
 }
@@ -45,6 +45,14 @@ export class AuthService {
         ok: false,
         code: 'AUTH_REQUIRED',
         message: 'institutionId and token required',
+      };
+    }
+    if (this.accounts.size === 0) {
+      return {
+        ok: false,
+        code: 'AUTH_NOT_CONFIGURED',
+        message:
+          'no institutions configured — set AST_INSTITUTION_SECRETS_JSON (production)',
       };
     }
     const acc = this.accounts.get(institutionId.trim().toUpperCase());
@@ -97,6 +105,10 @@ export class AuthService {
       .map((a) => ({ institutionId: a.institutionId, displayName: a.displayName }))
       .sort((a, b) => a.institutionId.localeCompare(b.institutionId));
   }
+
+  configuredCount(): number {
+    return this.accounts.size;
+  }
 }
 
 function tokensEqual(a: string, b: string): boolean {
@@ -106,15 +118,32 @@ function tokensEqual(a: string, b: string): boolean {
   return timingSafeEqual(ba, bb);
 }
 
-function loadAccounts(): InstitutionAccount[] {
-  const json = process.env.AST_INSTITUTION_SECRETS_JSON;
+/**
+ * Production: only AST_INSTITUTION_SECRETS_JSON (required for any login).
+ * Local/dev: set AST_ALLOW_DEMO=1 for built-in DEMO/ACME (never default in production).
+ */
+export function loadAccounts(): InstitutionAccount[] {
+  const json = process.env.AST_INSTITUTION_SECRETS_JSON?.trim();
   if (json) {
     try {
-      return JSON.parse(json) as InstitutionAccount[];
+      const parsed = JSON.parse(json) as InstitutionAccount[];
+      if (Array.isArray(parsed) && parsed.length > 0) {
+        return parsed.map((a) => ({
+          institutionId: String(a.institutionId ?? '').toUpperCase(),
+          displayName: String(a.displayName ?? a.institutionId ?? 'Institution'),
+          token: String(a.token ?? ''),
+          allowlisted: a.allowlisted !== false,
+        })).filter((a) => a.institutionId && a.token);
+      }
     } catch {
       /* fallthrough */
     }
   }
+
+  if (!allowDemoInstitutions()) {
+    return [];
+  }
+
   return [
     {
       institutionId: 'DEMO',
@@ -125,10 +154,18 @@ function loadAccounts(): InstitutionAccount[] {
     {
       institutionId: 'ACME',
       displayName: 'ACME Capital Markets',
-      token: 'acme-institution-token',
+      token: process.env.AST_ACME_TOKEN ?? 'acme-institution-token',
       allowlisted: true,
     },
   ];
+}
+
+function allowDemoInstitutions(): boolean {
+  const flag = process.env.AST_ALLOW_DEMO;
+  if (flag === '1' || flag === 'true') return true;
+  if (flag === '0' || flag === 'false') return false;
+  // Default: demo only outside production
+  return (process.env.NODE_ENV ?? 'development') !== 'production';
 }
 
 export function sha256Hex(text: string): string {

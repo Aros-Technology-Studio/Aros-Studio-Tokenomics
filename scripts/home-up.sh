@@ -13,7 +13,10 @@ export AST_JOURNAL_ENGINE="${AST_JOURNAL_ENGINE:-file}"
 export AST_JOURNAL_DIR="${AST_JOURNAL_DIR:-$ROOT/data/journal-home}"
 export AST_REQUIRE_CRYPTO="${AST_REQUIRE_CRYPTO:-0}"
 export AST_KEY_PROVIDER="${AST_KEY_PROVIDER:-memory}"
-export AST_INSTITUTION_TOKEN="${AST_INSTITUTION_TOKEN:-demo-institution-token}"
+export AST_INSTITUTION_TOKEN="${AST_INSTITUTION_TOKEN:-}"
+export AST_INSTITUTION_SECRETS_JSON="${AST_INSTITUTION_SECRETS_JSON:-}"
+export AST_ALLOW_DEMO="${AST_ALLOW_DEMO:-1}"
+export NODE_ENV="${NODE_ENV:-development}"
 export KILL_SWITCH="${KILL_SWITCH:-false}"
 export PORT="${PORT:-3000}"
 export PORTAL_PORT="${PORTAL_PORT:-3100}"
@@ -22,6 +25,7 @@ export PORTAL_CORE_HANDOFF="${PORTAL_CORE_HANDOFF:-true}"
 # Browser uses same-origin rewrites (home / public tunnel)
 export NEXT_PUBLIC_PORTAL_API_URL="${NEXT_PUBLIC_PORTAL_API_URL:-}"
 export PORTAL_EDGE_URL="${PORTAL_EDGE_URL:-http://127.0.0.1:3100}"
+
 
 mkdir -p "$AST_JOURNAL_DIR"
 
@@ -48,19 +52,24 @@ stop_pids
 
 echo "==> Starting Core :$PORT"
 nohup env PORT="$PORT" \
+  NODE_ENV="$NODE_ENV" \
   AST_JOURNAL_ENGINE="$AST_JOURNAL_ENGINE" \
   AST_JOURNAL_DIR="$AST_JOURNAL_DIR" \
   AST_KEY_PROVIDER="$AST_KEY_PROVIDER" \
   AST_INSTITUTION_TOKEN="$AST_INSTITUTION_TOKEN" \
+  AST_INSTITUTION_SECRETS_JSON="$AST_INSTITUTION_SECRETS_JSON" \
   KILL_SWITCH="$KILL_SWITCH" \
   node dist/src/main.js >"$LOG_DIR/core.log" 2>&1 &
 echo $! >"$LOG_DIR/core.pid"
 
 echo "==> Starting Portal edge :$PORTAL_PORT"
 nohup env PORTAL_PORT="$PORTAL_PORT" \
+  NODE_ENV="$NODE_ENV" \
+  AST_ALLOW_DEMO="$AST_ALLOW_DEMO" \
   CORE_API_URL="$CORE_API_URL" \
   PORTAL_CORE_HANDOFF="$PORTAL_CORE_HANDOFF" \
   AST_INSTITUTION_TOKEN="$AST_INSTITUTION_TOKEN" \
+  AST_INSTITUTION_SECRETS_JSON="$AST_INSTITUTION_SECRETS_JSON" \
   npm --prefix portal/backend run start:dev >"$LOG_DIR/edge.log" 2>&1 &
 echo $! >"$LOG_DIR/edge.pid"
 
@@ -78,7 +87,7 @@ echo "  LAN UI:   http://${LAN_IP}:3200"
 echo "  Local:    http://127.0.0.1:3200"
 echo "  Core:     http://${LAN_IP}:3000/health"
 echo "  Edge:     http://${LAN_IP}:3100/v1/health"
-echo "  Login:    DEMO / demo-institution-token"
+echo "  Login:    production → AST_INSTITUTION_SECRETS_JSON; local demo → AST_ALLOW_DEMO=1"
 echo "  Logs:     $LOG_DIR/*.log"
 echo "  Stop:     bash scripts/home-down.sh"
 echo ""
