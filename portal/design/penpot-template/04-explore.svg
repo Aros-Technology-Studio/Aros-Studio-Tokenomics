@@ -1,0 +1,38 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1440" height="900" viewBox="0 0 1440 900" fill="none">
+  <rect width="1440" height="900" fill="#F4F4F5"/>
+  <rect x="0" y="0" width="1440" height="72" fill="#E4E4E7" stroke="#A1A1AA"/>
+  <text x="48" y="42" font-family="system-ui,sans-serif" font-size="12" fill="#52525B">HEADER</text>
+
+  <rect x="120" y="100" width="1200" height="160" fill="#E4E4E7" stroke="#71717A" stroke-width="2"/>
+  <text x="140" y="130" font-family="system-ui,sans-serif" font-size="14" fill="#3F3F46">BLOCK: HERO</text>
+  <rect x="140" y="150" width="700" height="36" fill="#D4D4D8"/>
+  <text x="145" y="173" font-family="system-ui,sans-serif" font-size="14" fill="#27272A">H1</text>
+  <rect x="140" y="200" width="800" height="36" fill="#D4D4D8"/>
+  <text x="145" y="222" font-family="system-ui,sans-serif" font-size="11" fill="#52525B">lead</text>
+
+  <!-- SEARCH -->
+  <rect x="220" y="290" width="1000" height="160" fill="#E4E4E7" stroke="#71717A" stroke-width="2"/>
+  <text x="240" y="320" font-family="system-ui,sans-serif" font-size="14" fill="#3F3F46">BLOCK: SEARCH</text>
+  <text x="240" y="350" font-family="system-ui,sans-serif" font-size="11" fill="#52525B">label</text>
+  <rect x="240" y="360" width="720" height="48" fill="#FAFAFA" stroke="#71717A"/>
+  <text x="255" y="390" font-family="system-ui,sans-serif" font-size="13" fill="#A1A1AA">input</text>
+  <rect x="980" y="360" width="200" height="48" fill="#A1A1AA"/>
+  <text x="1040" y="390" font-family="system-ui,sans-serif" font-size="13" fill="#FAFAFA">BTN</text>
+
+  <!-- RESULT -->
+  <rect x="220" y="480" width="1000" height="320" fill="#E4E4E7" stroke="#71717A" stroke-width="2"/>
+  <text x="240" y="510" font-family="system-ui,sans-serif" font-size="14" fill="#3F3F46">BLOCK: RESULT</text>
+  <rect x="240" y="530" width="100" height="28" fill="#D4D4D8"/><text x="255" y="549" font-family="system-ui,sans-serif" font-size="11" fill="#52525B">badge</text>
+  <rect x="350" y="530" width="100" height="28" fill="#D4D4D8"/><text x="365" y="549" font-family="system-ui,sans-serif" font-size="11" fill="#52525B">badge</text>
+  <rect x="240" y="575" width="700" height="32" fill="#D4D4D8"/>
+  <text x="250" y="596" font-family="system-ui,sans-serif" font-size="13" fill="#27272A">processId / title</text>
+  <rect x="240" y="620" width="400" height="24" fill="#D4D4D8"/>
+  <text x="250" y="637" font-family="system-ui,sans-serif" font-size="11" fill="#52525B">field line</text>
+  <rect x="240" y="655" width="400" height="24" fill="#D4D4D8"/>
+  <text x="250" y="672" font-family="system-ui,sans-serif" font-size="11" fill="#52525B">field line</text>
+  <rect x="240" y="700" width="900" height="70" fill="#D4D4D8" stroke="#A1A1AA"/>
+  <text x="255" y="740" font-family="system-ui,sans-serif" font-size="12" fill="#52525B">detail / raw block (optional)</text>
+
+  <rect x="0" y="840" width="1440" height="60" fill="#E4E4E7" stroke="#A1A1AA"/>
+  <text x="48" y="875" font-family="system-ui,sans-serif" font-size="12" fill="#52525B">FOOTER</text>
+</svg>
