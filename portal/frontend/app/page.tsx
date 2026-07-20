@@ -20,7 +20,7 @@ export default function HomePage() {
               Institution login
             </button>
           </Link>
-          <Link href="/login">
+          <Link href="/dashboard">
             <button type="button" className="secondary">
               Open dashboard
             </button>

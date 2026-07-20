@@ -1,79 +1,51 @@
 # Aros Financial Core — Institutional Portal
 
-Product **edge UI + BFF** for institutional clients: branded login, dashboard KPIs, document hashing wizard, primary tokenization submit, process status pipeline.
+Product **edge UI + BFF** for institutional clients.
 
-## Product surfaces
+## Structure
 
-| Surface | Stack | Port |
-|---------|-------|------|
-| UI | Next.js App Router | 3200 |
-| Edge API (BFF) | NestJS | 3100 |
-| Core (SoT path) | NestJS Orchestrator | 3000 |
+See [`docs/portal/STRUCTURE.md`](../docs/portal/STRUCTURE.md) for the target tree and Canon map.
 
-## Canon boundary
-
-| Portal does | Portal does not |
-|-------------|-----------------|
-| Authenticate allowlisted institutions | Mint / burn ARO |
-| Collect valuation + document package hash + КЭП flag | Bypass PoT / NodeChain |
-| Hand off to Core Orchestrator | Hold third-party funds |
-| Show process status from Core | All-Seeing Eye veto |
-
-## Run (3 terminals)
-
-```bash
-# 1) Core
-cd /path/to/Aros-Studio-Tokenomics
-PORT=3000 npm run start:dev
-
-# 2) Portal edge API
-CORE_API_URL=http://localhost:3000 \
-AST_INSTITUTION_TOKEN=demo-institution-token \
-PORTAL_PORT=3100 \
-npm --prefix portal/backend run start:dev
-
-# 3) Portal UI
-NEXT_PUBLIC_PORTAL_API_URL=http://localhost:3100 \
-npm --prefix portal/frontend run dev
-# → http://localhost:3200
+```
+portal/
+├── frontend/     # Next.js App Router — (auth), (dashboard), components, lib, types
+├── backend/      # NestJS — src/modules/{auth,processes,documents,assets,health,tokenization}
+├── shared/       # admission validation + processId helpers
+└── openapi/
 ```
 
-### Dev login
-
-| Field | Value |
-|-------|--------|
-| Institution | `DEMO` |
-| Token | `demo-institution-token` |
-
-Also available: `ACME` / `acme-institution-token`.
-
-## API (edge)
-
-| Method | Path | Auth |
-|--------|------|------|
-| GET | `/v1/auth/institutions` | public |
-| POST | `/v1/auth/login` | public |
-| GET | `/v1/auth/me` | `X-Session-Id` |
-| POST | `/v1/documents/hash` | session |
-| GET | `/v1/processes` | session — list |
-| POST | `/v1/processes` | session + `Idempotency-Key` |
-| GET | `/v1/processes/:id` | session |
-
-## UI routes
+## Routes (UI)
 
 | Path | Page |
 |------|------|
 | `/` | Landing |
 | `/login` | Institution login |
-| `/dashboard` | Process list |
-| `/processes/new` | Primary tokenization wizard |
-| `/processes/[id]` | Status (edge + core) |
+| `/dashboard` | KPIs + process table |
+| `/tokenization` | New primary package (wizard) |
+| `/tokenization/[processId]` | Status pipeline |
+| `/assets` | Claims list (read-only) |
+| `/assets/[claimId]` | Claim detail |
+| `/history` | Submission history |
 
-## Tests
+## Edge API
+
+| Method | Path |
+|--------|------|
+| POST | `/v1/auth/login` |
+| GET | `/v1/processes`, `/v1/processes/stats`, `/v1/processes/:id` |
+| POST | `/v1/processes` |
+| POST | `/v1/documents/hash` |
+| GET | `/v1/assets`, `/v1/assets/:claimId` |
+| GET | `/v1/health`, `/v1/health/ready` |
+
+**No mint on edge.** Core remains SoT after hand-off.
+
+## Run
 
 ```bash
-npm --prefix portal/shared test
-npm --prefix portal/backend test
+# Core :3000, edge :3100, UI :3200
+bash scripts/home-up.sh
+# or see portal package scripts / docker compose
 ```
 
-Architecture: [`docs/portal/ARCHITECTURE.md`](../docs/portal/ARCHITECTURE.md)
+**Demo login:** `DEMO` / `demo-institution-token`

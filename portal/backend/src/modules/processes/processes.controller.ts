@@ -9,7 +9,7 @@ import {
   Post,
   Query,
 } from '@nestjs/common';
-import type { AttachDocumentsBody, CreateProcessBody } from '../shared-bridge';
+import type { AttachDocumentsBody, CreateProcessBody } from '../../common/shared-bridge';
 import { ProcessesService } from './processes.service';
 import { AuthService } from '../auth/auth.service';
 

@@ -8,8 +8,8 @@ import {
   type CreateProcessBody,
   type PortalErrorBody,
   type ProcessRecord,
-} from '../shared-bridge';
-import { CoreApiClient } from '../core-client';
+} from '../../common/shared-bridge';
+import { CoreApiClient } from '../../common/core-client';
 
 export interface CreateResult {
   statusCode: number;

@@ -1,7 +1,7 @@
 import { describe, it } from 'node:test';
 import assert from 'node:assert/strict';
 import { ProcessesService } from './processes.service';
-import { CoreApiClient } from '../core-client';
+import { CoreApiClient } from '../../common/core-client';
 
 const hash = 'b'.repeat(64);
 const goodBody = {

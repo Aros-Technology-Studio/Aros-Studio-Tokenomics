@@ -3,7 +3,7 @@
 import { FormEvent, useEffect, useMemo, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
-import { loadSession, portalFetch } from '../../../lib/session';
+import { loadSession, portalFetch } from '../../../lib/auth';
 
 function randomIdem(): string {
   if (typeof crypto !== 'undefined' && crypto.randomUUID) return crypto.randomUUID();
@@ -112,7 +112,7 @@ export default function NewProcessPage() {
       setResult(JSON.stringify(data, null, 2));
       if (data.processId) {
         setTimeout(() => {
-          router.push(`/processes/${encodeURIComponent(data.processId)}`);
+          router.push(`/tokenization/${encodeURIComponent(data.processId)}`);
         }, 700);
       }
     } catch (err) {

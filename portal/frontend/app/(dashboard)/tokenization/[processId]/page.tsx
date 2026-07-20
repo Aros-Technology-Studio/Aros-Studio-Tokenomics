@@ -3,9 +3,9 @@
 import { useCallback, useEffect, useState } from 'react';
 import { useParams, useRouter } from 'next/navigation';
 import Link from 'next/link';
-import { loadSession, portalFetch } from '../../../lib/session';
-import { StatusBadge } from '../../components/status-badge';
-import { PIPELINE_STEPS } from '../../../lib/status';
+import { loadSession, portalFetch } from '../../../../lib/auth';
+import { StatusBadge } from '../../../../components/ui/status-badge';
+import { PIPELINE_STEPS } from '../../../../lib/status';
 
 export default function ProcessStatusPage() {
   const params = useParams();

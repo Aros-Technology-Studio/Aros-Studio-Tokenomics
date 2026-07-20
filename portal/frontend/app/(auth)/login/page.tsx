@@ -2,7 +2,7 @@
 
 import { FormEvent, useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
-import { apiBase, loadSession, saveSession } from '../../lib/session';
+import { apiBase, loadSession, saveSession } from '../../../lib/auth';
 
 export default function LoginPage() {
   const router = useRouter();

@@ -1,7 +1,7 @@
 import type { Metadata } from 'next';
 import type { ReactNode } from 'react';
-import './globals.css';
-import { AppHeader } from './app-header';
+import '../styles/globals.css';
+import { AppHeader } from '../components/layout/app-header';
 
 export const metadata: Metadata = {
   title: {

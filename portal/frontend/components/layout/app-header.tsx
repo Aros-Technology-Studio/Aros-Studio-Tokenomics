@@ -8,7 +8,7 @@ import {
   loadSession,
   portalFetch,
   type PortalSession,
-} from '../lib/session';
+} from '../../lib/auth';
 
 export function AppHeader() {
   const [session, setSession] = useState<PortalSession | null>(null);
@@ -44,7 +44,9 @@ export function AppHeader() {
         {session ? (
           <>
             <Link href="/dashboard">Dashboard</Link>
-            <Link href="/processes/new">New process</Link>
+            <Link href="/tokenization">Tokenization</Link>
+            <Link href="/assets">Assets</Link>
+            <Link href="/history">History</Link>
             <span className="pill">{session.institutionId}</span>
             <button type="button" className="linkish" onClick={logout}>
               Log out

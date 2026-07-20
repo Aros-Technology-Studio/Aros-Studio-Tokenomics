@@ -1,5 +1,5 @@
 import { Controller, Get } from '@nestjs/common';
-import { CoreApiClient } from './core-client';
+import { CoreApiClient } from '../../common/core-client';
 
 @Controller('v1/health')
 export class HealthController {

@@ -3,8 +3,8 @@
 import Link from 'next/link';
 import { useCallback, useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
-import { loadSession, portalFetch } from '../../lib/session';
-import { StatusBadge } from '../components/status-badge';
+import { loadSession, portalFetch } from '../../../lib/auth';
+import { StatusBadge } from '../../../components/ui/status-badge';
 
 interface ProcessRow {
   processId: string;
@@ -103,7 +103,7 @@ export default function DashboardPage() {
             </p>
           </div>
           <div className="actions">
-            <Link href="/processes/new">
+            <Link href="/tokenization">
               <button type="button" className="primary">
                 New primary tokenization
               </button>
@@ -191,7 +191,7 @@ export default function DashboardPage() {
             <strong>No processes yet</strong>
             Start a primary tokenization package for this institution.
             <div className="actions" style={{ justifyContent: 'center', marginTop: '1rem' }}>
-              <Link href="/processes/new">
+              <Link href="/tokenization">
                 <button type="button" className="primary">
                   Create first process
                 </button>
@@ -216,7 +216,7 @@ export default function DashboardPage() {
                   {rows.map((r) => (
                     <tr key={r.processId}>
                       <td>
-                        <Link href={`/processes/${encodeURIComponent(r.processId)}`}>
+                        <Link href={`/tokenization/${encodeURIComponent(r.processId)}`}>
                           <code>{r.processId}</code>
                         </Link>
                       </td>

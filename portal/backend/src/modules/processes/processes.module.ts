@@ -5,5 +5,6 @@ import { ProcessesService } from './processes.service';
 @Module({
   controllers: [ProcessesController],
   providers: [ProcessesService],
+  exports: [ProcessesService],
 })
 export class ProcessesModule {}
