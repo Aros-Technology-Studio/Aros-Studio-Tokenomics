@@ -196,6 +196,18 @@ export class ProcessesService {
     };
   }
 
+  /**
+   * Public read-only lookup (no session). Redacted — for external transparency.
+   */
+  async getPublic(processId: string): Promise<CreateResult> {
+    const full = await this.get(processId, undefined, undefined);
+    if (full.statusCode >= 400) return full;
+    return {
+      statusCode: 200,
+      body: this.toPublicView(full.body, processId),
+    };
+  }
+
   async get(
     processId: string,
     institutionId: string | undefined,
@@ -288,6 +300,32 @@ export class ProcessesService {
     rec.status = 'awaiting_core';
     rec.updatedAt = new Date().toISOString();
     return { statusCode: 200, body: this.toStatus(rec) };
+  }
+
+  private toPublicView(
+    body: Record<string, unknown>,
+    processId: string,
+  ): Record<string, unknown> {
+    const edge = body.edge as Record<string, unknown> | undefined;
+    const status = String(body.status ?? edge?.status ?? 'unknown');
+    const valuation =
+      body.valuation ?? edge?.valuation ?? body.mintAmount ?? undefined;
+    return {
+      processId: body.processId ?? processId,
+      status,
+      source: body.source ?? 'edge',
+      currentStep: status,
+      valuation: valuation != null ? String(valuation) : undefined,
+      processType: body.processType ?? edge?.processType,
+      institutionId: body.institutionId ?? edge?.institutionId,
+      documentPackageHash:
+        body.documentPackageHash ?? edge?.documentPackageHash,
+      potVerified: body.potVerified ?? body.verified ?? undefined,
+      createdAt: body.createdAt ?? edge?.createdAt,
+      updatedAt: body.updatedAt ?? edge?.updatedAt,
+      public: true,
+      note: 'Read-only public view. Portal does not mint. NodeChain is SoT after Core hand-off.',
+    };
   }
 
   private toAccepted(rec: ProcessRecord, status: string) {

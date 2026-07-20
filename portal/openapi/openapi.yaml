@@ -24,6 +24,7 @@ servers:
 tags:
   - name: auth
   - name: health
+  - name: public
   - name: tokenization
   - name: documents
   - name: processes
@@ -60,6 +61,35 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/HealthResponse'
+
+  /v1/public/info:
+    get:
+      tags: [public]
+      operationId: publicInfo
+      security: []
+      summary: Public product info (what we do / do not)
+      responses:
+        '200':
+          description: Public manifesto summary
+
+  /v1/public/processes/{processId}:
+    get:
+      tags: [public]
+      operationId: publicGetProcess
+      security: []
+      summary: Public process lookup (no registration, no key)
+      description: Read-only redacted view. No mint. No NodeChain write.
+      parameters:
+        - $ref: '#/components/parameters/ProcessId'
+      responses:
+        '200':
+          description: Public process view
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ProcessResponse'
+        '404':
+          $ref: '#/components/responses/NotFound'
 
   /v1/auth/institutions:
     get:

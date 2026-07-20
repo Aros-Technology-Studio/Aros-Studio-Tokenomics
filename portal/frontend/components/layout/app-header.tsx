@@ -34,29 +34,32 @@ export function AppHeader() {
 
   return (
     <header className="topbar">
-      <Link href={session ? '/dashboard' : '/'} style={{ textDecoration: 'none' }}>
+      <Link href="/" style={{ textDecoration: 'none' }}>
         <div className="brand">
           <span className="brand-title">Aros Financial Core</span>
-          <span className="brand-sub">Institutional Portal · AST edge</span>
+          <span className="brand-sub">AST · public trust layer + institutional edge</span>
         </div>
       </Link>
       <nav className="nav">
+        <Link href="/about">About</Link>
+        <Link href="/system">System</Link>
+        <Link href="/explore">Explore</Link>
         {session ? (
           <>
-            <Link href="/dashboard">Dashboard</Link>
+            <Link href="/dashboard">Cabinet</Link>
             <Link href="/tokenization">Tokenization</Link>
             <Link href="/assets">Assets</Link>
-            <Link href="/history">History</Link>
             <span className="pill">{session.institutionId}</span>
             <button type="button" className="linkish" onClick={logout}>
               Log out
             </button>
           </>
         ) : (
-          <>
-            <Link href="/">Overview</Link>
-            <Link href="/login">Institution login</Link>
-          </>
+          <Link href="/login">
+            <button type="button" className="primary" style={{ padding: '0.45rem 0.9rem' }}>
+              Institution login
+            </button>
+          </Link>
         )}
       </nav>
     </header>

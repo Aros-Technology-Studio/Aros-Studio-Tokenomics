@@ -20,8 +20,16 @@ export default function RootLayout({ children }: { children: ReactNode }) {
           <AppHeader />
           <main className="shell-main">{children}</main>
           <footer className="footer">
-            <span>Aros Financial Core · AST Institutional Portal</span>
-            <span>Edge only · NodeChain remains source of truth</span>
+            <span>
+              Aros Financial Core · public site + institutional edge
+            </span>
+            <span>
+              <a href="/explore">Explore</a>
+              {' · '}
+              <a href="/system">System</a>
+              {' · '}
+              NodeChain is SoT
+            </span>
           </footer>
         </div>
       </body>

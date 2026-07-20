@@ -5,6 +5,7 @@ import { DocumentsModule } from './modules/documents/documents.module';
 import { HealthModule } from './modules/health/health.module';
 import { AssetsModule } from './modules/assets/assets.module';
 import { TokenizationModule } from './modules/tokenization/tokenization.module';
+import { PublicModule } from './modules/public/public.module';
 
 @Module({
   imports: [
@@ -14,6 +15,7 @@ import { TokenizationModule } from './modules/tokenization/tokenization.module';
     HealthModule,
     AssetsModule,
     TokenizationModule,
+    PublicModule,
   ],
 })
 export class AppModule {}

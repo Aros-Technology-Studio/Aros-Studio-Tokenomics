@@ -553,6 +553,77 @@ pre.result {
   flex-wrap: wrap;
 }
 
+/* —— Public site —— */
+.eyebrow {
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  font-size: 0.72rem;
+  color: var(--accent);
+  font-weight: 700;
+  margin: 0 0 0.65rem;
+}
+
+.hero-public {
+  padding: 2.4rem 1.75rem 2rem;
+}
+
+.lead-wide {
+  max-width: 68ch;
+  font-size: 1.02rem;
+}
+
+.kpis-public .kpi {
+  min-height: 7.5rem;
+}
+
+.door {
+  border: 1px solid var(--border);
+  border-radius: 14px;
+  padding: 1.1rem 1.15rem;
+  background: rgba(10, 16, 24, 0.45);
+}
+
+.door h3 {
+  margin: 0 0 0.4rem;
+  font-size: 1.05rem;
+}
+
+.plain-list {
+  margin: 0;
+  padding-left: 1.15rem;
+  color: var(--muted);
+  line-height: 1.55;
+}
+
+.plain-list li {
+  margin-bottom: 0.45rem;
+}
+
+.card.can {
+  border-color: rgba(93, 222, 160, 0.28);
+}
+
+.card.cannot {
+  border-color: rgba(240, 113, 120, 0.28);
+}
+
+.btn.ghost,
+button.ghost {
+  background: var(--accent-soft);
+  color: var(--fg);
+  border: 1px solid var(--border);
+  box-shadow: none;
+  font-weight: 600;
+  border-radius: 10px;
+  padding: 0.72rem 1.2rem;
+  cursor: pointer;
+  font: inherit;
+}
+
+.shell {
+  max-width: 1080px;
+}
+
 .empty {
   text-align: center;
   padding: 2rem 1rem;
