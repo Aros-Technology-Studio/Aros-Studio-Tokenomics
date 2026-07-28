@@ -19,11 +19,34 @@ NodeChain remains SoT; public explorer is **read path only** — no mint, no jou
 | Path | Content |
 |------|---------|
 | `/` | Landing — value prop, CTAs: Explore · About · Institution login |
-| `/about` | Aros Financial Core / AST mission, positioning |
+| `/about` | Aros Studio Tokenomics (AST) mission, positioning |
 | `/system` | What AST can / cannot; principles; boundary vs bank/custodian |
 | `/explore` | Public process lookup (no registration, no key) |
+| `/nodechain` | Public NodeChain journal UI (tip, verify, height, process history) |
 | `/login` | Institution only (cabinet entry) |
 | `/dashboard`… | Cabinet (authenticated) |
+| `/tokenization` | Wizard: document + e-sign → start process → certificate |
+
+## Institutional digitization path (document-first)
+
+The institution does **not** invent valuation up front. The signed document is the entry.
+
+1. **Login** (`/login`) — allowlisted institution session  
+2. **Upload first** — signed PDF / package (edge stores **hash only**)  
+3. **Confirm e-signature** — `POST /v1/documents/verify-signature` (institutional attestation; full QES PKI follow-on)  
+4. **Declare package fields** — values **as stated in the verified document** (not free appraisal)  
+5. **Start process** — `POST /v1/tokenization/start` → Core hand-off (no mint on portal)  
+6. **Certificate** — `GET /v1/processes/:id/certificate` — download/print digitization attestation
+
+## Public NodeChain UI
+
+| Path | Role |
+|------|------|
+| UI | `/nodechain` (Next.js) |
+| Edge API | `/v1/public/nodechain/*` → Core `/v1/core/nodechain/*` |
+
+**Read-only.** No append, no mint, no genesis POST from portal.  
+Shows tip / chain integrity / record by height / process-scoped journal rows.
 
 ## Public explorer rules (Canon)
 

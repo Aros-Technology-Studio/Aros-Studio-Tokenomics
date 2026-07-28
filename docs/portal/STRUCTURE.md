@@ -45,6 +45,7 @@ portal/
 | processes | Edge track + Core hand-off | Rewrite NodeChain |
 | history | Institution-scoped audit of edge submits | Eye veto / rollback UI |
 | health | Liveness + Core reachability | Business secrets |
+| public NodeChain | Read tip/verify/records via `/v1/public/nodechain/*` | Append / mint / genesis write |
 
 ## Stack notes
 

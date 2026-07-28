@@ -1,5 +1,6 @@
 import { Injectable } from '@nestjs/common';
 import { createHash, randomBytes, timingSafeEqual } from 'crypto';
+import * as fs from 'fs';
 
 export interface InstitutionAccount {
   institutionId: string;
@@ -55,7 +56,9 @@ export class AuthService {
           'no institutions configured — set AST_INSTITUTION_SECRETS_JSON (production)',
       };
     }
-    const acc = this.accounts.get(institutionId.trim().toUpperCase());
+    // login is institution id (case-insensitive); salt is the shared secret (token field)
+    const loginKey = institutionId.trim().toUpperCase();
+    const acc = this.accounts.get(loginKey);
     if (!acc || !tokensEqual(acc.token, token.trim())) {
       return {
         ok: false,
@@ -119,21 +122,23 @@ function tokensEqual(a: string, b: string): boolean {
 }
 
 /**
- * Production: only AST_INSTITUTION_SECRETS_JSON (required for any login).
- * Local/dev: set AST_ALLOW_DEMO=1 for built-in DEMO/ACME (never default in production).
+ * Production: AST_INSTITUTION_SECRETS_JSON and/or AST_INSTITUTION_SECRETS_FILE.
+ * Local/dev: AST_ALLOW_DEMO=1 → DEMO/ACME (never default in production).
+ *
+ * Prefer FILE for real secrets (not shell history). Path example:
+ *   data/institution-secrets.json  (gitignored via data/)
  */
 export function loadAccounts(): InstitutionAccount[] {
-  const json = process.env.AST_INSTITUTION_SECRETS_JSON?.trim();
-  if (json) {
+  const fromEnv = parseAccountsJson(process.env.AST_INSTITUTION_SECRETS_JSON);
+  if (fromEnv.length > 0) return fromEnv;
+
+  const filePath = process.env.AST_INSTITUTION_SECRETS_FILE?.trim();
+  if (filePath) {
     try {
-      const parsed = JSON.parse(json) as InstitutionAccount[];
-      if (Array.isArray(parsed) && parsed.length > 0) {
-        return parsed.map((a) => ({
-          institutionId: String(a.institutionId ?? '').toUpperCase(),
-          displayName: String(a.displayName ?? a.institutionId ?? 'Institution'),
-          token: String(a.token ?? ''),
-          allowlisted: a.allowlisted !== false,
-        })).filter((a) => a.institutionId && a.token);
+      if (fs.existsSync(filePath)) {
+        const raw = fs.readFileSync(filePath, 'utf8');
+        const fromFile = parseAccountsJson(raw);
+        if (fromFile.length > 0) return fromFile;
       }
     } catch {
       /* fallthrough */
@@ -145,6 +150,13 @@ export function loadAccounts(): InstitutionAccount[] {
   }
 
   return [
+    {
+      /** Quick local entry: login pilot · salt pilot */
+      institutionId: 'PILOT',
+      displayName: 'Pilot Institution',
+      token: process.env.AST_PILOT_SALT ?? 'pilot',
+      allowlisted: true,
+    },
     {
       institutionId: 'DEMO',
       displayName: 'Demo Institution',
@@ -158,6 +170,24 @@ export function loadAccounts(): InstitutionAccount[] {
       allowlisted: true,
     },
   ];
+}
+
+export function parseAccountsJson(json: string | undefined | null): InstitutionAccount[] {
+  if (!json?.trim()) return [];
+  try {
+    const parsed = JSON.parse(json) as InstitutionAccount[];
+    if (!Array.isArray(parsed) || parsed.length === 0) return [];
+    return parsed
+      .map((a) => ({
+        institutionId: String(a.institutionId ?? '').toUpperCase(),
+        displayName: String(a.displayName ?? a.institutionId ?? 'Institution'),
+        token: String(a.token ?? ''),
+        allowlisted: a.allowlisted !== false,
+      }))
+      .filter((a) => a.institutionId && a.token);
+  } catch {
+    return [];
+  }
 }
 
 function allowDemoInstitutions(): boolean {

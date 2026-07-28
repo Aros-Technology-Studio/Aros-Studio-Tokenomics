@@ -17,7 +17,9 @@ Institutional process token-economy: **NodeChain** is the sole source-of-truth j
 
 ```bash
 bash scripts/home-up.sh          # Core + edge + UI on this machine
-bash scripts/home-tunnel.sh      # public HTTPS URL via Cloudflare (no domain)
+bash scripts/home-tunnel.sh      # temporary HTTPS (*.trycloudflare.com)
+bash scripts/domain-tunnel-setup.sh arosfinancialcore.com   # once: permanent domain
+bash scripts/domain-tunnel-up.sh # permanent https://your-domain (see docs/DOMAIN-TUNNEL.md)
 ```
 
 See [`docs/HOME-ACCESS.md`](docs/HOME-ACCESS.md). LAN: `http://<your-LAN-IP>:3200`.

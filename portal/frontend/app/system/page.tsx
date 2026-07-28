@@ -1,87 +1,80 @@
-import Link from 'next/link';
-import type { Metadata } from 'next';
+'use client';
 
-export const metadata: Metadata = {
-  title: 'System',
-};
+import Link from 'next/link';
+import { useI18n } from '../../lib/i18n/context';
 
 export default function SystemPage() {
+  const { t } = useI18n();
   return (
     <>
       <section className="card hero">
-        <p className="eyebrow">System boundaries</p>
-        <h1>What AST is — and what it refuses</h1>
-        <p className="lead lead-wide">
-          Clarity builds trust. Below is the public boundary of Aros Studio Tokenomics as exposed
-          through this portal. Full law lives in Core Canon; this page is the outside-world
-          summary.
-        </p>
+        <p className="eyebrow">{t('system.eyebrow')}</p>
+        <h1>{t('system.h1')}</h1>
+        <p className="lead lead-wide">{t('system.lead')}</p>
       </section>
 
       <div className="grid2">
         <div className="card can">
-          <h2 className="ok">What it can do</h2>
+          <h2 className="ok">{t('system.can.h')}</h2>
           <ul className="plain-list">
-            <li>Accept an official institutional valuation package</li>
-            <li>Require document evidence + qualified signature attestation</li>
-            <li>Hand off to Core Orchestrator for PoT-gated settlement</li>
-            <li>Record significant process states on NodeChain (Core path)</li>
-            <li>Pay infrastructure post-factum after confirmed work</li>
-            <li>Let anyone look up a known processId (read-only)</li>
+            <li>{t('system.can.1')}</li>
+            <li>{t('system.can.2')}</li>
+            <li>{t('system.can.3')}</li>
+            <li>{t('system.can.4')}</li>
+            <li>{t('system.can.5')}</li>
+            <li>{t('system.can.6')}</li>
           </ul>
         </div>
         <div className="card cannot">
           <h2 className="err" style={{ marginTop: 0 }}>
-            What it cannot / will not do
+            {t('system.cannot.h')}
           </h2>
           <ul className="plain-list">
-            <li>Appraise assets or invent market prices</li>
-            <li>Mint ARO in the browser or portal edge</li>
-            <li>Act as a bank, exchange, or custodian of client funds</li>
-            <li>Open free self-signup for retail “anyone mints”</li>
-            <li>Let public users write or edit NodeChain</li>
-            <li>Offer staking, farming, or passive yield for holding</li>
+            <li>{t('system.cannot.1')}</li>
+            <li>{t('system.cannot.2')}</li>
+            <li>{t('system.cannot.3')}</li>
+            <li>{t('system.cannot.4')}</li>
+            <li>{t('system.cannot.5')}</li>
+            <li>{t('system.cannot.6')}</li>
           </ul>
         </div>
       </div>
 
       <div className="card">
-        <h2>How the pieces fit</h2>
+        <h2>{t('system.how.h')}</h2>
         <div className="timeline">
           <div className="item done">
-            <div className="t">Portal (this site)</div>
-            <div className="d">Public story · explorer · institutional edge admission</div>
+            <div className="t">{t('system.how.portal.t')}</div>
+            <div className="d">{t('system.how.portal.d')}</div>
           </div>
           <div className="item done">
-            <div className="t">Core Orchestrator</div>
-            <div className="d">Sole economic entry for the process path</div>
+            <div className="t">{t('system.how.core.t')}</div>
+            <div className="d">{t('system.how.core.d')}</div>
           </div>
           <div className="item active">
-            <div className="t">PoT</div>
-            <div className="d">Proof that the process is validly confirmed</div>
+            <div className="t">{t('system.how.pot.t')}</div>
+            <div className="d">{t('system.how.pot.d')}</div>
           </div>
           <div className="item">
-            <div className="t">NodeChain</div>
-            <div className="d">Append-only source of truth for significant states</div>
+            <div className="t">{t('system.how.nc.t')}</div>
+            <div className="d">{t('system.how.nc.d')}</div>
           </div>
         </div>
       </div>
 
       <div className="callout">
-        <strong>NodeChain & transparency.</strong> You do not need registration to ask “what is the
-        status of process X?”. You need a processId. You still cannot mint, reverse, or rewrite
-        history from this site.
+        <strong>NodeChain.</strong> {t('system.callout')}
       </div>
 
       <div className="actions">
         <Link href="/explore">
           <button type="button" className="primary">
-            Open public explorer
+            {t('system.cta.explore')}
           </button>
         </Link>
-        <Link href="/about">
+        <Link href="/nodechain">
           <button type="button" className="secondary">
-            About
+            {t('system.cta.nodechain')}
           </button>
         </Link>
       </div>

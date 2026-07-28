@@ -29,6 +29,7 @@ A significant event is valid only if it is recorded here.
 ```text
 01_NodeChain/
 ├── README.md
+├── ASSEMBLY.md               operational package (HTTP + CLI + boot)
 ├── 00_scope/                 purpose, non-goals, boundaries
 ├── 01_ledger/                journal core ★
 ├── 02_identity_and_nodes/    roles, auth, suspension
@@ -42,6 +43,7 @@ A significant event is valid only if it is recorded here.
 └── diagrams/
 ```
 
+**Code:** `src/nodechain/` · **HTTP:** `/v1/core/nodechain/*` · **CLI:** `npm run journal:status`
 ## Sources used
 
 - Core Canon §4.1 NodeChain, write-ahead / SoT principles  

@@ -37,6 +37,18 @@ describe('AuthService (institutional login)', () => {
     assert.equal(s!.institutionId, 'DEMO');
   });
 
+  it('quick pilot login/salt pilot (case-insensitive login)', () => {
+    delete process.env.AST_INSTITUTION_SECRETS_JSON;
+    delete process.env.AST_INSTITUTION_SECRETS_FILE;
+    process.env.AST_ALLOW_DEMO = '1';
+    process.env.NODE_ENV = 'test';
+    const auth = new AuthService();
+    const r = auth.login('pilot', 'pilot');
+    assert.equal(r.ok, true);
+    if (!r.ok) return;
+    assert.equal(r.session.institutionId, 'PILOT');
+  });
+
   it('rejects bad credentials', () => {
     const auth = new AuthService();
     const r = auth.login('DEMO', 'wrong');
@@ -83,5 +95,35 @@ describe('AuthService (institutional login)', () => {
     process.env.NODE_ENV = 'test';
     process.env.AST_ALLOW_DEMO = '1';
     delete process.env.AST_INSTITUTION_SECRETS_JSON;
+  });
+
+  it('loads institutions from AST_INSTITUTION_SECRETS_FILE', () => {
+    const fs = require('fs') as typeof import('fs');
+    const os = require('os') as typeof import('os');
+    const path = require('path') as typeof import('path');
+    const dir = fs.mkdtempSync(path.join(os.tmpdir(), 'ast-sec-'));
+    const file = path.join(dir, 'secrets.json');
+    fs.writeFileSync(
+      file,
+      JSON.stringify([
+        {
+          institutionId: 'FILECO',
+          displayName: 'From File',
+          token: 'file-secret-token-yy',
+          allowlisted: true,
+        },
+      ]),
+    );
+    process.env.NODE_ENV = 'production';
+    process.env.AST_ALLOW_DEMO = '0';
+    delete process.env.AST_INSTITUTION_SECRETS_JSON;
+    process.env.AST_INSTITUTION_SECRETS_FILE = file;
+    const auth = new AuthService();
+    const r = auth.login('FILECO', 'file-secret-token-yy');
+    assert.equal(r.ok, true);
+    delete process.env.AST_INSTITUTION_SECRETS_FILE;
+    process.env.NODE_ENV = 'test';
+    process.env.AST_ALLOW_DEMO = '1';
+    fs.rmSync(dir, { recursive: true, force: true });
   });
 });

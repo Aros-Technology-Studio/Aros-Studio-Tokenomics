@@ -1,30 +1,35 @@
+'use client';
+
 import Link from 'next/link';
+import { useI18n } from '../lib/i18n/context';
 
 export default function HomePage() {
+  const { t } = useI18n();
   return (
     <>
       <section className="card hero hero-public">
-        <p className="eyebrow">Aros Studio Tokenomics · public face</p>
-        <h1>Institutional value, recorded with proof — not speculation</h1>
-        <p className="lead lead-wide">
-          Aros Financial Core is how the outside world meets <strong>AST</strong>: a system that
-          turns confirmed institutional valuation into a process-bound digital record. Minting
-          only after Proof of Transaction on NodeChain. No free float theater. No bank costume.
-        </p>
+        <p className="eyebrow">{t('home.eyebrow')}</p>
+        <h1>{t('home.h1')}</h1>
+        <p className="lead lead-wide">{t('home.lead')}</p>
         <div className="actions">
           <Link href="/explore">
             <button type="button" className="primary">
-              Look up a process
+              {t('home.cta.explore')}
+            </button>
+          </Link>
+          <Link href="/nodechain">
+            <button type="button" className="secondary">
+              {t('home.cta.nodechain')}
             </button>
           </Link>
           <Link href="/system">
-            <button type="button" className="secondary">
-              What AST can & cannot
+            <button type="button" className="ghost">
+              {t('home.cta.system')}
             </button>
           </Link>
           <Link href="/login">
             <button type="button" className="ghost">
-              Institution cabinet
+              {t('home.cta.cabinet')}
             </button>
           </Link>
         </div>
@@ -32,95 +37,87 @@ export default function HomePage() {
 
       <div className="kpis kpis-public">
         <div className="kpi">
-          <div className="label">For everyone</div>
+          <div className="label">{t('home.kpi.public.label')}</div>
           <div className="value" style={{ fontSize: '1.1rem' }}>
-            Public explorer
+            {t('home.kpi.public.value')}
           </div>
-          <div className="hint">No registration · no special key · read-only</div>
+          <div className="hint">{t('home.kpi.public.hint')}</div>
         </div>
         <div className="kpi">
-          <div className="label">For institutions</div>
+          <div className="label">{t('home.kpi.inst.label')}</div>
           <div className="value" style={{ fontSize: '1.1rem' }}>
-            Secure cabinet
+            {t('home.kpi.inst.value')}
           </div>
-          <div className="hint">Allowlisted login · package admit · status</div>
+          <div className="hint">{t('home.kpi.inst.hint')}</div>
         </div>
         <div className="kpi">
-          <div className="label">Source of truth</div>
+          <div className="label">{t('home.kpi.sot.label')}</div>
           <div className="value" style={{ fontSize: '1.1rem' }}>
-            NodeChain
+            <a href="/nodechain" style={{ color: 'inherit' }}>
+              NodeChain
+            </a>
           </div>
-          <div className="hint">After Core · after PoT — not the browser</div>
+          <div className="hint">{t('home.kpi.sot.hint')}</div>
         </div>
         <div className="kpi">
-          <div className="label">Portal never</div>
+          <div className="label">{t('home.kpi.never.label')}</div>
           <div className="value" style={{ fontSize: '1.1rem' }}>
-            Mints ARO
+            {t('home.kpi.never.value')}
           </div>
-          <div className="hint">Edge only · fail-closed if Core is down</div>
+          <div className="hint">{t('home.kpi.never.hint')}</div>
         </div>
       </div>
 
       <ul className="feature-list">
         <li>
-          <strong>Transparency</strong>
-          <span>
-            Search a <code>processId</code> and see status without logging in. Trust is
-            verifiable, not marketed only.
-          </span>
+          <strong>{t('home.f1.t')}</strong>
+          <span>{t('home.f1.d')}</span>
         </li>
         <li>
-          <strong>Institutional path</strong>
-          <span>
-            Allowlisted clients submit valuation + documents + signature attestation. Hand-off to
-            Orchestrator.
-          </span>
+          <strong>{t('home.f2.t')}</strong>
+          <span>{t('home.f2.d')}</span>
         </li>
         <li>
-          <strong>Clear boundaries</strong>
-          <span>
-            We explain what the system does and what it refuses — appraisal, custody, free
-            emission, retail self-signup.
-          </span>
+          <strong>{t('home.f3.t')}</strong>
+          <span>{t('home.f3.d')}</span>
         </li>
         <li>
-          <strong>Outside world link</strong>
-          <span>
-            This site is not only a cabinet. It is the public narrative and the public read path.
-          </span>
+          <strong>{t('home.f4.t')}</strong>
+          <span>{t('home.f4.d')}</span>
         </li>
       </ul>
 
       <section className="card flat" style={{ marginTop: '1rem' }}>
-        <h2>Two doors</h2>
+        <h2>{t('home.doors')}</h2>
         <div className="grid2">
           <div className="door">
-            <h3>Public</h3>
-            <p className="muted">
-              About · system rules · explore a transaction. No key required.
-            </p>
+            <h3>{t('home.public.h')}</h3>
+            <p className="muted">{t('home.public.d')}</p>
             <div className="actions">
               <Link href="/about">
                 <button type="button" className="secondary">
-                  About us
+                  {t('home.public.about')}
                 </button>
               </Link>
               <Link href="/explore">
                 <button type="button" className="primary">
-                  Explore
+                  {t('nav.explore')}
+                </button>
+              </Link>
+              <Link href="/nodechain">
+                <button type="button" className="secondary">
+                  NodeChain
                 </button>
               </Link>
             </div>
           </div>
           <div className="door">
-            <h3>Institution</h3>
-            <p className="muted">
-              Dashboard, tokenization wizard, claims, history. Allowlisted only.
-            </p>
+            <h3>{t('home.inst.h')}</h3>
+            <p className="muted">{t('home.inst.d')}</p>
             <div className="actions">
               <Link href="/login">
                 <button type="button" className="primary">
-                  Sign in
+                  {t('home.inst.signin')}
                 </button>
               </Link>
             </div>

@@ -32,7 +32,12 @@ export class CoreApiClient {
       process.env.AST_CORE_URL ??
       'http://localhost:3000'
     ).replace(/\/$/, '');
-    this.timeoutMs = config?.timeoutMs ?? 60_000;
+    // Primary tokenization can exceed 60s under load — allow long hand-off
+    this.timeoutMs =
+      config?.timeoutMs ??
+      (process.env.CORE_HTTP_TIMEOUT_MS
+        ? Number(process.env.CORE_HTTP_TIMEOUT_MS)
+        : 180_000);
   }
 
   get enabled(): boolean {
@@ -63,8 +68,71 @@ export class CoreApiClient {
     );
   }
 
+  /** Resume stuck Core process (awaiting_pot → PoT → mint). */
+  async continueProcess(
+    processId: string,
+    headers: { institutionId: string; institutionToken?: string },
+  ): Promise<{ statusCode: number; body: Record<string, unknown> }> {
+    return this.request(
+      'POST',
+      `/v1/core/processes/${encodeURIComponent(processId)}/continue`,
+      {},
+      {
+        institutionId: headers.institutionId,
+        idempotencyKey: `continue-${processId}`.slice(0, 128),
+        institutionToken: headers.institutionToken,
+      },
+    );
+  }
+
   async getReleaseStatus(): Promise<{ statusCode: number; body: Record<string, unknown> }> {
     return this.request('GET', '/v1/core/release');
+  }
+
+  /** NodeChain read surface (SoT journal) — portal never appends. */
+  async getNodechainStatus(): Promise<{ statusCode: number; body: Record<string, unknown> }> {
+    return this.request('GET', '/v1/core/nodechain/status');
+  }
+
+  async getNodechainTip(): Promise<{ statusCode: number; body: Record<string, unknown> }> {
+    return this.request('GET', '/v1/core/nodechain/tip');
+  }
+
+  async getNodechainVerify(): Promise<{ statusCode: number; body: Record<string, unknown> }> {
+    return this.request('GET', '/v1/core/nodechain/verify');
+  }
+
+  async getNodechainByHeight(
+    height: number,
+  ): Promise<{ statusCode: number; body: Record<string, unknown> }> {
+    return this.request('GET', `/v1/core/nodechain/records/height/${height}`);
+  }
+
+  async getNodechainByRecordId(
+    recordId: string,
+  ): Promise<{ statusCode: number; body: Record<string, unknown> }> {
+    return this.request(
+      'GET',
+      `/v1/core/nodechain/records/id/${encodeURIComponent(recordId)}`,
+    );
+  }
+
+  async getNodechainByProcess(
+    processId: string,
+    limit?: number,
+  ): Promise<{ statusCode: number; body: Record<string, unknown> }> {
+    const q = limit != null ? `?limit=${limit}` : '';
+    return this.request(
+      'GET',
+      `/v1/core/nodechain/processes/${encodeURIComponent(processId)}${q}`,
+    );
+  }
+
+  async getNodechainBlocks(
+    limit?: number,
+  ): Promise<{ statusCode: number; body: Record<string, unknown> }> {
+    const q = limit != null ? `?limit=${limit}` : '';
+    return this.request('GET', `/v1/core/nodechain/blocks${q}`);
   }
 
   private async request(

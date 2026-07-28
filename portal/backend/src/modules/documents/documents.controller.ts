@@ -9,6 +9,7 @@ import {
 import { createHash, randomBytes } from 'crypto';
 import { AuthService } from '../auth/auth.service';
 import { ProcessesService } from '../processes/processes.service';
+import { extractFromBuffer } from './document-extract';
 
 /**
  * Document package at the edge (SHA-256 + signature attestation).
@@ -20,6 +21,59 @@ export class DocumentsController {
     @Inject(AuthService) private readonly auth: AuthService,
     @Inject(ProcessesService) private readonly processes: ProcessesService,
   ) {}
+
+  /**
+   * Assist: extract text-ish signals from package (amounts, labels).
+   * Human must still confirm — not OCR for image-only scans.
+   */
+  @Post('extract')
+  extract(
+    @Headers('x-session-id') sessionId: string | undefined,
+    @Body()
+    body: {
+      fileName?: string;
+      contentBase64?: string;
+      parts?: Array<{ name: string; content: string; encoding?: 'utf8' | 'base64' }>;
+    },
+  ) {
+    this.requireSession(sessionId);
+    let buf: Buffer | null = null;
+    let fileName = body.fileName ?? 'package.bin';
+    if (body.contentBase64?.trim()) {
+      buf = Buffer.from(body.contentBase64, 'base64');
+    } else if (body.parts?.length) {
+      // Prefer first PDF part for assist
+      const pdf =
+        body.parts.find((p) => p.name.toLowerCase().endsWith('.pdf')) ?? body.parts[0];
+      fileName = pdf.name;
+      buf =
+        (pdf.encoding ?? 'utf8') === 'base64'
+          ? Buffer.from(pdf.content, 'base64')
+          : Buffer.from(pdf.content, 'utf8');
+    }
+    if (!buf || buf.length === 0) {
+      throw new HttpException(
+        { code: 'EMPTY_PACKAGE', message: 'contentBase64 or parts required' },
+        422,
+      );
+    }
+    if (buf.length > 25 * 1024 * 1024) {
+      throw new HttpException(
+        { code: 'VALIDATION_ERROR', message: 'file too large for extract assist (25MB)' },
+        422,
+      );
+    }
+    const hints = extractFromBuffer(buf, fileName);
+    return {
+      ok: true,
+      fileName,
+      byteLength: buf.length,
+      assist: true,
+      ...hints,
+      disclaimer:
+        'Assist only. Values must match the verified signed document. AST does not appraise.',
+    };
+  }
 
   @Post('hash')
   hash(
@@ -37,6 +91,77 @@ export class DocumentsController {
       institutionId: s.institutionId,
       byteLength,
       partCount,
+    };
+  }
+
+  /**
+   * Confirm electronic signature before tokenization starts.
+   * v1: institutional attestation + package hash (full X.509/QES PKI = follow-on).
+   * Fail-closed if attestation incomplete.
+   */
+  @Post('verify-signature')
+  verifySignature(
+    @Headers('x-session-id') sessionId: string | undefined,
+    @Body()
+    body: {
+      documentPackageHash?: string;
+      fileName?: string;
+      hasQualifiedSignature?: boolean;
+      /** Free-form attestation (КЭП id / seal reference / base64 fragment). */
+      signatureAttestation?: string;
+      signerId?: string;
+    },
+  ) {
+    const s = this.requireSession(sessionId);
+    const hash = body.documentPackageHash?.trim().toLowerCase() ?? '';
+    if (!/^[a-f0-9]{64}$/.test(hash)) {
+      throw new HttpException(
+        {
+          code: 'MISSING_DOCUMENTS',
+          message: 'documentPackageHash required (64 hex SHA-256)',
+        },
+        422,
+      );
+    }
+    if (body.hasQualifiedSignature !== true) {
+      throw new HttpException(
+        {
+          code: 'MISSING_QUALIFIED_SIGNATURE',
+          message: 'hasQualifiedSignature must be true — electronic signature required',
+        },
+        422,
+      );
+    }
+    const att = body.signatureAttestation?.trim() ?? '';
+    if (att.length < 8) {
+      throw new HttpException(
+        {
+          code: 'SIGNATURE_ATTESTATION_REQUIRED',
+          message:
+            'signatureAttestation required (min 8 chars): QES id, seal reference, or signature material',
+        },
+        422,
+      );
+    }
+
+    const verificationId = createHash('sha256')
+      .update(`${s.institutionId}:${hash}:${att}:${body.signerId ?? ''}`)
+      .digest('hex')
+      .slice(0, 24);
+
+    return {
+      ok: true,
+      verified: true,
+      mode: 'institutional_attestation',
+      verificationId,
+      documentPackageHash: hash,
+      fileName: body.fileName ?? null,
+      signerId: body.signerId?.trim() || s.institutionId,
+      institutionId: s.institutionId,
+      verifiedAt: new Date().toISOString(),
+      message:
+        'Electronic signature attested at portal edge. Full X.509/QES chain validation is a follow-on. Tokenization may proceed.',
+      next: 'POST /v1/tokenization/start or POST /v1/processes',
     };
   }
 
@@ -133,19 +258,31 @@ export class DocumentsController {
     parts?: Array<{ name: string; content: string; encoding?: 'utf8' | 'base64' }>;
     rawPackage?: string;
   }) {
-    let material = body.rawPackage ?? '';
     if (body.parts?.length) {
-      material = body.parts
-        .map((p) => {
-          const enc = p.encoding ?? 'utf8';
-          const payload =
-            enc === 'base64'
-              ? Buffer.from(p.content, 'base64').toString('utf8')
-              : p.content;
-          return `${p.name}\n${payload}`;
-        })
-        .join('\n---\n');
+      const h = createHash('sha256');
+      let byteLength = 0;
+      for (const p of body.parts) {
+        const nameBuf = Buffer.from(`${p.name}\n`, 'utf8');
+        h.update(nameBuf);
+        byteLength += nameBuf.length;
+        if ((p.encoding ?? 'utf8') === 'base64') {
+          const raw = Buffer.from(p.content, 'base64');
+          h.update(raw);
+          byteLength += raw.length;
+        } else {
+          const raw = Buffer.from(p.content, 'utf8');
+          h.update(raw);
+          byteLength += raw.length;
+        }
+        h.update(Buffer.from('\n---\n', 'utf8'));
+      }
+      return {
+        documentPackageHash: h.digest('hex'),
+        byteLength,
+        partCount: body.parts.length,
+      };
     }
+    const material = body.rawPackage ?? '';
     if (!material.trim()) {
       throw new HttpException(
         { code: 'EMPTY_PACKAGE', message: 'document package empty' },
@@ -158,7 +295,7 @@ export class DocumentsController {
     return {
       documentPackageHash,
       byteLength: Buffer.byteLength(material, 'utf8'),
-      partCount: body.parts?.length ?? (body.rawPackage ? 1 : 0),
+      partCount: 1,
     };
   }
 }

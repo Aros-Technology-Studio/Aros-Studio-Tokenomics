@@ -1,4 +1,4 @@
-# Aros Financial Core — Institutional Portal
+# Aros Studio Tokenomics (AST) — Institutional Portal
 
 Product **edge UI + BFF** for institutional clients.
 

@@ -1,6 +1,6 @@
 /**
  * Browser hashing helpers for document packages (Web Crypto).
- * Full КЭП / X.509 chain is a follow-on — v1 uses SHA-256 package hash + signature flag.
+ * Full QES / X.509 chain is a follow-on — v1 uses SHA-256 package hash + signature flag.
  */
 
 export async function sha256Hex(text: string): Promise<string> {

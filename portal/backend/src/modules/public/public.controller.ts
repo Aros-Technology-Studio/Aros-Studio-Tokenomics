@@ -29,17 +29,24 @@ export class PublicController {
   @Get('info')
   info() {
     return {
-      product: 'Aros Financial Core',
-      role: 'Public face of AST + institutional edge cabinet',
+      product: 'Aros Studio Tokenomics (AST)',
+      role: 'Public face + institutional edge cabinet',
       system: 'Aros Studio Tokenomics (AST)',
       publicExplorer: true,
+      nodechainUi: true,
       registrationRequiredForLookup: false,
       mintOnPortal: false,
       sourceOfTruth: 'NodeChain (via Core Orchestrator after PoT)',
+      paths: {
+        processLookup: '/explore',
+        nodechain: '/nodechain',
+        apiNodechain: '/v1/public/nodechain/status',
+      },
       whatWeDo: [
         'Accept institutional valuation packages (allowlisted institutions)',
         'Hand off to Core Orchestrator for PoT-gated economic path',
         'Expose public read-only process lookup',
+        'Expose public NodeChain tip / verify / journal query',
         'Explain system boundaries to the outside world',
       ],
       whatWeDoNot: [

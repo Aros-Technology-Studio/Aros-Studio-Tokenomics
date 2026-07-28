@@ -5,6 +5,7 @@ import { useCallback, useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { loadSession, portalFetch } from '../../../lib/auth';
 import { StatusBadge } from '../../../components/ui/status-badge';
+import { useI18n } from '../../../lib/i18n/context';
 
 interface ProcessRow {
   processId: string;
@@ -26,6 +27,7 @@ interface Stats {
 
 export default function DashboardPage() {
   const router = useRouter();
+  const { t } = useI18n();
   const [rows, setRows] = useState<ProcessRow[]>([]);
   const [stats, setStats] = useState<Stats | null>(null);
   const [error, setError] = useState<string | null>(null);
@@ -95,21 +97,21 @@ export default function DashboardPage() {
         >
           <div>
             <p className="muted" style={{ margin: 0 }}>
-              Workspace
+              {t('dash.welcome')}
             </p>
             <h1 style={{ marginBottom: 0.2 }}>{displayName || institutionId}</h1>
             <p className="lead" style={{ marginBottom: 0 }}>
-              Institution <code>{institutionId}</code> — processes tracked on this portal edge.
+              {t('dash.lead')} · <code>{institutionId}</code>
             </p>
           </div>
           <div className="actions">
             <Link href="/tokenization">
               <button type="button" className="primary">
-                New primary tokenization
+                {t('dash.new')}
               </button>
             </Link>
             <button type="button" className="secondary" onClick={() => void load()}>
-              Refresh
+              {t('nc.refresh')}
             </button>
           </div>
         </div>

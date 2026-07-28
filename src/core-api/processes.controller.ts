@@ -178,6 +178,53 @@ export class CoreProcessesController {
     }
   }
 
+  /**
+   * Resume process stuck after open (awaiting_pot) — completes PoT → mint path.
+   */
+  @Post(':processId/continue')
+  @HttpCode(200)
+  async continueProcess(
+    @Param('processId') processId: string,
+    @Headers('x-institution-id') institutionId: string | undefined,
+    @Headers('x-institution-token') institutionToken: string | undefined,
+  ) {
+    if (!isValidProcessId(processId)) {
+      throw new HttpException(
+        { code: 'INVALID_PROCESS_ID', message: 'invalid processId' },
+        400,
+      );
+    }
+    const requireAuth =
+      process.env.AST_REQUIRE_INSTITUTION_AUTH === '1' ||
+      process.env.AST_REQUIRE_INSTITUTION_AUTH === 'true';
+    if (requireAuth || institutionToken) {
+      const auth = this.auth.authenticate(institutionId, institutionToken);
+      if (!auth.ok) {
+        throw new HttpException({ code: auth.code, message: auth.message }, 401);
+      }
+    }
+    try {
+      const result = await this.orchestrator.continuePrimary(processId);
+      return {
+        processId: result.processId,
+        status: result.status,
+        resumedFrom: result.resumedFrom,
+        mint: result.mint,
+        verdict: result.verdict,
+        potVerified: result.verdict?.verified === 1 ? 1 : 0,
+        mintAmount: result.mint?.amount ?? null,
+      };
+    } catch (e) {
+      if (e instanceof OrchestratorError) {
+        throw new HttpException({ code: e.code, message: e.message }, 422);
+      }
+      throw new HttpException(
+        { code: 'CORE_ERROR', message: e instanceof Error ? e.message : String(e) },
+        500,
+      );
+    }
+  }
+
   @Get(':processId')
   async get(
     @Param('processId') processId: string,

@@ -36,3 +36,9 @@ timestampUtc      string
 ## Auth
 
 mTLS or internal service identity mandatory.
+
+## HTTP note (v1)
+
+Open HTTP append is **not** exposed on core Nest. Writers are in-process services
+(`OrchestratorService`, PoT, token, …) calling `NodechainService.append`.  
+Idempotent genesis only: `POST /v1/core/nodechain/genesis` (see `ASSEMBLY.md`).

@@ -80,6 +80,20 @@ describe('NodechainService', () => {
     ).rejects.toBeInstanceOf(NodeChainError);
   });
 
+  it('getByRecordId and getStatus report chain health', async () => {
+    const g = await nc.ensureGenesis('system');
+    const byId = await nc.getByRecordId(g.recordId);
+    expect(byId?.recordType).toBe('genesis');
+    expect(byId?.height).toBe(0);
+
+    const status = await nc.getStatus();
+    expect(status.hasGenesis).toBe(true);
+    expect(status.tip?.height).toBe(0);
+    expect(status.chain.ok).toBe(true);
+    expect(status.recordCount).toBe(1);
+    expect(status.readOnly).toBe(false);
+  });
+
   it('memory ledger is append-only (no height overwrite, records frozen)', async () => {
     await nc.ensureGenesis();
     const a = await nc.append({

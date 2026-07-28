@@ -1,7 +1,81 @@
 import { CoreProcessesController } from './processes.controller';
 import { CorePartialReleaseController } from './partial-release.controller';
+import { CoreNodechainController } from './nodechain.controller';
 import { OrchestratorService } from '../orchestrator/orchestrator.service';
+import { createNodechain } from '../nodechain/journal.factory';
 import { globalKillSwitch } from '../hardening/kill-switch';
+
+describe('Core API NodeChain controller', () => {
+  afterEach(() => {
+    globalKillSwitch.release();
+  });
+
+  it('status / tip / verify / by-height after genesis', async () => {
+    const { nodechain } = createNodechain({ engine: 'memory' });
+    const ctrl = new CoreNodechainController(nodechain);
+
+    const g = await ctrl.genesis();
+    expect(g.height).toBe(0);
+    expect(g.ok).toBe(true);
+
+    const status = await ctrl.status();
+    expect(status.hasGenesis).toBe(true);
+    expect(status.service).toBe('nodechain');
+    expect(status.chain.ok).toBe(true);
+
+    const tip = await ctrl.tip();
+    expect(tip.tip?.height).toBe(0);
+
+    const verify = await ctrl.verify();
+    expect(verify.ok).toBe(true);
+    expect(verify.height).toBe(0);
+
+    const byH = await ctrl.byHeight('0');
+    expect(byH.record.recordType).toBe('genesis');
+
+    const byId = await ctrl.byRecordId(g.recordId);
+    expect(byId.record.height).toBe(0);
+
+    await expect(ctrl.byHeight('99')).rejects.toMatchObject({ status: 404 });
+  });
+
+  it('lists process-scoped records', async () => {
+    const { nodechain } = createNodechain({ engine: 'memory' });
+    const ctrl = new CoreNodechainController(nodechain);
+    await nodechain.ensureGenesis('system');
+    await nodechain.append({
+      clientRecordId: 'nc-ctrl-proc-1',
+      recordType: 'process_open',
+      processId: 'AST-DEMO-20260720-nctest1',
+      payload: { stage: 'open' },
+      writerId: 'orchestrator',
+      writerRole: 'orchestrator',
+    });
+    const list = await ctrl.byProcess('AST-DEMO-20260720-nctest1');
+    expect(list.count).toBe(1);
+    expect(list.records[0].recordType).toBe('process_open');
+  });
+
+  it('returns blockchain-style recent blocks tip-first', async () => {
+    const { nodechain } = createNodechain({ engine: 'memory' });
+    const ctrl = new CoreNodechainController(nodechain);
+    await nodechain.ensureGenesis('system');
+    await nodechain.append({
+      clientRecordId: 'nc-blocks-boot',
+      recordType: 'system_boot',
+      payload: { event: 'boot' },
+      writerId: 'system',
+      writerRole: 'system',
+    });
+    const feed = await ctrl.recentBlocks('10');
+    expect(feed.count).toBe(2);
+    expect(feed.blocks[0].blockNumber).toBe(1);
+    expect(feed.blocks[0].type).toBe('system_boot');
+    expect(feed.blocks[0].parentHash).toBe(feed.blocks[1].blockHash);
+    expect(feed.blocks[1].blockNumber).toBe(0);
+    expect(feed.blocks[1].type).toBe('genesis');
+  });
+});
 
 describe('Core API processes controller', () => {
   afterEach(() => {

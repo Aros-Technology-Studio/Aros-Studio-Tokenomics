@@ -53,12 +53,67 @@ export class NodechainService {
     return this.store.getByHeight(height);
   }
 
+  async getByRecordId(recordId: string): Promise<JournalRecord | null> {
+    return this.store.getByRecordId(recordId);
+  }
+
   async listByProcessId(processId: string): Promise<JournalRecord[]> {
     return this.store.listByProcessId(processId);
   }
 
   async listAll(): Promise<JournalRecord[]> {
     return this.store.listAll();
+  }
+
+  /**
+   * Latest N blocks (records), tip-first — blockchain explorer feed.
+   * Height is monotonic like block number; each record links prevHash → parent.
+   */
+  async listRecent(limit = 25): Promise<JournalRecord[]> {
+    const n = Math.min(200, Math.max(1, limit));
+    const all = await this.store.listAll();
+    if (all.length === 0) return [];
+    return all.slice(-n).reverse();
+  }
+
+  /**
+   * Inclusive height range [fromHeight, toHeight], ascending.
+   */
+  async listByHeightRange(fromHeight: number, toHeight: number): Promise<JournalRecord[]> {
+    const from = Math.max(0, Math.floor(fromHeight));
+    const to = Math.max(from, Math.floor(toHeight));
+    const out: JournalRecord[] = [];
+    for (let h = from; h <= to; h += 1) {
+      const rec = await this.store.getByHeight(h);
+      if (rec) out.push(rec);
+    }
+    return out;
+  }
+
+  /**
+   * Operational status of the journal (tip + chain verify + mode).
+   * Does not mutate state.
+   */
+  async getStatus(): Promise<{
+    tip: Tip | null;
+    hasGenesis: boolean;
+    readOnly: boolean;
+    killSwitch: boolean;
+    chain: { ok: boolean; height: number; error?: string };
+    recordCount: number;
+  }> {
+    const tip = await this.store.getTip();
+    const genesis = tip === null ? null : await this.store.getByHeight(0);
+    const all = await this.store.listAll();
+    const chain = await this.verifyChain();
+    return {
+      tip,
+      hasGenesis: genesis?.recordType === 'genesis',
+      readOnly: this.isReadOnly(),
+      killSwitch: globalKillSwitch.isEngaged(),
+      chain,
+      recordCount: all.length,
+    };
   }
 
   async verifyChain(): Promise<{ ok: boolean; height: number; error?: string }> {

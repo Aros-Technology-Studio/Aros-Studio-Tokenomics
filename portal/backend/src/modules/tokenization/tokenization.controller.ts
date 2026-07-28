@@ -13,10 +13,23 @@ import type { CreateProcessBody } from '../../common/shared-bridge';
 
 export interface StartTokenizationRequest {
   assetType?: 'real_estate' | 'bond' | 'investment_package' | 'other';
+  /**
+   * ARO amount to mint (network unit). Usually computed as
+   * amountFromDocument × institutionalAroPerUnit (default rate 1).
+   */
   institutionalValuation: string;
+  /** @deprecated use valuationCurrency */
   currency?: string;
+  /** Currency as on the document: USD, EUR, GEL, ARO, … */
+  valuationCurrency?: string;
+  /** Numeric amount printed on the document */
+  amountFromDocument?: string;
+  /** Institutional ARO per 1 document-currency unit (default 1) */
+  institutionalAroPerUnit?: string;
   holderId: string;
   assetId?: string;
+  /** Optional EVM wallet for certificate / wallet-compat QR (0x…) */
+  holderWallet?: string;
   hasQualifiedSignature: boolean;
   documentPackageHash: string;
   processId?: string;
@@ -65,18 +78,34 @@ export class TokenizationController {
       );
     }
 
+    const valuationCurrency = (
+      body.valuationCurrency ??
+      body.currency ??
+      'ARO'
+    )
+      .trim()
+      .toUpperCase();
+    const amountFromDocument = body.amountFromDocument?.trim();
+    const institutionalAroPerUnit = body.institutionalAroPerUnit?.trim() || '1';
+
     const noteParts = [
       body.note?.trim(),
       body.assetType ? `assetType=${body.assetType}` : undefined,
-      body.currency ? `currency=${body.currency}` : undefined,
+      `currency=${valuationCurrency}`,
+      amountFromDocument ? `docAmount=${amountFromDocument}` : undefined,
+      `aroPerUnit=${institutionalAroPerUnit}`,
       body.metadata ? `metadata=${JSON.stringify(body.metadata)}` : undefined,
     ].filter(Boolean);
 
     const createBody: CreateProcessBody = {
       processType: 'primary_tokenization',
       valuation: body.institutionalValuation,
+      valuationCurrency,
+      amountFromDocument,
+      institutionalAroPerUnit,
       holderId: body.holderId,
       assetId: body.assetId,
+      holderWallet: body.holderWallet?.trim() || undefined,
       hasQualifiedSignature: true,
       documentPackageHash: body.documentPackageHash,
       processId: body.processId,
@@ -109,6 +138,12 @@ export class TokenizationController {
       message: r.message,
       core: r.core,
       coreError: r.coreError,
+      progress: r.progress,
+      potVerified: r.potVerified,
+      mintAmount: r.mintAmount ?? (r.mint as { amount?: string } | undefined)?.amount,
+      mint: r.mint,
+      verdict: r.verdict,
+      source: r.source,
     };
   }
 }

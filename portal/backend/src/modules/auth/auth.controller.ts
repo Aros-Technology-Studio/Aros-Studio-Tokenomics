@@ -47,7 +47,7 @@ export class AuthController {
       displayName: s.displayName,
       expiresAt: s.expiresAt,
       sessionId: s.sessionId,
-      product: 'Aros Financial Core Institutional Portal',
+      product: 'Aros Studio Tokenomics (AST) Institutional Portal',
       capabilities: {
         primaryTokenization: true,
         documentHash: true,

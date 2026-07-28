@@ -14,7 +14,7 @@ async function bootstrap(): Promise<void> {
   // eslint-disable-next-line no-console
   console.log(`AST Nest core listening on :${port}`);
   // eslint-disable-next-line no-console
-  console.log('Journal/CLI: npm run demo:tokenize | npm run cli -- journal tip');
+  console.log('NodeChain: GET /v1/core/nodechain/status | npm run journal:status');
 }
 
 bootstrap().catch((err) => {

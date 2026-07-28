@@ -35,7 +35,15 @@ bash scripts/home-up.sh
 | Phone / PC in same Wi‑Fi | http://&lt;LAN-IP&gt;:3200 (script prints it) |
 | Anyone on internet | run tunnel (below) |
 
-**Login:** `DEMO` / `demo-institution-token`
+**Quick pilot entry (browser):** Login `pilot` · Salt `pilot`  
+**Wizard (document-first):** http://127.0.0.1:3200/tokenization  
+Each new process gets a unique code `AST-PILOT-YYYYMMDD-…`  
+
+
+`home-up.sh` waits until Core, edge, and UI answer health checks, then prints URLs.  
+If `data/institution-secrets.json` exists, demo is off by default.  
+Edge process list: `data/edge-processes.json` (not NodeChain SoT).  
+Secrets guide: [`docs/portal/INSTITUTION-SECRETS.md`](portal/INSTITUTION-SECRETS.md).
 
 ## Internet through home (no domain)
 
@@ -47,7 +55,18 @@ Gives a URL like `https://xxxx.trycloudflare.com` that terminates at **your home
 
 - Machine must stay on; tunnel process must run.
 - Free quick tunnels are temporary (URL changes each start).
-- Permanent hostname later = your domain + named Cloudflare Tunnel (optional).
+
+## Permanent domain (named tunnel)
+
+When the domain is on Cloudflare (zone Active), bind it once and keep a stable HTTPS URL:
+
+```bash
+bash scripts/domain-tunnel-setup.sh arosfinancialcore.com   # once (browser login)
+bash scripts/home-up.sh
+bash scripts/domain-tunnel-up.sh
+```
+
+Full checklist: [`docs/DOMAIN-TUNNEL.md`](DOMAIN-TUNNEL.md).
 
 ## Stop
 

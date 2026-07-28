@@ -26,9 +26,27 @@ export type EdgeProcessStatus =
 export interface CreateProcessBody {
   processId?: string;
   processType: ProcessTypeId;
+  /** ARO amount to mint on Core (network unit of account after institutional mapping). */
   valuation: string;
+  /**
+   * Currency as stated on the institutional document (USD, EUR, GEL, …).
+   * Labels the source unit; not an FX market rate from AST.
+   */
+  valuationCurrency?: string;
+  /** Numeric amount as printed on the document (before ARO mapping). */
+  amountFromDocument?: string;
+  /**
+   * How many ARO per 1 unit of document currency (institutional declaration).
+   * Default 1 = one-to-one of the document figure into ARO units.
+   */
+  institutionalAroPerUnit?: string;
   holderId: string;
   assetId?: string;
+  /**
+   * Optional EVM wallet (0x…) for representation / wallet-compat QR.
+   * Not SoT — binding for adapters & certificate only.
+   */
+  holderWallet?: string;
   hasQualifiedSignature: boolean;
   documentPackageHash: string;
   note?: string;
@@ -46,8 +64,13 @@ export interface ProcessRecord {
   processType: ProcessTypeId;
   status: EdgeProcessStatus;
   valuation: string;
+  valuationCurrency?: string;
+  amountFromDocument?: string;
+  institutionalAroPerUnit?: string;
   holderId: string;
   assetId?: string;
+  /** Optional EVM address for wallet-compatible certificate / adapters */
+  holderWallet?: string;
   hasQualifiedSignature: boolean;
   documentPackageHash: string;
   idempotencyKey: string;
@@ -160,6 +183,12 @@ export function validateCreateProcess(
   if (!body.holderId?.trim()) {
     return { code: 'VALIDATION_ERROR', message: 'holderId required' };
   }
+  if (body.holderWallet?.trim() && !isValidEvmAddress(body.holderWallet.trim())) {
+    return {
+      code: 'VALIDATION_ERROR',
+      message: 'holderWallet must be a valid EVM address (0x + 40 hex)',
+    };
+  }
   if (body.processId && !isValidProcessId(body.processId)) {
     return {
       code: 'INVALID_PROCESS_ID',
@@ -167,4 +196,9 @@ export function validateCreateProcess(
     };
   }
   return null;
+}
+
+/** EVM address 0x + 40 hex (checksum not required). */
+export function isValidEvmAddress(addr: string): boolean {
+  return /^0x[a-fA-F0-9]{40}$/.test(addr.trim());
 }

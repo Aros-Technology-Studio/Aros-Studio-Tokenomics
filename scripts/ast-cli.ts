@@ -6,6 +6,7 @@ function usage(): void {
   console.log(`Usage:
   npm run cli -- journal genesis [--dir data/journal] [--engine file|rocksdb|memory]
   npm run cli -- journal first-record [--dir data/journal] [--engine rocksdb]
+  npm run cli -- journal status [--dir data/journal] [--engine rocksdb]
   npm run cli -- journal tip [--dir data/journal] [--engine rocksdb]
   npm run cli -- journal verify [--dir data/journal] [--engine rocksdb]
   npm run cli -- journal dump [--dir data/journal] [--engine rocksdb]
@@ -81,6 +82,13 @@ async function main(): Promise<void> {
           2,
         ),
       );
+      return;
+    }
+
+    if (cmd === 'status') {
+      const status = await nc.getStatus();
+      console.log(JSON.stringify({ ok: true, action: 'status', dir, engine, ...status }, null, 2));
+      process.exitCode = status.chain.ok ? 0 : 2;
       return;
     }
 

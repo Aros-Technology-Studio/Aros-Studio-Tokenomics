@@ -1,13 +1,17 @@
 import { createHmac, timingSafeEqual } from 'crypto';
+import * as fs from 'fs';
 
 /**
  * Institution edge authentication (phase C).
  * Headers: X-Institution-Id + X-Institution-Token (HMAC or shared secret).
  * Production: replace secrets map with mTLS cert map / OIDC.
+ *
+ * Loads: constructor seed → AST_INSTITUTION_SECRETS_JSON → AST_INSTITUTION_SECRETS_FILE
+ * → built-in PILOT/pilot + DEMO (dev).
  */
 export interface InstitutionCredential {
   institutionId: string;
-  /** Shared secret or API token */
+  /** Shared secret or API token (UI: salt) */
   token: string;
   allowlisted: boolean;
 }
@@ -16,7 +20,7 @@ export class InstitutionAuthService {
   private readonly secrets = new Map<string, InstitutionCredential>();
 
   constructor(seed?: InstitutionCredential[]) {
-    for (const c of seed ?? defaultDevCredentials()) {
+    for (const c of seed ?? loadInstitutionCredentials()) {
       this.secrets.set(c.institutionId.toUpperCase(), {
         ...c,
         institutionId: c.institutionId.toUpperCase(),
@@ -65,19 +69,45 @@ function tokensEqual(a: string, b: string): boolean {
   return timingSafeEqual(ba, bb);
 }
 
-function defaultDevCredentials(): InstitutionCredential[] {
-  // Dev only — override via AST_INSTITUTION_SECRETS_JSON
-  const json = process.env.AST_INSTITUTION_SECRETS_JSON;
-  if (json) {
+export function loadInstitutionCredentials(): InstitutionCredential[] {
+  const fromJson = parseCredentialsJson(process.env.AST_INSTITUTION_SECRETS_JSON);
+  if (fromJson.length > 0) return fromJson;
+
+  const filePath = process.env.AST_INSTITUTION_SECRETS_FILE?.trim();
+  if (filePath) {
     try {
-      return JSON.parse(json) as InstitutionCredential[];
+      if (fs.existsSync(filePath)) {
+        const raw = fs.readFileSync(filePath, 'utf8');
+        const fromFile = parseCredentialsJson(raw);
+        if (fromFile.length > 0) return fromFile;
+      }
     } catch {
       /* fall through */
     }
   }
+
+  // Dev defaults — quick pilot entry matches portal login/salt
   return [
+    { institutionId: 'PILOT', token: process.env.AST_PILOT_SALT ?? 'pilot', allowlisted: true },
     { institutionId: 'DEMO', token: 'demo-institution-token', allowlisted: true },
   ];
+}
+
+function parseCredentialsJson(json: string | undefined | null): InstitutionCredential[] {
+  if (!json?.trim()) return [];
+  try {
+    const parsed = JSON.parse(json) as InstitutionCredential[];
+    if (!Array.isArray(parsed) || parsed.length === 0) return [];
+    return parsed
+      .map((a) => ({
+        institutionId: String(a.institutionId ?? '').toUpperCase(),
+        token: String(a.token ?? ''),
+        allowlisted: a.allowlisted !== false,
+      }))
+      .filter((a) => a.institutionId && a.token);
+  } catch {
+    return [];
+  }
 }
 
 /** Optional request signing: HMAC-SHA256(token, method\\npath\\nbodyHash). */

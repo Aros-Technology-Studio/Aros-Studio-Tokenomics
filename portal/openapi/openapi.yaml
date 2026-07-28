@@ -91,6 +91,112 @@ paths:
         '404':
           $ref: '#/components/responses/NotFound'
 
+  /v1/public/nodechain/status:
+    get:
+      tags: [public]
+      operationId: publicNodechainStatus
+      security: []
+      summary: NodeChain journal status (tip, chain, engine)
+      description: Read-only proxy to Core. Portal never appends.
+      responses:
+        '200':
+          description: Status
+        '503':
+          description: Core unavailable
+
+  /v1/public/nodechain/blocks:
+    get:
+      tags: [public]
+      operationId: publicNodechainBlocks
+      security: []
+      summary: Latest blocks (tip-first blockchain-style feed)
+      parameters:
+        - name: limit
+          in: query
+          schema:
+            type: integer
+            maximum: 200
+            default: 40
+      responses:
+        '200':
+          description: Blocks list
+
+  /v1/public/nodechain/tip:
+    get:
+      tags: [public]
+      operationId: publicNodechainTip
+      security: []
+      summary: Journal tip
+      responses:
+        '200':
+          description: Tip
+
+  /v1/public/nodechain/verify:
+    get:
+      tags: [public]
+      operationId: publicNodechainVerify
+      security: []
+      summary: Full hash-chain verify
+      responses:
+        '200':
+          description: Chain OK
+        '409':
+          description: Chain broken
+
+  /v1/public/nodechain/records/height/{height}:
+    get:
+      tags: [public]
+      operationId: publicNodechainByHeight
+      security: []
+      summary: Journal record by height
+      parameters:
+        - name: height
+          in: path
+          required: true
+          schema:
+            type: integer
+            minimum: 0
+      responses:
+        '200':
+          description: Record
+        '404':
+          $ref: '#/components/responses/NotFound'
+
+  /v1/public/nodechain/records/id/{recordId}:
+    get:
+      tags: [public]
+      operationId: publicNodechainByRecordId
+      security: []
+      summary: Journal record by recordId
+      parameters:
+        - name: recordId
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Record
+        '404':
+          $ref: '#/components/responses/NotFound'
+
+  /v1/public/nodechain/processes/{processId}:
+    get:
+      tags: [public]
+      operationId: publicNodechainByProcess
+      security: []
+      summary: Process-scoped journal history
+      parameters:
+        - $ref: '#/components/parameters/ProcessId'
+        - name: limit
+          in: query
+          schema:
+            type: integer
+            maximum: 500
+      responses:
+        '200':
+          description: Records list
+
   /v1/auth/institutions:
     get:
       tags: [auth]

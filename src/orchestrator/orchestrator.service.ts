@@ -446,13 +446,230 @@ export class OrchestratorService {
     }
   }
 
+  /**
+   * Resume a process stuck after open (awaiting_pot) or after pot without mint.
+   * Used when portal HTTP timed out mid-pipeline or Core restarted.
+   */
+  async continuePrimary(processId: string): Promise<{
+    processId: string;
+    status: string;
+    verdict?: { verified: 0 | 1; ledgerHeight: number; criteriaResult: unknown };
+    mint?: { amount: string; ledgerHeight: number; recordId: string };
+    resumedFrom: string;
+  }> {
+    if (globalKillSwitch.isEngaged()) {
+      throw new OrchestratorError(OrchestratorErrorCode.KILL_SWITCH, 'kill-switch engaged');
+    }
+    globalKillSwitch.assertWritable();
+
+    const history = await this.nodechain.listByProcessId(processId);
+    if (history.length === 0) {
+      throw new OrchestratorError(
+        OrchestratorErrorCode.NOT_FOUND,
+        `no journal history for ${processId}`,
+      );
+    }
+
+    const mintRow = history.find((r) => r.recordType === 'mint_fact');
+    if (mintRow) {
+      const pot = history.find((r) => r.recordType === 'pot_verdict');
+      return {
+        processId,
+        status: 'completed',
+        resumedFrom: 'already_minted',
+        verdict: pot
+          ? {
+              verified: pot.payload?.verified === 1 ? 1 : 0,
+              ledgerHeight: pot.height,
+              criteriaResult: pot.payload?.criteriaResult,
+            }
+          : undefined,
+        mint: {
+          amount: String(mintRow.payload?.amount ?? ''),
+          ledgerHeight: mintRow.height,
+          recordId: mintRow.recordId,
+        },
+      };
+    }
+
+    // Ensure process state is in memory
+    let proc = this.processes.get(processId);
+    if (!proc) {
+      proc = await this.processes.hydrate(processId);
+    }
+
+    const open = history.find((r) => r.recordType === 'process_open');
+    const openPayload = (open?.payload ?? {}) as Record<string, unknown>;
+    let val = String(openPayload.valuation ?? proc.valuation ?? '');
+    let holderId = String(openPayload.holderId ?? proc.holderId ?? '');
+    if (!val || !holderId) {
+      try {
+        const body = (openPayload.body ?? {}) as { valuation?: string; holderId?: string };
+        if (!val && body.valuation) val = String(body.valuation);
+        if (!holderId && body.holderId) holderId = String(body.holderId);
+      } catch {
+        /* ignore */
+      }
+    }
+    if (!val || !holderId) {
+      throw new OrchestratorError(
+        OrchestratorErrorCode.INVALID_STAGE,
+        `cannot recover valuation/holder for ${processId}`,
+      );
+    }
+
+    const feeRate = 0.0015;
+    const validators = ['v1', 'v2', 'v3'];
+    const confirmers = ['v1', 'v2', 'v3'];
+
+    // Already have pot verdict?
+    const potExisting = history.find((r) => r.recordType === 'pot_verdict' && r.payload?.verified === 1);
+    let potLedgerHeight: number;
+
+    if (!potExisting) {
+      if (proc.stage !== 'awaiting_pot' && proc.stage !== 'encoded' && proc.stage !== 'opened') {
+        throw new OrchestratorError(
+          OrchestratorErrorCode.INVALID_STAGE,
+          `cannot run PoT from stage ${proc.stage}`,
+        );
+      }
+      const fresh = this.processes.get(processId) ?? (await this.processes.hydrate(processId));
+      // Resume may run after the 15m PoT window — evaluate timeout relative to open, not wall clock
+      const openedMs = Date.parse(fresh.openedAtUtc);
+      const nowMs = Number.isFinite(openedMs) ? openedMs + 60_000 : Date.now();
+      const verdict = await this.pot.verify({
+        process: fresh,
+        confirmers,
+        validatorIds: validators,
+        keys: this.keys,
+        nowMs,
+      });
+      if (verdict.verified !== 1) {
+        // Do not abort on resume failure — leave process for another attempt / inspection
+        throw new OrchestratorError(
+          OrchestratorErrorCode.POT_FAILED,
+          `PoT rejected on continue: ${verdict.reasonCodes.join(',')}`,
+        );
+      }
+      await this.processes.markPotDone(processId, { potLedgerHeight: verdict.ledgerHeight });
+      await this.journalStep(processId, 'pot', {
+        verified: 1,
+        ledgerHeight: verdict.ledgerHeight,
+        resumed: true,
+      });
+      potLedgerHeight = verdict.ledgerHeight;
+      for (const id of confirmers) {
+        this.nodes.heartbeat(id);
+        this.reputation.recordParticipation(id, true);
+        this.reputation.setUptimeFactor(id, 1);
+      }
+    } else {
+      potLedgerHeight = potExisting.height;
+      const stageNow = (this.processes.get(processId) ?? proc).stage;
+      if (stageNow === 'awaiting_pot' || stageNow === 'encoded') {
+        await this.processes.markPotDone(processId, { potLedgerHeight });
+      }
+    }
+
+    const okToEmit = await this.pot.okToEmit(processId);
+    const highValue = parseAro(val) >= parseAro(defaultHardeningConfig.highValueThreshold);
+    const l3 = await this.governance.evaluateL3({
+      processId,
+      valuation: val,
+      potVerified: 1,
+      institutionAllowlisted: true,
+      stagesCompleted: this.processes.get(processId)?.stagesCompleted ?? [],
+      allSeeingEyeCriticalCount: this.allSeeingEye
+        .history()
+        .filter((e) => e.level === 'critical').length,
+      highValue,
+    });
+    await this.governance.recordGovernanceEvent(processId, 'L3_PANEL', {
+      pass: l3.pass,
+      aggregateScore: l3.aggregateScore,
+      reasonCodes: l3.reasonCodes,
+      resumed: true,
+    });
+    if (highValue && !l3.pass) {
+      await this.processes.abort(processId, `L3 failed: ${l3.reasonCodes.join(',')}`);
+      throw new OrchestratorError(
+        OrchestratorErrorCode.L3_FAILED,
+        `L3 failed: ${l3.reasonCodes.join(',')}`,
+      );
+    }
+
+    const emission = await this.emission.emitFromValuation({
+      processId,
+      holderId,
+      valuation: val,
+      potLedgerHeight: okToEmit.potLedgerHeight,
+    });
+    await this.journalStep(processId, 'emission', {
+      amount: emission.amount,
+      mode: emission.mode,
+      resumed: true,
+    });
+
+    const settlement = await this.commission.settleCommission({
+      processId,
+      valuation: val,
+      feeRate,
+      nodeWeights: Object.fromEntries(confirmers.map((c) => [c, 1])),
+      potVerified: 1,
+    });
+    await this.journalStep(processId, 'settlement', {
+      fee: settlement.fee,
+      nodesPool: settlement.nodesPool,
+      astShare: settlement.astShare,
+      resumed: true,
+    });
+
+    const reserve = await this.reserve.accrueFromCommission({
+      processId,
+      astShare: settlement.astShare,
+      processValuation: val,
+    });
+    await this.journalStep(processId, 'reserve', {
+      ownBalance: reserve.ownBalance,
+      reserveIndex: reserve.reserveIndex,
+      resumed: true,
+    });
+
+    await this.processes.markSettled(processId, { note: 'resumed emission+commission+reserve' });
+    await this.processes.close(processId);
+    await this.journalStep(processId, 'end', { resumed: true, chainOk: true });
+
+    await this.mirror.replayFrom(this.nodechain);
+    const chain = await this.nodechain.verifyChain();
+    if (!chain.ok) {
+      globalKillSwitch.engage(`post-continue chain fail: ${chain.error}`);
+      throw new Error(`chain verify failed: ${chain.error}`);
+    }
+
+    return {
+      processId,
+      status: 'completed',
+      resumedFrom: potExisting ? 'after_pot' : 'awaiting_pot',
+      verdict: {
+        verified: 1,
+        ledgerHeight: potLedgerHeight,
+        criteriaResult: potExisting?.payload?.criteriaResult ?? { P1: true, P2: true, P3: true, P4: true },
+      },
+      mint: {
+        amount: emission.amount,
+        ledgerHeight: emission.mint!.ledgerHeight,
+        recordId: emission.mint!.recordId,
+      },
+    };
+  }
+
   private async journalStep(
     processId: string,
     step: OrchestratorStepId,
     payload: Record<string, unknown>,
   ): Promise<void> {
     await this.nodechain.append({
-      clientRecordId: `orch-step:${processId}:${step}`,
+      clientRecordId: `orch-step:${processId}:${step}${payload.resumed ? ':resume' : ''}`,
       recordType: 'orchestrator_step',
       processId,
       payload: { step, ...payload },

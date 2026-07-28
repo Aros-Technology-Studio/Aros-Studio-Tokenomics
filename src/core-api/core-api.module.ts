@@ -6,10 +6,12 @@ import { CoreReleaseController } from './release.controller';
 import { CoreEyeController } from './eye.controller';
 import { CorePartialReleaseController } from './partial-release.controller';
 import { CoreOracleController } from './oracle.controller';
+import { CoreNodechainController } from './nodechain.controller';
 
 @Module({
   imports: [LayersModule],
   controllers: [
+    CoreNodechainController,
     CoreProcessesController,
     CoreNodesController,
     CoreReleaseController,

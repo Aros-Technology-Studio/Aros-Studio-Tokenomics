@@ -2,7 +2,7 @@
 
 | ID | Path | Code | Status |
 |----|------|------|--------|
-| 01 | docs/layers/01_NodeChain | src/nodechain | append-only journal (memory/file/rocksdb) |
+| 01 | docs/layers/01_NodeChain | src/nodechain | SoT journal + HTTP `/v1/core/nodechain/*` + CLI (ASSEMBLY.md) |
 | — | Core Canon §XI | src/invariants | I1–I9 fail-closed + ok-to-emit |
 | — | common money / processId | src/common | decimal ARO + AST processId |
 | 02 | docs/layers/02_TxEncoding | src/tx-encoding | done v1 |

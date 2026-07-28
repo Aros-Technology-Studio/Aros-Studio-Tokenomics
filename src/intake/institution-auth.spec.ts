@@ -9,14 +9,27 @@ import {
 
 describe('Institution auth + qualified signature (phase C)', () => {
   it('authenticates DEMO with token', () => {
-    const auth = new InstitutionAuthService();
+    const auth = new InstitutionAuthService([
+      { institutionId: 'DEMO', token: 'demo-institution-token', allowlisted: true },
+    ]);
     const ok = auth.authenticate('DEMO', 'demo-institution-token');
     expect(ok.ok).toBe(true);
     if (ok.ok) expect(ok.allowlisted).toBe(true);
   });
 
+  it('authenticates PILOT with salt pilot', () => {
+    const auth = new InstitutionAuthService([
+      { institutionId: 'PILOT', token: 'pilot', allowlisted: true },
+    ]);
+    const ok = auth.authenticate('pilot', 'pilot');
+    expect(ok.ok).toBe(true);
+    if (ok.ok) expect(ok.institutionId).toBe('PILOT');
+  });
+
   it('rejects bad token fail-closed', () => {
-    const auth = new InstitutionAuthService();
+    const auth = new InstitutionAuthService([
+      { institutionId: 'DEMO', token: 'demo-institution-token', allowlisted: true },
+    ]);
     const bad = auth.authenticate('DEMO', 'wrong');
     expect(bad.ok).toBe(false);
   });

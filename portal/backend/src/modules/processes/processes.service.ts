@@ -10,6 +10,7 @@ import {
   type ProcessRecord,
 } from '../../common/shared-bridge';
 import { CoreApiClient } from '../../common/core-client';
+import { EdgeProcessStore } from './edge-process-store';
 
 export interface CreateResult {
   statusCode: number;
@@ -19,15 +20,44 @@ export interface CreateResult {
 /**
  * Portal edge process service for institutional clients.
  * Validates admission, tracks edge history, hands off to Core Orchestrator.
+ * Edge index is file-persisted (not NodeChain SoT).
  */
 @Injectable()
 export class ProcessesService {
   private readonly byId = new Map<string, ProcessRecord>();
   private readonly byIdem = new Map<string, { processId: string; fingerprint: string }>();
   private readonly core: CoreApiClient;
+  private readonly store: EdgeProcessStore;
 
-  constructor(core?: CoreApiClient) {
+  constructor(core?: CoreApiClient, store?: EdgeProcessStore) {
     this.core = core ?? new CoreApiClient();
+    this.store = store ?? new EdgeProcessStore();
+    this.hydrateFromDisk();
+  }
+
+  private hydrateFromDisk(): void {
+    const snap = this.store.load();
+    for (const rec of snap.processes) {
+      this.byId.set(rec.processId, rec);
+    }
+    for (const row of snap.idempotency) {
+      this.byIdem.set(row.scope, {
+        processId: row.processId,
+        fingerprint: row.fingerprint,
+      });
+    }
+  }
+
+  private persist(): void {
+    this.store.save({
+      version: 1,
+      processes: [...this.byId.values()],
+      idempotency: [...this.byIdem.entries()].map(([scope, v]) => ({
+        scope,
+        processId: v.processId,
+        fingerprint: v.fingerprint,
+      })),
+    });
   }
 
   listForInstitution(
@@ -124,14 +154,20 @@ export class ProcessesService {
     }
 
     const now = new Date().toISOString();
+    // Core money helpers expect up to 9 decimal places; normalize bare integers
+    const valuationNorm = normalizeValuation(body.valuation.trim());
     const rec: ProcessRecord = {
       processId,
       institutionId: inst,
       processType: body.processType,
       status: 'awaiting_core',
-      valuation: body.valuation.trim(),
+      valuation: valuationNorm,
+      valuationCurrency: body.valuationCurrency?.trim().toUpperCase() || undefined,
+      amountFromDocument: body.amountFromDocument?.trim() || undefined,
+      institutionalAroPerUnit: body.institutionalAroPerUnit?.trim() || undefined,
       holderId: body.holderId.trim(),
       assetId: body.assetId,
+      holderWallet: body.holderWallet?.trim() || undefined,
       hasQualifiedSignature: true,
       documentPackageHash: body.documentPackageHash.toLowerCase(),
       idempotencyKey: key,
@@ -142,6 +178,7 @@ export class ProcessesService {
     };
     this.byId.set(processId, rec);
     this.byIdem.set(idemScope, { processId, fingerprint });
+    this.persist();
 
     if (this.core.enabled) {
       const coreRes = await this.core.createProcess(
@@ -167,32 +204,174 @@ export class ProcessesService {
       if (coreRes.statusCode >= 200 && coreRes.statusCode < 300) {
         rec.status = 'submitted_to_core';
         rec.updatedAt = new Date().toISOString();
+        this.persist();
+        const coreBody = coreRes.body as Record<string, unknown>;
         return {
           statusCode: 202,
-          body: {
+          body: this.enrichProgress({
             ...this.toAccepted(rec, 'submitted_to_core'),
-            core: coreRes.body,
+            ...coreBody,
+            status:
+              coreBody.status === 'completed' || coreBody.mint
+                ? 'completed'
+                : 'submitted_to_core',
+            source: 'core',
+            core: coreBody,
             message: 'Submitted to Core Orchestrator — mint only after PoT on core',
-          },
+          }),
         };
       }
 
       rec.status = 'awaiting_core';
       rec.updatedAt = new Date().toISOString();
+      this.persist();
       return {
         statusCode: 202,
-        body: {
+        body: this.enrichProgress({
           ...this.toAccepted(rec, 'awaiting_core'),
+          source: 'edge',
           coreError: coreRes.body,
           message:
             'Accepted at edge; Core unavailable — no mint from portal (retry later)',
-        },
+        }),
       };
     }
 
     return {
       statusCode: 202,
-      body: this.toAccepted(rec, 'awaiting_core'),
+      body: this.enrichProgress({
+        ...this.toAccepted(rec, 'awaiting_core'),
+        source: 'edge',
+      }),
+    };
+  }
+
+  /**
+   * Retry Core hand-off OR continue stuck Core pipeline (awaiting_pot → mint).
+   */
+  async retryHandoff(
+    processId: string,
+    institutionId: string | undefined,
+    institutionToken?: string,
+  ): Promise<CreateResult> {
+    const rec = this.byId.get(processId);
+    if (!rec) {
+      return this.error(
+        { code: 'NOT_FOUND', message: `unknown process ${processId}` },
+        404,
+      );
+    }
+    if (institutionId && rec.institutionId.toUpperCase() !== institutionId.toUpperCase()) {
+      return this.error({ code: 'FORBIDDEN', message: 'institution mismatch' }, 403);
+    }
+    if (!this.core.enabled) {
+      return {
+        statusCode: 202,
+        body: this.enrichProgress({
+          ...this.toAccepted(rec, rec.status),
+          source: 'edge',
+          message: 'Core hand-off disabled',
+        }),
+      };
+    }
+
+    // If already on Core, try continue (PoT → mint) for stuck awaiting_pot
+    if (rec.status === 'submitted_to_core' || rec.status === 'awaiting_core') {
+      const cont = await this.core.continueProcess(processId, {
+        institutionId: rec.institutionId,
+        institutionToken,
+      });
+      if (cont.statusCode >= 200 && cont.statusCode < 300) {
+        rec.status = 'submitted_to_core';
+        rec.updatedAt = new Date().toISOString();
+        this.persist();
+        const coreBody = cont.body as Record<string, unknown>;
+        return {
+          statusCode: 200,
+          body: this.enrichProgress({
+            ...this.toAccepted(rec, 'submitted_to_core'),
+            ...coreBody,
+            status:
+              coreBody.status === 'completed' || coreBody.mint || coreBody.mintAmount
+                ? 'completed'
+                : String(coreBody.status ?? 'submitted_to_core'),
+            source: 'core',
+            core: coreBody,
+            message: 'Continued Core pipeline (PoT / mint)',
+          }),
+        };
+      }
+      // If continue failed because process unknown, fall through to create
+      const contErr = cont.body as { code?: string };
+      if (contErr.code !== 'ORCH_NOT_FOUND' && cont.statusCode !== 404) {
+        // still try create for awaiting_core; for submitted try report continue error
+        if (rec.status === 'submitted_to_core') {
+          return {
+            statusCode: 202,
+            body: this.enrichProgress({
+              ...(await this.get(processId, institutionId, institutionToken)).body,
+              coreError: cont.body,
+              message: 'Continue on Core failed — see coreError',
+            }),
+          };
+        }
+      }
+    }
+
+    if (rec.status === 'submitted_to_core') {
+      // Refresh from core
+      return this.get(processId, institutionId, institutionToken);
+    }
+
+    const coreRes = await this.core.createProcess(
+      {
+        processType: rec.processType,
+        valuation: rec.valuation,
+        holderId: rec.holderId,
+        assetId: rec.assetId,
+        processId: rec.processId,
+        hasQualifiedSignature: true,
+        documentPackageHash: rec.documentPackageHash,
+        hasDocuments: true,
+        institutionAllowlisted: true,
+        note: rec.note,
+      },
+      {
+        institutionId: rec.institutionId,
+        idempotencyKey: rec.idempotencyKey,
+        institutionToken,
+      },
+    );
+    if (coreRes.statusCode >= 200 && coreRes.statusCode < 300) {
+      rec.status = 'submitted_to_core';
+      rec.updatedAt = new Date().toISOString();
+      this.persist();
+      const coreBody = coreRes.body as Record<string, unknown>;
+      return {
+        statusCode: 202,
+        body: this.enrichProgress({
+          ...this.toAccepted(rec, 'submitted_to_core'),
+          ...coreBody,
+          status:
+            coreBody.status === 'completed' || coreBody.mint
+              ? 'completed'
+              : 'submitted_to_core',
+          source: 'core',
+          core: coreBody,
+          message: 'Retry succeeded — submitted to Core Orchestrator',
+        }),
+      };
+    }
+    rec.updatedAt = new Date().toISOString();
+    this.persist();
+    return {
+      statusCode: 202,
+      body: this.enrichProgress({
+        ...this.toAccepted(rec, 'awaiting_core'),
+        source: 'edge',
+        coreError: coreRes.body,
+        message: 'Retry failed — Core still unavailable; no mint from portal',
+      }),
     };
   }
 
@@ -206,6 +385,139 @@ export class ProcessesService {
       statusCode: 200,
       body: this.toPublicView(full.body, processId),
     };
+  }
+
+  /**
+   * Digitization / registration certificate for the institution.
+   * Edge attestation of process state; economic finality only when Core/PoT/mint present.
+   */
+  async getCertificate(
+    processId: string,
+    institutionId: string | undefined,
+    institutionToken?: string,
+  ): Promise<CreateResult> {
+    const full = await this.get(processId, institutionId, institutionToken);
+    if (full.statusCode >= 400) return full;
+    const b = full.body;
+    const edge = b.edge as Record<string, unknown> | undefined;
+    const valuation = String(
+      b.valuation ?? edge?.valuation ?? b.mintAmount ?? '—',
+    );
+    const potVerified = b.potVerified === 1 || b.verified === 1 ? 1 : 0;
+    const mintAmount =
+      b.mintAmount != null
+        ? String(b.mintAmount)
+        : (b.mint as { amount?: string } | undefined)?.amount != null
+          ? String((b.mint as { amount?: string }).amount)
+          : null;
+    const status = String(b.status ?? edge?.status ?? 'unknown');
+    const handedOff =
+      status === 'submitted_to_core' ||
+      status === 'completed' ||
+      b.source === 'core' ||
+      potVerified === 1;
+
+    const pid = String(b.processId ?? processId);
+    const holderWallet =
+      (b.holderWallet as string | null | undefined) ??
+      (edge?.holderWallet as string | null | undefined) ??
+      null;
+    const publicOrigin = (process.env.AST_PUBLIC_PORTAL_ORIGIN ?? '').replace(/\/$/, '');
+    const publicLookupPath = `/explore?processId=${encodeURIComponent(pid)}`;
+    const nodechainPath = `/nodechain?processId=${encodeURIComponent(pid)}`;
+    const verifyUrl = publicOrigin
+      ? `${publicOrigin}${publicLookupPath}`
+      : publicLookupPath;
+
+    // Wallet-compatible payload (representation layer — ERC balances are NOT SoT)
+    const walletCompat = buildWalletCompatPackage({
+      processId: pid,
+      institutionId: String(b.institutionId ?? edge?.institutionId ?? institutionId ?? ''),
+      holderId: String(b.holderId ?? edge?.holderId ?? ''),
+      holderWallet,
+      assetId: (b.assetId ?? edge?.assetId ?? null) as string | null,
+      valuation,
+      mintAmountAro: mintAmount,
+      documentPackageHash: String(
+        b.documentPackageHash ?? edge?.documentPackageHash ?? '',
+      ),
+      potVerified,
+      status,
+      verifyUrl,
+      issuedAt: new Date().toISOString(),
+    });
+
+    const certificate = {
+      documentType: 'AST_DIGITIZATION_CERTIFICATE',
+      title: 'Certificate of asset digitization and process registration',
+      version: '1.1',
+      processId: pid,
+      institutionId: b.institutionId ?? edge?.institutionId ?? institutionId,
+      holderId: b.holderId ?? edge?.holderId,
+      holderWallet,
+      assetId: b.assetId ?? edge?.assetId ?? null,
+      institutionalValuation: valuation,
+      valuationCurrency:
+        (b.valuationCurrency as string | null | undefined) ??
+        (edge?.valuationCurrency as string | null | undefined) ??
+        null,
+      amountFromDocument:
+        (b.amountFromDocument as string | null | undefined) ??
+        (edge?.amountFromDocument as string | null | undefined) ??
+        null,
+      institutionalAroPerUnit:
+        (b.institutionalAroPerUnit as string | null | undefined) ??
+        (edge?.institutionalAroPerUnit as string | null | undefined) ??
+        null,
+      mintAmountAro: mintAmount,
+      documentPackageHash:
+        b.documentPackageHash ?? edge?.documentPackageHash ?? null,
+      hasQualifiedSignature:
+        b.hasQualifiedSignature ?? edge?.hasQualifiedSignature ?? true,
+      potVerified,
+      status,
+      source: b.source ?? 'edge',
+      pipeline: {
+        documentsAdmitted: true,
+        electronicSignatureConfirmed: true,
+        handedOffToCore: handedOff,
+        potComplete: potVerified === 1,
+        economicMintRecorded: mintAmount != null,
+      },
+      statements: [
+        'The institution submitted an evidence package with electronic signature attestation.',
+        'Portal edge does not mint ARO and is not NodeChain source of truth.',
+        handedOff
+          ? 'Package was handed off to Core Orchestrator for PoT-gated processing.'
+          : 'Package is admitted at edge; awaiting Core Orchestrator hand-off.',
+        potVerified === 1
+          ? 'Proof of Transaction verified=1 is recorded (or reported) for this process.'
+          : 'PoT verification is pending or not yet visible on this status read.',
+        mintAmount != null
+          ? `Economic mint amount reported: ${mintAmount} ARO (Core journal is SoT).`
+          : 'Mint amount not yet reported on this status view.',
+        holderWallet
+          ? `Bound representation wallet (non-SoT): ${holderWallet}`
+          : 'No holder wallet bound — add 0x address for wallet-compatible certificate export.',
+      ],
+      issuedAt: new Date().toISOString(),
+      createdAt: b.createdAt ?? edge?.createdAt ?? null,
+      publicLookupPath,
+      nodechainPath,
+      qrVerifyPath: publicLookupPath,
+      qrLabel: 'Scan to verify (wallet / browser)',
+      /** Prefer encoding wallet-compat URI in QR when wallet is bound; else public verify URL */
+      qrPayloadHint: holderWallet
+        ? 'ast-certificate-v1 + eip681-style verify (see walletCompat)'
+        : 'public verify URL',
+      issuerName: 'Aros Studio Tokenomics (AST)',
+      certificateSerial: `AST-CERT-${pid.replace(/^AST-/, '')}`,
+      walletCompat,
+      disclaimer:
+        'This certificate is an institutional edge attestation. NodeChain + PoT remain SoT. ERC / wallet balances are representation only — not free mint authority. QR is wallet- and dApp-scannable for verification.',
+    };
+
+    return { statusCode: 200, body: certificate };
   }
 
   async get(
@@ -224,14 +536,47 @@ export class ProcessesService {
         if (edge) {
           edge.status = 'submitted_to_core';
           edge.updatedAt = new Date().toISOString();
+          this.persist();
+        }
+        let body: Record<string, unknown> = {
+          ...coreRes.body,
+          source: 'core',
+          edge: edge ? this.toStatus(edge) : undefined,
+        };
+        // Auto-continue stuck Core pipelines (timeout mid-request left awaiting_pot)
+        const coreStatus = String(coreRes.body.status ?? '');
+        const potOk = coreRes.body.potVerified === 1;
+        const hasMint = coreRes.body.mintAmount != null;
+        if (
+          (coreStatus === 'awaiting_pot' || (coreStatus !== 'settled' && coreStatus !== 'closed' && coreStatus !== 'completed' && !hasMint)) &&
+          !potOk &&
+          !hasMint &&
+          institutionId
+        ) {
+          const cont = await this.core.continueProcess(processId, {
+            institutionId,
+            institutionToken,
+          });
+          if (cont.statusCode >= 200 && cont.statusCode < 300) {
+            body = {
+              ...body,
+              ...cont.body,
+              source: 'core',
+              status: cont.body.status ?? 'completed',
+              edge: edge ? this.toStatus(edge) : undefined,
+              autoContinued: true,
+            };
+          } else {
+            body = {
+              ...body,
+              coreError: cont.body,
+              continueAttempted: true,
+            };
+          }
         }
         return {
           statusCode: 200,
-          body: {
-            ...coreRes.body,
-            source: 'core',
-            edge: edge ? this.toStatus(edge) : undefined,
-          },
+          body: this.enrichProgress(body),
         };
       }
       if (coreRes.statusCode === 404 && !this.byId.has(processId)) {
@@ -252,7 +597,109 @@ export class ProcessesService {
     if (institutionId && rec.institutionId.toUpperCase() !== institutionId.toUpperCase()) {
       return this.error({ code: 'FORBIDDEN', message: 'institution mismatch' }, 403);
     }
-    return { statusCode: 200, body: { ...this.toStatus(rec), source: 'edge' } };
+    return {
+      statusCode: 200,
+      body: this.enrichProgress({ ...this.toStatus(rec), source: 'edge' }),
+    };
+  }
+
+  /**
+   * Normalize pipeline flags for the portal UI (progress bar + steps).
+   */
+  private enrichProgress(body: Record<string, unknown>): Record<string, unknown> {
+    const edge = body.edge as Record<string, unknown> | undefined;
+    const status = String(body.status ?? edge?.status ?? 'unknown');
+    const source = String(body.source ?? 'edge');
+    const potVerified =
+      body.potVerified === 1 ||
+      body.verified === 1 ||
+      (body.verdict as { verified?: number } | undefined)?.verified === 1
+        ? 1
+        : 0;
+    const mintAmount =
+      body.mintAmount != null
+        ? String(body.mintAmount)
+        : (body.mint as { amount?: string } | undefined)?.amount != null
+          ? String((body.mint as { amount: string }).amount)
+          : null;
+    const handedOff =
+      source === 'core' ||
+      status === 'submitted_to_core' ||
+      status === 'completed' ||
+      status === 'settled' ||
+      status === 'pot_done' ||
+      potVerified === 1 ||
+      mintAmount != null;
+    const potDone = potVerified === 1;
+    const mintDone =
+      mintAmount != null || status === 'settled' || status === 'completed';
+
+    const steps = [
+      {
+        id: 'admitted',
+        title: 'Admitted at edge',
+        state: 'done' as const,
+        detail: 'Package hash + e-sign attestation accepted',
+      },
+      {
+        id: 'core',
+        title: 'Core hand-off',
+        state: handedOff ? ('done' as const) : status === 'awaiting_core' ? ('active' as const) : ('pending' as const),
+        detail: handedOff
+          ? 'Orchestrator received the process'
+          : 'Waiting for Core — use Retry hand-off if Core was down',
+      },
+      {
+        id: 'pot',
+        title: 'PoT verification',
+        state: potDone ? ('done' as const) : handedOff ? ('active' as const) : ('pending' as const),
+        detail: potDone ? 'verified = 1 on NodeChain' : 'Proof of Transaction pending or not yet visible',
+      },
+      {
+        id: 'mint',
+        title: 'Economic settle (mint)',
+        state: mintDone ? ('done' as const) : potDone ? ('active' as const) : ('pending' as const),
+        detail: mintDone
+          ? `Mint recorded: ${mintAmount ?? 'yes'} ARO`
+          : 'Mint only after PoT (never on portal)',
+      },
+    ];
+    const doneCount = steps.filter((s) => s.state === 'done').length;
+    const percent = Math.round((doneCount / steps.length) * 100);
+    const current =
+      steps.find((s) => s.state === 'active') ??
+      (mintDone ? steps[steps.length - 1] : steps.find((s) => s.state === 'pending') ?? steps[0]);
+
+    const coreError = body.coreError as { code?: string; message?: string } | undefined;
+    const failHint =
+      !handedOff && coreError?.code
+        ? ` Hand-off error: ${coreError.code}${coreError.message ? ` — ${coreError.message}` : ''}`
+        : !handedOff
+          ? ' Core may be down or institution not known to Core (PILOT/pilot). Restart stack with home-up.sh.'
+          : '';
+
+    return {
+      ...body,
+      potVerified,
+      mintAmount: mintAmount ?? body.mintAmount ?? null,
+      progress: {
+        percent,
+        currentStepId: current.id,
+        currentTitle: current.title,
+        currentDetail: current.detail + (coreError?.message ? ` (${coreError.message})` : ''),
+        handedOff,
+        potDone,
+        mintDone,
+        steps,
+        message: mintDone
+          ? 'Process complete on Core path'
+          : handedOff
+            ? `In progress: ${current.title}`
+            : `Stuck at edge — Core hand-off not completed yet.${failHint}`,
+        coreErrorCode: coreError?.code ?? null,
+        coreErrorMessage: coreError?.message ?? null,
+      },
+    };
   }
 
   async attachDocuments(
@@ -299,6 +746,7 @@ export class ProcessesService {
     rec.hasQualifiedSignature = true;
     rec.status = 'awaiting_core';
     rec.updatedAt = new Date().toISOString();
+    this.persist();
     return { statusCode: 200, body: this.toStatus(rec) };
   }
 
@@ -335,7 +783,11 @@ export class ProcessesService {
       status,
       institutionId: rec.institutionId,
       valuation: rec.valuation,
+      valuationCurrency: rec.valuationCurrency ?? null,
+      amountFromDocument: rec.amountFromDocument ?? null,
+      institutionalAroPerUnit: rec.institutionalAroPerUnit ?? null,
       holderId: rec.holderId,
+      holderWallet: rec.holderWallet ?? null,
       hasQualifiedSignature: rec.hasQualifiedSignature,
       documentPackageHash: rec.documentPackageHash,
       message:
@@ -352,8 +804,12 @@ export class ProcessesService {
       processType: rec.processType,
       institutionId: rec.institutionId,
       valuation: rec.valuation,
+      valuationCurrency: rec.valuationCurrency ?? null,
+      amountFromDocument: rec.amountFromDocument ?? null,
+      institutionalAroPerUnit: rec.institutionalAroPerUnit ?? null,
       holderId: rec.holderId,
       assetId: rec.assetId,
+      holderWallet: rec.holderWallet ?? null,
       hasQualifiedSignature: rec.hasQualifiedSignature,
       documentPackageHash: rec.documentPackageHash,
       idempotencyKey: rec.idempotencyKey,
@@ -366,4 +822,105 @@ export class ProcessesService {
   private error(body: PortalErrorBody, statusCode: number): CreateResult {
     return { statusCode, body: { ...body } };
   }
+}
+
+/** Ensure ARO decimal string (e.g. 150000 → 150000.000000000). */
+function normalizeValuation(v: string): string {
+  const t = v.trim();
+  if (!/^-?\d+(\.\d{1,9})?$/.test(t)) return t;
+  if (t.includes('.')) {
+    const [w, f = ''] = t.split('.');
+    return `${w}.${(f + '000000000').slice(0, 9)}`;
+  }
+  return `${t}.000000000`;
+}
+
+/**
+ * Wallet / dApp compatible package (representation layer).
+ * ERC-721-like metadata + EIP-681-style ethereum: URI for scanners.
+ * Does NOT mint on-chain; adapters may later bridge SoT → chain.
+ */
+function buildWalletCompatPackage(input: {
+  processId: string;
+  institutionId: string;
+  holderId: string;
+  holderWallet: string | null;
+  assetId: string | null;
+  valuation: string;
+  mintAmountAro: string | null;
+  documentPackageHash: string;
+  potVerified: 0 | 1;
+  status: string;
+  verifyUrl: string;
+  issuedAt: string;
+}) {
+  const chainId = Number(process.env.AST_REPRESENTATION_CHAIN_ID ?? 1);
+  const tokenView = (process.env.AST_ARO_VIEW_CONTRACT ?? '').trim() || null;
+  const amount = input.mintAmountAro ?? input.valuation;
+  const name = `AST Certificate ${input.processId}`;
+  const description =
+    'AST digitization certificate. Economic truth is NodeChain + PoT, not this NFT/metadata alone.';
+
+  // ERC-721 / OpenSea-style metadata (wallets & marketplaces understand this shape)
+  const erc721Metadata = {
+    name,
+    description,
+    external_url: input.verifyUrl.startsWith('http')
+      ? input.verifyUrl
+      : undefined,
+    image: undefined as string | undefined,
+    attributes: [
+      { trait_type: 'processId', value: input.processId },
+      { trait_type: 'institutionId', value: input.institutionId },
+      { trait_type: 'holderId', value: input.holderId },
+      { trait_type: 'assetId', value: input.assetId ?? '' },
+      { trait_type: 'valuationARO', value: input.valuation },
+      { trait_type: 'mintAmountARO', value: input.mintAmountAro ?? '' },
+      { trait_type: 'documentPackageHash', value: input.documentPackageHash },
+      { trait_type: 'potVerified', value: input.potVerified },
+      { trait_type: 'status', value: input.status },
+      { trait_type: 'standard', value: 'AST-Token-Protocol / representation' },
+    ],
+  };
+
+  // EIP-681-like deep link (Metamask etc. parse ethereum: URIs)
+  // pay-style: ethereum:<address>@<chainId>/transfer?address=&uint256=
+  // Without deployed adapter we encode verify + optional payment address binding
+  const eip681 =
+    input.holderWallet != null
+      ? `ethereum:${input.holderWallet}@${chainId}`
+      : null;
+
+  // CAIP-19 style asset id for multi-chain wallets (abstract until adapter live)
+  const caip19 = tokenView
+    ? `eip155:${chainId}/erc20:${tokenView}`
+    : `ast:nodechain/process:${input.processId}`;
+
+  // Compact URI for QR (wallet or browser)
+  const astUri = `ast://certificate/v1?processId=${encodeURIComponent(input.processId)}&hash=${encodeURIComponent(input.documentPackageHash)}&verify=${encodeURIComponent(input.verifyUrl)}`;
+
+  return {
+    schema: 'ast-wallet-compat-1',
+    soT: 'NodeChain + PoT (not ERC balance)',
+    representationOnly: true,
+    chainId,
+    caip2: `eip155:${chainId}`,
+    caip19,
+    holderWallet: input.holderWallet,
+    eip681,
+    astUri,
+    erc721Metadata,
+    /** Suggested amount string for wallet display (9 decimals ARO) */
+    amountAro: amount,
+    decimals: 9,
+    symbol: 'ARO',
+    name: 'ArosCoin (AST Token Protocol)',
+    standards: ['AST-Token-Protocol', 'ERC-721-metadata', 'EIP-681', 'CAIP-19'],
+    adapters: {
+      erc20View: tokenView,
+      note:
+        'On-chain ARO view / ERC-3643 adapters are representation plugins. Deploy contracts separately; do not treat chain balance as SoT.',
+    },
+    issuedAt: input.issuedAt,
+  };
 }

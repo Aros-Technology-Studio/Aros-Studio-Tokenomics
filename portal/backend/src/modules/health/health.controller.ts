@@ -13,34 +13,42 @@ export class HealthController {
     return {
       status: 'ok',
       service: 'portal-backend',
-      product: 'Aros Financial Core — Institutional Portal',
-      version: '1.0.0',
+      product: 'Aros Studio Tokenomics (AST) — Institutional Portal',
+      version: '1.1.0',
+      edge: 'up',
       coreHandOff: handoff === '0' || handoff === 'false' ? 'disabled' : 'live',
       coreApiUrl: coreUrl,
       time: new Date().toISOString(),
     };
   }
 
-  /** Liveness + optional Core reachability (for dashboard banner). */
+  /** Liveness + Core reachability (login / dashboard banners). */
   @Get('ready')
   async ready() {
     const base = this.health();
     if (!this.core.enabled) {
-      return { ...base, core: { reachable: false, reason: 'handoff_disabled' } };
+      return {
+        ...base,
+        ready: false,
+        core: { reachable: false, reason: 'handoff_disabled' },
+      };
     }
     try {
       const r = await this.core.getReleaseStatus();
+      // Also treat any non-5xx as "edge can talk to core process"
       const reachable = r.statusCode > 0 && r.statusCode < 500;
       return {
         ...base,
+        ready: reachable,
         core: {
-          reachable: r.statusCode === 200 || reachable,
+          reachable,
           statusCode: r.statusCode,
         },
       };
     } catch (e) {
       return {
         ...base,
+        ready: false,
         core: {
           reachable: false,
           reason: e instanceof Error ? e.message : String(e),

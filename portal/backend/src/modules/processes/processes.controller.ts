@@ -108,6 +108,26 @@ export class ProcessesController {
     return result.body;
   }
 
+  /**
+   * Digitization certificate — what the institution downloads after submission.
+   */
+  @Get(':processId/certificate')
+  async certificate(
+    @Param('processId') processId: string,
+    @Headers('x-session-id') sessionId: string | undefined,
+  ) {
+    const s = this.requireSession(sessionId);
+    const result = await this.processes.getCertificate(
+      processId,
+      s.institutionId,
+      s.token,
+    );
+    if (result.statusCode >= 400) {
+      throw new HttpException(result.body, result.statusCode);
+    }
+    return result.body;
+  }
+
   @Post(':processId/documents')
   async attachDocuments(
     @Param('processId') processId: string,
@@ -121,6 +141,24 @@ export class ProcessesController {
       body,
       s.institutionId,
       idempotencyKey,
+    );
+    if (result.statusCode >= 400) {
+      throw new HttpException(result.body, result.statusCode);
+    }
+    return result.body;
+  }
+
+  /** Retry Core hand-off when edge is stuck awaiting_core. */
+  @Post(':processId/retry-handoff')
+  async retryHandoff(
+    @Param('processId') processId: string,
+    @Headers('x-session-id') sessionId: string | undefined,
+  ) {
+    const s = this.requireSession(sessionId);
+    const result = await this.processes.retryHandoff(
+      processId,
+      s.institutionId,
+      s.token,
     );
     if (result.statusCode >= 400) {
       throw new HttpException(result.body, result.statusCode);

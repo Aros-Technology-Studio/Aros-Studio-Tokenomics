@@ -4,7 +4,7 @@ set -euo pipefail
 ROOT="$(cd "$(dirname "$0")/.." && pwd)"
 LOG_DIR="${AST_HOME_LOG_DIR:-$ROOT/.home-run}"
 
-for f in core edge ui tunnel; do
+for f in core edge ui tunnel caddy; do
   if [[ -f "$LOG_DIR/$f.pid" ]]; then
     pid="$(cat "$LOG_DIR/$f.pid" || true)"
     if [[ -n "${pid:-}" ]] && kill -0 "$pid" 2>/dev/null; then
@@ -18,7 +18,7 @@ for f in core edge ui tunnel; do
 done
 
 # Best-effort free ports if leftovers
-for port in 3000 3100 3200; do
+for port in 80 443 3000 3100 3200; do
   pids="$(lsof -tiTCP:$port -sTCP:LISTEN 2>/dev/null || true)"
   if [[ -n "${pids:-}" ]]; then
     echo "Freeing :$port ($pids)"
