@@ -44,8 +44,9 @@ export function AppHeader() {
         </div>
       </Link>
       <div className="topbar-right">
+        {/* Always visible: EN · RU · KA */}
         <LanguageSwitcher />
-        <nav className="nav">
+        <nav className="nav" aria-label="Main">
           <Link href="/about">{t('nav.about')}</Link>
           <Link href="/system">{t('nav.system')}</Link>
           <Link href="/explore">{t('nav.explore')}</Link>

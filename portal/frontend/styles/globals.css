@@ -104,33 +104,86 @@ a:hover {
 
 .lang-switch {
   display: inline-flex;
-  gap: 0.2rem;
-  padding: 0.15rem;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 0.25rem;
+  padding: 0.25rem 0.35rem;
   border: 1px solid var(--border);
   border-radius: 999px;
-  background: rgba(0, 0, 0, 0.25);
+  background: rgba(0, 0, 0, 0.35);
+  flex-shrink: 0;
+}
+
+.lang-switch-label {
+  font-size: 0.68rem;
+  font-weight: 700;
+  color: var(--muted);
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  padding: 0 0.35rem 0 0.45rem;
+  border-right: 1px solid var(--border);
+  margin-right: 0.1rem;
 }
 
 .lang-btn {
-  border: none;
+  border: 1px solid transparent;
   background: transparent;
   color: var(--muted);
-  font-size: 0.72rem;
+  font-size: 0.78rem;
   font-weight: 700;
-  letter-spacing: 0.04em;
-  padding: 0.28rem 0.5rem;
+  letter-spacing: 0.02em;
+  padding: 0.35rem 0.55rem;
   border-radius: 999px;
   cursor: pointer;
   font-family: inherit;
+  display: inline-flex;
+  flex-direction: column;
+  align-items: center;
+  line-height: 1.15;
+  min-width: 2.6rem;
+}
+
+.lang-btn .lang-code {
+  font-size: 0.8rem;
+  letter-spacing: 0.04em;
+}
+
+.lang-btn .lang-native {
+  font-size: 0.58rem;
+  font-weight: 600;
+  opacity: 0.85;
+  max-width: 4.5rem;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
 }
 
 .lang-btn:hover {
   color: var(--fg);
+  border-color: var(--border);
 }
 
 .lang-btn.on {
-  background: var(--accent-soft);
-  color: var(--fg);
+  background: var(--accent);
+  color: #fff;
+  border-color: transparent;
+}
+
+.lang-btn.on .lang-native {
+  opacity: 0.95;
+}
+
+@media (max-width: 780px) {
+  .lang-switch {
+    width: 100%;
+    justify-content: flex-start;
+    border-radius: 14px;
+  }
+  .lang-btn {
+    flex-direction: row;
+    gap: 0.3rem;
+    min-width: auto;
+  }
 }
 
 .nav {

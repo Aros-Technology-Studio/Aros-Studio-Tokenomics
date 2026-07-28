@@ -8,15 +8,18 @@ export function LanguageSwitcher() {
 
   return (
     <div className="lang-switch" role="group" aria-label={t('lang.label')}>
+      <span className="lang-switch-label">{t('lang.label')}</span>
       {LOCALES.map((code: Locale) => (
         <button
           key={code}
           type="button"
           className={locale === code ? 'lang-btn on' : 'lang-btn'}
           title={LOCALE_NATIVE[code]}
+          aria-pressed={locale === code}
           onClick={() => setLocale(code)}
         >
-          {LOCALE_LABELS[code]}
+          <span className="lang-code">{LOCALE_LABELS[code]}</span>
+          <span className="lang-native">{LOCALE_NATIVE[code]}</span>
         </button>
       ))}
     </div>
