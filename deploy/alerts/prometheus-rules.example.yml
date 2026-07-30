@@ -34,3 +34,22 @@ groups:
           severity: warning
         annotations:
           summary: Journal height did not advance for 30m (may be idle — tune)
+
+      - alert: AstCoreUnhealthy
+        # Prefer blackbox/json exporter on /health; placeholder if you scrape metrics only
+        expr: ast_up == 0
+        for: 1m
+        labels:
+          severity: critical
+        annotations:
+          summary: AST core reports ast_up=0
+
+  - name: ast-edge
+    rules:
+      - alert: AstEdgeDown
+        expr: up{job="ast-portal-edge"} == 0
+        for: 2m
+        labels:
+          severity: critical
+        annotations:
+          summary: AST portal edge scrape target down

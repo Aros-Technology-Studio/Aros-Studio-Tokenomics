@@ -8,8 +8,9 @@ Repo completion blocks **A–D · I · F** on `main` (not a semver tag by itself
 - Infra package: Postgres/Redis/Kafka profiles, JSON logs, K8s skeleton, `/metrics`  
 - Final go-live + audit prep packages (`docs/GO-LIVE-F1.md`, `docs/AUDIT-PREP-F2.md`)  
 - Host cutover packages (`docs/cutover/`, `cutover:env|preflight|health`)  
-- Solidity Block E: ArosCoinView Foundry tests, testnet deploy, journal tip reporter (`contracts:deploy` / `contracts:report-tip`); E4 free-mint out  
-- CI: `require-canon-update` ignores lockfile / dep-only noise (F3)
+- Solidity Block E: ArosCoinView Foundry tests, testnet deploy, journal tip reporter; E4 free-mint out  
+- Hardening Block F (Bar B): audit prep, KMS residual, mesh residual, L3 key env, `drill:backup-restore`, `monitor:smoke`  
+- CI: `require-canon-update` ignores lockfile / dep-only noise
 
 ## 1.1.0 — 2026-07-20
 

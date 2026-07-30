@@ -17,7 +17,7 @@
 | **D** | Portal / pilot finish | **Done** engineering D1–D12 · owner ops residual (see D8/D11) |
 | **E** | Solidity / representation (ArosCoinView) | **Done** E1–E3 · **E4 out** (no free mint / ERC-as-SoT) |
 | **I** | Infra Postgres · Redis · Kafka · logs · K8s · Nest · alerts | **Done** engineering I1–I7 · owner cluster residual |
-| **F** | Final go-live / audit prep / CI / field release | **Done** engineering F1–F5 · owner residual |
+| **F** | Hardening / ops / prod (Bar B) | **Done** package F1–F6 · owner residual (audit, KMS, mesh, drills live) |
 | **Cutover** | Live host packages (domain/secrets/data/health) | **Done** package `docs/cutover/` · owner executes |
 
 ---
@@ -118,30 +118,37 @@ Rollup: [`docs/contracts/SOLIDITY-BLOCK-E.md`](contracts/SOLIDITY-BLOCK-E.md).
 
 ---
 
-## Block F — Final go-live / field readiness ✅ engineering
+## Block F — Hardening / ops / prod (Bar B) ✅ engineering package
 
 | ID | Item | Status |
 |----|------|--------|
-| **F1** | Go-live runbook (single owner card) | ✅ `GO-LIVE-F1.md` |
-| **F2** | External audit prep package | ✅ `AUDIT-PREP-F2.md` |
-| **F3** | CI require-canon noise fix | ✅ lockfile/dep-only no longer force Canon |
-| **F4** | Field release checklist | ✅ `FIELD-RELEASE-F4.md` · links `RELEASE.md` |
-| **F5** | Final engineering rollup | ✅ `FINAL-ENGINEERING-F5.md` |
+| **F1** | External security audit | ✅ prep `EXTERNAL-AUDIT-F1.md` · **owner engages firm** |
+| **F2** | Cloud KMS / real PKCS#11 | ✅ soft-HSM + interface · **later real KMS/PKCS#11** |
+| **F3** | Multi-region replication mesh | ✅ catch-up only · **mesh residual** |
+| **F4** | Live multi-vendor LLM keys | ✅ env adapters · **vault residual** |
+| **F5** | Kill-switch / backup / restore drill | ✅ `drill:backup-restore` + runbook · **owner quarterly prod drill** |
+| **F6** | Monitoring / alerts | ✅ `/metrics` · rules · `monitor:smoke` · **owner wire Prometheus** |
+
+Rollup: [`docs/hardening/BLOCK-F.md`](hardening/BLOCK-F.md).
+
+Prior field packages (still valid, not F1–F6 IDs): `GO-LIVE-F1.md`, `FIELD-RELEASE-F4.md`, `FINAL-ENGINEERING-F5.md`, cutover scripts.
 
 ---
 
-## Next (owner executes cutover)
+## Next (owner Bar B residual)
 
 ```bash
-npm run cutover:env
-npm run cutover:preflight
-# domain path E1 · compose or kubectl E3/E4
-npm run cutover:health -- --base https://YOUR_HOST
+npm run drill:backup-restore
+npm run monitor:smoke
+npm run cutover:preflight   # host cutover still via docs/cutover/
 ```
 
-- External auditor engagement (F2)  
-- Semver field tag + GHCR (F4)  
-- Optional chat: **`E cutover done`** · `F1 go-live`
+- Engage external auditor (F1)  
+- Real KMS/PKCS#11 when required (F2)  
+- Multi-region mesh design (F3)  
+- L3 keys in vault (F4)  
+- Quarterly prod restore drill log (F5)  
+- Prometheus/Alertmanager (F6)  
 
 ---
 
@@ -166,7 +173,7 @@ npm run cutover:health -- --base https://YOUR_HOST
 | **C — Infra package** | I1–I7 engineering — **done** |
 | **D — Final field package** | F1–F5 go-live/audit/CI — **done** |
 | **E — Solidity representation** | E1–E3 done · E4 out (no free mint) |
-| **F — Live execution residual** | DNS, vault, auditor, mainnet view — **open** |
+| **F — Hardening Bar B** | F1–F6 package done · owner audit/KMS/mesh/live drill |
 
 ---
 
@@ -214,8 +221,9 @@ curl -s http://127.0.0.1:3000/metrics | head
 | 2026-07-30 | List refresh | Block **D** engineering complete; **I** open |
 | 2026-07-30 | **I1–I7** | Infra package: postgres/redis/kafka/logs/k8s/Nest/metrics · `docs/infra/BLOCK-I.md` |
 | 2026-07-30 | List refresh | Block **I** engineering complete; live cutover residual |
-| 2026-07-30 | **F1–F5** | Go-live runbook · audit prep · canon-gate fix · field release · final rollup |
-| 2026-07-30 | List refresh | Block **F** engineering complete; owner cutover residual |
+| 2026-07-30 | Field packages | Go-live / audit prep / field release / final rollup docs (pre-F redefine) |
+| 2026-07-30 | **F1–F6** Hardening Bar B | Audit prep · KMS residual · mesh residual · L3 keys · drill script · monitor smoke |
+| 2026-07-30 | List refresh | Block **F** = hardening/ops/prod package |
 | 2026-07-30 | Cutover ops packages | `docs/cutover/*` (domain/secrets/data/health) — not Solidity |
 | 2026-07-30 | **E1–E3** Solidity | Foundry green · testnet deploy · report-tip; **E4 out** no free mint |
 | 2026-07-30 | List refresh | Block **E** = Solidity representation complete |

@@ -1,4 +1,5 @@
-import type { EventStreamService } from '../event-stream/event-stream.service';
+import { Injectable, Optional, Inject } from '@nestjs/common';
+import { EventStreamService } from '../event-stream/event-stream.service';
 
 /**
  * Layer 08 — All-Seeing Eye: observe + notify.
@@ -17,11 +18,14 @@ export interface AllSeeingEyeNotification {
   seq?: number;
 }
 
+@Injectable()
 export class AllSeeingEyeService {
   private readonly log: AllSeeingEyeNotification[] = [];
   private readonly listeners: Array<(n: AllSeeingEyeNotification) => void> = [];
 
-  constructor(private readonly eventStream?: EventStreamService | null) {}
+  constructor(
+    @Optional() @Inject(EventStreamService) private readonly eventStream?: EventStreamService | null,
+  ) {}
 
   observe(n: Omit<AllSeeingEyeNotification, 'at' | 'seq'>): AllSeeingEyeNotification {
     const full: AllSeeingEyeNotification = { ...n, at: new Date().toISOString() };

@@ -40,3 +40,15 @@
 | Formal L3 LLM adapters | #70 | Done (adapters + mock/OpenAI-compatible) |
 
 Full list: [`docs/BACKLOG.md`](BACKLOG.md).
+
+## Block F (Bar B) — hardening / ops / prod
+
+| ID | Doc |
+|----|-----|
+| Rollup | [`hardening/BLOCK-F.md`](hardening/BLOCK-F.md) |
+| F1 External audit | [`hardening/EXTERNAL-AUDIT-F1.md`](hardening/EXTERNAL-AUDIT-F1.md) |
+| F2 KMS / PKCS#11 | [`hardening/KMS-PKCS11-F2.md`](hardening/KMS-PKCS11-F2.md) |
+| F3 Multi-region mesh | [`hardening/MULTI-REGION-F3.md`](hardening/MULTI-REGION-F3.md) |
+| F4 L3 LLM keys | [`hardening/L3-LLM-KEYS-F4.md`](hardening/L3-LLM-KEYS-F4.md) |
+| F5 Backup/restore drill | [`hardening/DRILL-F5.md`](hardening/DRILL-F5.md) · `npm run drill:backup-restore` |
+| F6 Monitoring | [`hardening/MONITORING-F6.md`](hardening/MONITORING-F6.md) · `npm run monitor:smoke` |

@@ -40,6 +40,8 @@
     "cutover:env": "bash scripts/cutover-env.sh",
     "cutover:preflight": "bash scripts/cutover-preflight.sh",
     "cutover:health": "bash scripts/cutover-health.sh",
+    "drill:backup-restore": "tsx scripts/drill-backup-restore.ts",
+    "monitor:smoke": "tsx scripts/monitor-smoke.ts",
     "journal:status": "tsx scripts/ast-cli.ts journal status",
     "journal:verify": "tsx scripts/ast-cli.ts journal verify",
     "mirror:status": "tsx scripts/ast-cli.ts mirror status",

@@ -9,7 +9,7 @@ import { EventStreamService } from '../event-stream/event-stream.service';
 @Controller('v1/core/eye')
 export class CoreEyeController {
   constructor(
-    private readonly eye: AllSeeingEyeService,
+    @Inject(AllSeeingEyeService) private readonly eye: AllSeeingEyeService,
     @Optional() @Inject(EventStreamService) private readonly eventStream?: EventStreamService,
   ) {}
 

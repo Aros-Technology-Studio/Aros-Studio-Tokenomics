@@ -13,16 +13,16 @@
 
 ## Engineering complete (repo) — 2026-07-30
 
-Blocks **A · B · C · D · E (Solidity) · I · F** — see `docs/COMPLETION-TRACK.md` · `docs/contracts/SOLIDITY-BLOCK-E.md`.
+Blocks **A · B · C · D · E (Solidity) · I · F (Hardening Bar B)** — see `docs/COMPLETION-TRACK.md` · `docs/hardening/BLOCK-F.md`.
 
-## Next (owner-driven)
+## Next (owner-driven · Bar B residual)
 
 | Priority | Item |
 |----------|------|
-| A | Host cutover (`docs/cutover/`) + field tag |
-| B | Testnet/mainnet ArosCoinView deploy if explorers need it (E2 residual) |
-| B | Production IdP/JWKS + national QTSP residual |
-| C | External audit engagement ([`AUDIT-PREP-F2.md`](AUDIT-PREP-F2.md)) |
+| A | External audit engagement (F1) |
+| B | Host cutover + quarterly restore drill (F5) · monitoring wire (F6) |
+| B | Cloud KMS / PKCS#11 (F2) · multi-region mesh (F3) when required |
+| C | L3 multi-vendor keys in vault (F4) · IdP/QTSP residuals |
 
 ## Later
 

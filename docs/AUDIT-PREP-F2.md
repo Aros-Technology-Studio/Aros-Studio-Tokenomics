@@ -1,7 +1,8 @@
-# F2 — External audit prep package
+# External audit prep package (Block F1)
 
-**Status:** Package for auditor hand-off  
-**Purpose:** What to give an external reviewer; what is in scope.
+**Status:** Package for auditor hand-off · Block **F1**  
+**Purpose:** What to give an external reviewer; what is in scope.  
+**Owner card:** [`hardening/EXTERNAL-AUDIT-F1.md`](hardening/EXTERNAL-AUDIT-F1.md)
 
 ---
 
