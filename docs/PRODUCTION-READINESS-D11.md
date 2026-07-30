@@ -35,9 +35,10 @@
 | 14 | Domain / tunnel monitored | D8 | |
 | 15 | Showcase + portal links correct | D9/D10 | |
 
-## Residual infra (block I)
+## Residual infra (block I) — engineering package done
 
-PostgreSQL default, Redis, Kafka, K8s, alerts — separate owner decisions (`COMPLETION-TRACK` §I).
+See `docs/infra/BLOCK-I.md`. Live cutover still owner.  
+Single go-live card: [`GO-LIVE-F1.md`](GO-LIVE-F1.md).
 
 ---
 

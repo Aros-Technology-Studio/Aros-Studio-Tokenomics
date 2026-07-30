@@ -1,9 +1,9 @@
 # AST Completion Track — finish remaining repo components
 
-**Status:** Blocks **A · B · C · D · I engineering complete** (2026-07-30)  
+**Status:** Blocks **A · B · C · D · I · F engineering complete** (2026-07-30)  
 **Law:** `docs/AST-CORE-CANON.md` · decisions · layer acceptances  
 **Rule:** No fake Done. Docs first when a unit lacks a written contract.  
-**Owner residual:** live domain/IdP cutover, managed data plane, k8s cluster apply.
+**Owner residual:** live cutover, auditor engagement, semver field tag.
 
 ---
 
@@ -16,6 +16,7 @@
 | **C** | Acceptance depth + operator smoke | **Done** (C1–C5) |
 | **D** | Portal / pilot finish | **Done** engineering D1–D12 · owner ops residual (see D8/D11) |
 | **I** | Infra Postgres · Redis · Kafka · logs · K8s · Nest · alerts | **Done** engineering I1–I7 · owner cluster residual |
+| **F** | Final go-live / audit prep / CI / field release | **Done** engineering F1–F5 · owner cutover residual |
 
 ---
 
@@ -94,11 +95,24 @@ Rollup: [`docs/infra/BLOCK-I.md`](infra/BLOCK-I.md).
 
 ---
 
-## Next (owner ops)
+## Block F — Final go-live / field readiness ✅ engineering
 
-- Live DNS / IdP / managed Postgres-Redis-Kafka  
-- `kubectl apply` + secrets in real cluster  
-- Optional: owner reply `I6 Nest confirmed`
+| ID | Item | Status |
+|----|------|--------|
+| **F1** | Go-live runbook (single owner card) | ✅ `GO-LIVE-F1.md` |
+| **F2** | External audit prep package | ✅ `AUDIT-PREP-F2.md` |
+| **F3** | CI require-canon noise fix | ✅ lockfile/dep-only no longer force Canon |
+| **F4** | Field release checklist | ✅ `FIELD-RELEASE-F4.md` · links `RELEASE.md` |
+| **F5** | Final engineering rollup | ✅ `FINAL-ENGINEERING-F5.md` |
+
+---
+
+## Next (owner ops only)
+
+- Live DNS / IdP / managed data plane / `kubectl apply`  
+- External auditor engagement (F2)  
+- Semver field tag + GHCR (F4)  
+- Optional chat: `F1 go-live` · `I6 Nest confirmed`
 
 ---
 
@@ -120,8 +134,9 @@ Rollup: [`docs/infra/BLOCK-I.md`](infra/BLOCK-I.md).
 |-----|---------|
 | **A — Repo engineering** | Specs ↔ code ↔ tests ↔ guards — **A/B/C done** |
 | **B — Pilot portal path** | D1–D12 engineering — **done** |
-| **C — Infra package** | I1–I7 engineering — **done** (live cluster residual) |
-| **D — Live production cutover** | Owner DNS, secrets vault, managed data plane — **open** |
+| **C — Infra package** | I1–I7 engineering — **done** |
+| **D — Final field package** | F1–F5 go-live/audit/CI — **done** |
+| **E — Live production cutover** | Owner DNS, vault, managed data plane, auditor — **open** |
 
 ---
 
@@ -169,6 +184,8 @@ curl -s http://127.0.0.1:3000/metrics | head
 | 2026-07-30 | List refresh | Block **D** engineering complete; **I** open |
 | 2026-07-30 | **I1–I7** | Infra package: postgres/redis/kafka/logs/k8s/Nest/metrics · `docs/infra/BLOCK-I.md` |
 | 2026-07-30 | List refresh | Block **I** engineering complete; live cutover residual |
+| 2026-07-30 | **F1–F5** | Go-live runbook · audit prep · canon-gate fix · field release · final rollup |
+| 2026-07-30 | List refresh | Block **F** engineering complete; owner cutover residual |
 
 ---
 

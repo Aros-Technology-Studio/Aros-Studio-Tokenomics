@@ -2,7 +2,8 @@
 
 **Status:** Real operational release  
 **Date:** 2026-07-20  
-**Tag:** `v1.1.0`
+**Tag:** `v1.1.0`  
+**Field go-live (after A–I engineering):** see [`GO-LIVE-F1.md`](GO-LIVE-F1.md) · [`FIELD-RELEASE-F4.md`](FIELD-RELEASE-F4.md)
 
 ## What “real” means
 

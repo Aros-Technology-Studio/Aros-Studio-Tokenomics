@@ -1,5 +1,6 @@
 #!/usr/bin/env bash
 # require-canon-update — architectural diffs must update the Core Canon file.
+# F3: ignore lockfiles and dependency-only noise (Dependabot package.json bumps).
 set -uo pipefail
 ROOT="$(cd "$(dirname "$0")/../.." && pwd)"
 cd "$ROOT"
@@ -30,11 +31,20 @@ fi
 echo "Changed files:"
 echo "$CHANGED"
 
-ARCH_REGEX='^(src/|docs/ARCHITECTURE\.md|docs/AST-CORE-CANON\.md|docs/PORTAL\.md|docs/components/|docs/DOC_MAP\.md|docs/BUILD_SCHEDULE\.md|docs/WORKFLOWS\.md|docs/principles/|docs/processes/|smart-contracts/|nodechain/|pot-engine/|portal/|aroscoin/|package\.json|tsconfig.*\.json)'
+# Drop noise that is never "architecture law"
+FILTERED="$(echo "$CHANGED" | grep -Ev '(^|/)package-lock\.json$|(^|/).*\\.lock$|\\.tsbuildinfo$' || true)"
 
-arch_hits="$(echo "$CHANGED" | grep -E "$ARCH_REGEX" || true)"
+# Architectural: source trees + canon-related docs (not every package.json / lock)
+# - src/ core
+# - portal TypeScript/OpenAPI (not package-lock)
+# - companion contracts/rust roots
+# - key architecture docs
+ARCH_REGEX='^(src/|portal/.+\.(ts|tsx|js|mjs|cjs|yaml|yml)$|contracts/src/|rust/crates/|docs/ARCHITECTURE\.md|docs/AST-CORE-CANON\.md|docs/PORTAL\.md|docs/components/|docs/DOC_MAP\.md|docs/BUILD_SCHEDULE\.md|docs/WORKFLOWS\.md|docs/principles/|docs/processes/|smart-contracts/|nodechain/|pot-engine/|aroscoin/)'
+
+arch_hits="$(echo "$FILTERED" | grep -E "$ARCH_REGEX" || true)"
 canon_hit="$(echo "$CHANGED" | grep -E '^(docs/AST-CORE-CANON\.md|CANON\.md)$' || true)"
 
+# Dependency-only bump: only package.json / package-lock under portal or root → OK without canon
 if [ -z "$arch_hits" ]; then
   echo "require-canon-update: no architectural paths changed — OK."
   exit 0
