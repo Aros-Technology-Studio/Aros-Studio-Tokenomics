@@ -3,6 +3,11 @@ import { NodeRegistryService } from '../nodes/node-registry.service';
 import { NodeReputationService } from '../nodes/node-reputation.service';
 import type { NodeRole } from '../nodes/types';
 
+/**
+ * Network participant registry (writers / validators / observers).
+ * Not the chain Nodes list — that is GET /v1/core/nodechain/nodes (ListNodes).
+ * See docs/layers/01_NodeChain/08_api/nodes-vs-registry.md (B5).
+ */
 @Controller('v1/core/nodes')
 export class CoreNodesController {
   constructor(
@@ -13,8 +18,10 @@ export class CoreNodesController {
   @Get()
   list() {
     return {
+      kind: 'network_registry',
       nodes: this.registry.list(),
       reputations: this.reputation.listSnapshots(),
+      note: 'Network participants — not NodeChain journal heights. Chain feed: GET /v1/core/nodechain/nodes',
     };
   }
 

@@ -30,6 +30,7 @@ A significant event is valid only if it is recorded here.
 01_NodeChain/
 ├── README.md
 ├── ASSEMBLY.md               operational package (HTTP + CLI + boot)
+├── VOCABULARY.md             node vs network node; no product “blocks”
 ├── 00_scope/                 purpose, non-goals, boundaries
 ├── 01_ledger/                journal core ★
 ├── 02_identity_and_nodes/    roles, auth, suspension

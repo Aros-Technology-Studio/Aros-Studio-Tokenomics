@@ -20,8 +20,10 @@ import type { KeyRegistry } from './common/crypto/key-registry';
 import { MemoryIndexMirror, type IndexMirror } from './index-mirror/index-mirror';
 import { PostgresIndexMirror } from './index-mirror/postgres-index-mirror';
 import { EncodingService } from './tx-encoding/encoding.service';
+import { EventStreamService } from './event-stream/event-stream.service';
 
 export const INDEX_MIRROR = 'INDEX_MIRROR';
+export const EVENT_STREAM = 'EVENT_STREAM';
 
 @Module({
   imports: [NodechainModule],
@@ -62,7 +64,47 @@ export const INDEX_MIRROR = 'INDEX_MIRROR';
       inject: [NodechainService],
       useFactory: (nc: NodechainService) => new ReserveService(nc),
     },
-    AllSeeingEyeService,
+    {
+      provide: EventStreamService,
+      useFactory: async () => EventStreamService.createDefault(),
+    },
+    {
+      provide: AllSeeingEyeService,
+      inject: [EventStreamService],
+      useFactory: (stream: EventStreamService) => new AllSeeingEyeService(stream),
+    },
+    {
+      provide: INDEX_MIRROR,
+      useFactory: (): IndexMirror => {
+        const url = process.env.DATABASE_URL?.trim();
+        if (url) return new PostgresIndexMirror(url);
+        return new MemoryIndexMirror();
+      },
+    },
+    {
+      provide: 'OBSERVER_MIRROR_WIRE',
+      inject: [NodechainService, EventStreamService, INDEX_MIRROR],
+      useFactory: (
+        nc: NodechainService,
+        stream: EventStreamService,
+        mirror: IndexMirror,
+      ) => {
+        // B4 event stream + B6 continuous mirror upsert (journal remains SoT)
+        nc.setOnRecordAppended(async (record) => {
+          try {
+            await stream.onRecordAppended(record);
+          } catch {
+            /* non-fatal */
+          }
+          try {
+            await mirror.upsert(record);
+          } catch {
+            /* lag allowed; rebuild via POST /v1/core/mirror/replay */
+          }
+        });
+        return true;
+      },
+    },
     {
       provide: GovernanceService,
       inject: [NodechainService],
@@ -83,14 +125,6 @@ export const INDEX_MIRROR = 'INDEX_MIRROR';
       inject: [NodechainService, ReserveService, ArosCoinService],
       useFactory: (nc: NodechainService, reserve: ReserveService, coin: ArosCoinService) =>
         new ReleaseDaemon(nc, reserve, coin),
-    },
-    {
-      provide: INDEX_MIRROR,
-      useFactory: (): IndexMirror => {
-        const url = process.env.DATABASE_URL;
-        if (url) return new PostgresIndexMirror(url);
-        return new MemoryIndexMirror();
-      },
     },
     {
       provide: OrchestratorService,
@@ -115,6 +149,7 @@ export const INDEX_MIRROR = 'INDEX_MIRROR';
     EmissionService,
     CommissionService,
     ReserveService,
+    EventStreamService,
     AllSeeingEyeService,
     GovernanceService,
     NodeRegistryService,

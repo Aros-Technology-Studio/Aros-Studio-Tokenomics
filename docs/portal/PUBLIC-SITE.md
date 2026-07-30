@@ -44,9 +44,13 @@ The institution does **not** invent valuation up front. The signed document is t
 |------|------|
 | UI | `/nodechain` (Next.js) |
 | Edge API | `/v1/public/nodechain/*` → Core `/v1/core/nodechain/*` |
+| Nodes list | `GET /v1/public/nodechain/nodes` → Core `GET /v1/core/nodechain/nodes` |
 
 **Read-only.** No append, no mint, no genesis POST from portal.  
-Shows tip / chain integrity / record by height / process-scoped journal rows.
+Shows tip / chain integrity / **Nodes list** (height chain) / process-scoped journal rows.  
+
+Not the network registry (`GET /v1/core/nodes` — writers/validators; not a public explorer table).  
+See `docs/layers/01_NodeChain/08_api/nodes-vs-registry.md`.
 
 ## Public explorer rules (Canon)
 

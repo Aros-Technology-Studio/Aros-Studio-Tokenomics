@@ -32,6 +32,7 @@ All-Seeing Eye is not a subdirectory of NodeChain and does not define append aut
 How much a node is paid is commission/settlement.  
 NodeChain may store `payment_credited` facts. Weights and formulas live outside this layer.
 
-### “Blocks”
+### “Blocks” vs nodes
 
-Product language uses **journal records**, **height**, **snapshots** — not chain “blocks” in API or docs of this layer.
+Product language uses **nodes** (chain units at a height), **height**, **envelopeHash**, **prevHash**, **snapshots** — not product-API “blocks”.  
+Storage may still call a persisted row a journal record; the explorer feed is **Nodes list**.

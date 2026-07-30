@@ -3,13 +3,23 @@
 Tracked items beyond shipped core path.  
 GitHub Issues are the operational list; this file is the in-repo mirror.
 
+**A6 (2026-07-30):** Stale MIGRATE/DOC/INTERFACE noise closed — see `docs/ISSUE-HYGIENE-A6.md`.
+
+## Open GitHub issues (after A6)
+
+| # | Title | Owner |
+|---|--------|--------|
+| [#52](https://github.com/Aros-Technology-Studio/Aros-Studio-Tokenomics/issues/52) | DOC: `docs/ONTOLOGY.md` (+ Application) | Docs when prioritized |
+| [#41](https://github.com/Aros-Technology-Studio/Aros-Studio-Tokenomics/issues/41) | LEGAL: regulatory verification | Owner / counsel |
+| [#34](https://github.com/Aros-Technology-Studio/Aros-Studio-Tokenomics/issues/34) | SYNC: mirror docs to Notion | Owner-deferred |
+
 ## Shipped hardening / governance
 
 | # | Item | Issue | Status |
 |---|------|--------|--------|
-| 1 | **HSM key provider** | [#68](https://github.com/Aros-Technology-Studio/Aros-Studio-Tokenomics/issues/68) | **Done** — `KeyProvider` + `HsmKeyProvider` (`AST_KEY_PROVIDER=hsm`) |
-| 2 | **Network replication** | [#69](https://github.com/Aros-Technology-Studio/Aros-Studio-Tokenomics/issues/69) | **Done** — `JournalReplicator` catch-up, diverge refuse |
-| 3 | **Formal L3 LLM adapters** | [#70](https://github.com/Aros-Technology-Studio/Aros-Studio-Tokenomics/issues/70) | **Done** — `llm-adapters.ts` + `AST_L3_USE_LLM` |
+| 1 | **HSM key provider** | [#68](https://github.com/Aros-Technology-Studio/Aros-Studio-Tokenomics/issues/68) | **Done** |
+| 2 | **Network replication** | [#69](https://github.com/Aros-Technology-Studio/Aros-Studio-Tokenomics/issues/69) | **Done** |
+| 3 | **Formal L3 LLM adapters** | [#70](https://github.com/Aros-Technology-Studio/Aros-Studio-Tokenomics/issues/70) | **Done** |
 
 ## Already in v1 (reference)
 

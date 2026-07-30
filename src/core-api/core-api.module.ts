@@ -7,6 +7,7 @@ import { CoreEyeController } from './eye.controller';
 import { CorePartialReleaseController } from './partial-release.controller';
 import { CoreOracleController } from './oracle.controller';
 import { CoreNodechainController } from './nodechain.controller';
+import { CoreMirrorController } from './mirror.controller';
 
 @Module({
   imports: [LayersModule],
@@ -18,6 +19,7 @@ import { CoreNodechainController } from './nodechain.controller';
     CoreEyeController,
     CorePartialReleaseController,
     CoreOracleController,
+    CoreMirrorController,
   ],
 })
 export class CoreApiModule {}

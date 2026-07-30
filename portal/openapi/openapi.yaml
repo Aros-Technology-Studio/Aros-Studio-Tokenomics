@@ -3,7 +3,7 @@ info:
   title: AST Institutional Portal API
   version: 1.0.0
   description: |
-    Edge API for the institutional portal (AFC-side admission).
+    Edge API for the institutional portal (admission edge only — not SoT).
 
     **Canon alignment (AST-CORE-CANON):**
     - Portal does **not** mint, burn, or hold third-party funds.
@@ -104,12 +104,15 @@ paths:
         '503':
           description: Core unavailable
 
-  /v1/public/nodechain/blocks:
+  /v1/public/nodechain/nodes:
     get:
       tags: [public]
-      operationId: publicNodechainBlocks
+      operationId: publicNodechainNodes
       security: []
-      summary: Latest blocks (tip-first blockchain-style feed)
+      summary: Nodes list (tip-first NodeChain feed)
+      description: >
+        Chain nodes of the NodeChain journal (height, envelopeHash, prevHash).
+        Not the network participant registry at /v1/core/nodes.
       parameters:
         - name: limit
           in: query
@@ -119,7 +122,7 @@ paths:
             default: 40
       responses:
         '200':
-          description: Blocks list
+          description: Nodes list (height, envelopeHash, prevHash)
 
   /v1/public/nodechain/tip:
     get:

@@ -1,6 +1,6 @@
 'use client';
 
-import { FormEvent, useCallback, useEffect, useState } from 'react';
+import { FormEvent, Suspense, useCallback, useEffect, useState } from 'react';
 import Link from 'next/link';
 import { useSearchParams } from 'next/navigation';
 import { apiBase } from '../../lib/auth';
@@ -40,17 +40,18 @@ type JournalRecord = {
   signatures?: Array<{ signerId?: string; algorithm?: string }>;
 };
 
-type BlockRow = {
-  blockNumber: number;
-  blockHash: string;
-  parentHash: string;
+/** One NodeChain node (chain unit at a height) — not a blockchain block. */
+type ChainNode = {
+  height: number;
+  envelopeHash: string;
+  prevHash: string;
   timestamp: string;
   type: string;
   processId: string | null;
   writer: string;
   writerRole: string;
   recordId: string;
-  record: JournalRecord;
+  payload?: Record<string, unknown>;
 };
 
 async function fetchJson(path: string): Promise<{ ok: boolean; status: number; body: unknown }> {
@@ -65,23 +66,22 @@ async function fetchJson(path: string): Promise<{ ok: boolean; status: number; b
 }
 
 /**
- * NodeChain explorer — blockchain-style registration journal.
- * Blocks = append-only records; height = block number; prevHash = parent link.
- * Read-only. No mint / write from portal. English UI only.
+ * NodeChain explorer — append-only chain of **nodes** (height-linked).
+ * Not blockchain blocks. Read-only. No mint / write from portal.
  */
-export default function NodechainPage() {
+function NodechainPageInner() {
   const { t } = useI18n();
   const search = useSearchParams();
   const [status, setStatus] = useState<StatusBody | null>(null);
-  const [blocks, setBlocks] = useState<BlockRow[]>([]);
+  const [nodes, setNodes] = useState<ChainNode[]>([]);
   const [error, setError] = useState<string | null>(null);
   const [loading, setLoading] = useState(true);
-  const [selected, setSelected] = useState<BlockRow | null>(null);
+  const [selected, setSelected] = useState<ChainNode | null>(null);
   const [showTech, setShowTech] = useState(false);
 
   const [jumpHeight, setJumpHeight] = useState('');
   const [processId, setProcessId] = useState('');
-  const [processBlocks, setProcessBlocks] = useState<JournalRecord[] | null>(null);
+  const [processNodes, setProcessNodes] = useState<JournalRecord[] | null>(null);
   const [processMeta, setProcessMeta] = useState<{ count?: number; returned?: number } | null>(
     null,
   );
@@ -101,12 +101,12 @@ export default function NodechainPage() {
       message?: string;
     };
     if (!r.ok) {
-      setProcessBlocks([]);
+      setProcessNodes([]);
       setProcessMeta(null);
       setError(b.message ?? `process history HTTP ${r.status}`);
       return;
     }
-    setProcessBlocks(b.records ?? []);
+    setProcessNodes(b.records ?? []);
     setProcessMeta({ count: b.count, returned: b.returned });
   }, []);
 
@@ -114,24 +114,24 @@ export default function NodechainPage() {
     setLoading(true);
     setError(null);
     try {
-      const [st, bl] = await Promise.all([
+      const [st, nl] = await Promise.all([
         fetchJson('/v1/public/nodechain/status'),
-        fetchJson('/v1/public/nodechain/blocks?limit=50'),
+        fetchJson('/v1/public/nodechain/nodes?limit=50'),
       ]);
       if (!st.ok) {
         const b = st.body as { message?: string };
         throw new Error(b.message ?? `status HTTP ${st.status}`);
       }
-      if (!bl.ok) {
-        const b = bl.body as { message?: string };
-        throw new Error(b.message ?? `blocks HTTP ${bl.status}`);
+      if (!nl.ok) {
+        const b = nl.body as { message?: string };
+        throw new Error(b.message ?? `nodes HTTP ${nl.status}`);
       }
       setStatus(st.body as StatusBody);
-      const body = bl.body as { blocks?: BlockRow[] };
-      setBlocks(body.blocks ?? []);
+      const body = nl.body as { nodes?: ChainNode[] };
+      setNodes(body.nodes ?? []);
     } catch (e) {
       setStatus(null);
-      setBlocks([]);
+      setNodes([]);
       setError(e instanceof Error ? e.message : String(e));
     } finally {
       setLoading(false);
@@ -176,16 +176,16 @@ export default function NodechainPage() {
     }
     const rec = b.record;
     setSelected({
-      blockNumber: rec.height ?? h,
-      blockHash: rec.envelopeHash ?? '',
-      parentHash: rec.prevHash ?? '',
+      height: rec.height ?? h,
+      envelopeHash: rec.envelopeHash ?? '',
+      prevHash: rec.prevHash ?? '',
       timestamp: rec.timestampUtc ?? '',
       type: rec.recordType ?? '',
       processId: rec.processId ?? null,
       writer: rec.writerId ?? '',
       writerRole: rec.writerRole ?? '',
       recordId: rec.recordId ?? '',
-      record: rec,
+      payload: rec.payload,
     });
     setShowTech(false);
   }
@@ -198,8 +198,8 @@ export default function NodechainPage() {
 
   const filtered =
     filterKind === 'all'
-      ? blocks
-      : blocks.filter((b) => labelForType(b.type).kind === filterKind);
+      ? nodes
+      : nodes.filter((n) => labelForType(n.type).kind === filterKind);
 
   const tipH = status?.tip?.height;
   const chainOk = status?.chain?.ok === true;
@@ -318,22 +318,22 @@ export default function NodechainPage() {
         </div>
       </div>
 
-      {processBlocks && (
+      {processNodes && (
         <div className="card">
           <h2>
             {t('nc.proc.records')} · {processId.trim() || '—'}
             {processMeta?.count != null ? (
               <span className="muted" style={{ fontWeight: 400, fontSize: '0.9rem' }}>
                 {' '}
-                ({processMeta.returned ?? processBlocks.length}/{processMeta.count})
+                ({processMeta.returned ?? processNodes.length}/{processMeta.count})
               </span>
             ) : null}
           </h2>
-          {processBlocks.length === 0 ? (
+          {processNodes.length === 0 ? (
             <p className="muted">{t('nc.proc.empty')}</p>
           ) : (
             <div className="nc-chain">
-              {processBlocks.map((rec, i) => {
+              {processNodes.map((rec, i) => {
                 const lab = labelForType(rec.recordType);
                 const when = formatWhen(rec.timestampUtc);
                 return (
@@ -391,7 +391,7 @@ export default function NodechainPage() {
           <table className="table nc-table">
             <thead>
               <tr>
-                <th>{t('nc.th.block')}</th>
+                <th>{t('nc.th.node')}</th>
                 <th>{t('nc.th.when')}</th>
                 <th>{t('nc.th.event')}</th>
                 <th>{t('nc.th.meaning')}</th>
@@ -400,21 +400,21 @@ export default function NodechainPage() {
               </tr>
             </thead>
             <tbody>
-              {filtered.map((b) => {
-                const lab = labelForType(b.type);
-                const when = formatWhen(b.timestamp);
-                const summary = summarizePayload(b.type, b.record?.payload) ?? lab.description;
+              {filtered.map((n) => {
+                const lab = labelForType(n.type);
+                const when = formatWhen(n.timestamp);
+                const summary = summarizePayload(n.type, n.payload) ?? lab.description;
                 return (
                   <tr
-                    key={b.recordId || b.blockNumber}
-                    className={selected?.blockNumber === b.blockNumber ? 'nc-row-on' : ''}
+                    key={n.recordId || n.height}
+                    className={selected?.height === n.height ? 'nc-row-on' : ''}
                     onClick={() => {
-                      setSelected(b);
+                      setSelected(n);
                       setShowTech(false);
                     }}
                   >
                     <td className="mono">
-                      <span className="nc-block-num">#{b.blockNumber}</span>
+                      <span className="nc-node-num">#{n.height}</span>
                     </td>
                     <td>
                       <div>{when.date}</div>
@@ -429,17 +429,17 @@ export default function NodechainPage() {
                     </td>
                     <td className="nc-sense">{summary}</td>
                     <td className="mono" style={{ fontSize: '0.78rem', maxWidth: 160 }}>
-                      {b.processId ? (
-                        <span title={b.processId}>
-                          {b.processId.length > 22
-                            ? `${b.processId.slice(0, 18)}…`
-                            : b.processId}
+                      {n.processId ? (
+                        <span title={n.processId}>
+                          {n.processId.length > 22
+                            ? `${n.processId.slice(0, 18)}…`
+                            : n.processId}
                         </span>
                       ) : (
                         <span className="muted">—</span>
                       )}
                     </td>
-                    <td style={{ fontSize: '0.85rem' }}>{roleLabel(b.writerRole, b.writer)}</td>
+                    <td style={{ fontSize: '0.85rem' }}>{roleLabel(n.writerRole, n.writer)}</td>
                   </tr>
                 );
               })}
@@ -449,12 +449,12 @@ export default function NodechainPage() {
       </div>
 
       {selected && (
-        <div className="card nc-block-detail">
-          <div className="nc-block-detail-head">
+        <div className="card nc-node-detail">
+          <div className="nc-node-detail-head">
             <div>
               <p className="eyebrow">{t('nc.detail.eyebrow')}</p>
               <h2 style={{ margin: '0.2rem 0' }}>
-                #{selected.blockNumber} · {labelForType(selected.type).title}
+                #{selected.height} · {labelForType(selected.type).title}
               </h2>
               <p className="muted" style={{ margin: 0 }}>
                 {labelForType(selected.type).description}
@@ -465,7 +465,7 @@ export default function NodechainPage() {
             </button>
           </div>
 
-          <div className="nc-block-meta">
+          <div className="nc-node-meta">
             <div>
               <span className="label">{t('nc.detail.time')}</span>
               <span>
@@ -483,7 +483,7 @@ export default function NodechainPage() {
             <div>
               <span className="label">{t('nc.detail.summary')}</span>
               <span>
-                {summarizePayload(selected.type, selected.record?.payload) ??
+                {summarizePayload(selected.type, selected.payload) ??
                   labelForType(selected.type).description}
               </span>
             </div>
@@ -492,42 +492,42 @@ export default function NodechainPage() {
           <div className="nc-parent-link">
             <div>
               <span className="label">{t('nc.detail.parent')}</span>
-              <code className="mono">{shortHash(selected.parentHash, 14)}</code>
-              {selected.blockNumber > 0 && (
+              <code className="mono">{shortHash(selected.prevHash, 14)}</code>
+              {selected.height > 0 && (
                 <button
                   type="button"
                   className="linkish"
                   onClick={async () => {
-                    setJumpHeight(String(selected.blockNumber - 1));
+                    setJumpHeight(String(selected.height - 1));
                     const r = await fetchJson(
-                      `/v1/public/nodechain/records/height/${selected.blockNumber - 1}`,
+                      `/v1/public/nodechain/records/height/${selected.height - 1}`,
                     );
                     const b = r.body as { record?: JournalRecord };
                     if (b.record) {
                       const rec = b.record;
                       setSelected({
-                        blockNumber: rec.height ?? selected.blockNumber - 1,
-                        blockHash: rec.envelopeHash ?? '',
-                        parentHash: rec.prevHash ?? '',
+                        height: rec.height ?? selected.height - 1,
+                        envelopeHash: rec.envelopeHash ?? '',
+                        prevHash: rec.prevHash ?? '',
                         timestamp: rec.timestampUtc ?? '',
                         type: rec.recordType ?? '',
                         processId: rec.processId ?? null,
                         writer: rec.writerId ?? '',
                         writerRole: rec.writerRole ?? '',
                         recordId: rec.recordId ?? '',
-                        record: rec,
+                        payload: rec.payload,
                       });
                     }
                   }}
                 >
-                  {t('nc.detail.open')} #{selected.blockNumber - 1}
+                  {t('nc.detail.open')} #{selected.height - 1}
                 </button>
               )}
             </div>
             <div className="nc-arrow">↓</div>
             <div>
               <span className="label">{t('nc.detail.this')}</span>
-              <code className="mono">{shortHash(selected.blockHash, 14)}</code>
+              <code className="mono">{shortHash(selected.envelopeHash, 14)}</code>
             </div>
           </div>
 
@@ -543,16 +543,12 @@ export default function NodechainPage() {
             <pre className="result" style={{ marginTop: '0.75rem' }}>
               {JSON.stringify(
                 {
+                  height: selected.height,
                   recordId: selected.recordId,
-                  recordType: selected.type,
-                  envelopeHash: selected.blockHash,
-                  prevHash: selected.parentHash,
-                  contentHash: selected.record?.contentHash,
-                  payload: selected.record?.payload,
-                  signatures: selected.record?.signatures?.map((s) => ({
-                    signerId: s.signerId,
-                    algorithm: s.algorithm,
-                  })),
+                  type: selected.type,
+                  envelopeHash: selected.envelopeHash,
+                  prevHash: selected.prevHash,
+                  payload: selected.payload,
                 },
                 null,
                 2,
@@ -571,5 +567,19 @@ export default function NodechainPage() {
         </ul>
       </section>
     </>
+  );
+}
+
+export default function NodechainPage() {
+  return (
+    <Suspense
+      fallback={
+        <section className="card">
+          <p className="muted">Loading NodeChain…</p>
+        </section>
+      }
+    >
+      <NodechainPageInner />
+    </Suspense>
   );
 }

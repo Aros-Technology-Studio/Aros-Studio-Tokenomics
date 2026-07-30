@@ -11,6 +11,8 @@ EXCLUDES=(
   --exclude-dir=node_modules
   --exclude-dir=dist
   --exclude-dir=.github
+  --exclude-dir=sessions
+  --exclude-dir=.grok
   --exclude=package-lock.json
   '--exclude=*.lock'
 )

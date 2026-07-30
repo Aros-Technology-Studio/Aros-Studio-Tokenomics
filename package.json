@@ -12,6 +12,11 @@
     "start": "node dist/main.js",
     "start:dev": "tsx src/main.ts",
     "test": "jest",
+    "test:portal": "npm --prefix portal/backend test",
+    "test:contracts": "forge test --root contracts",
+    "test:rust": "cargo test --manifest-path rust/Cargo.toml --workspace",
+    "test:all": "bash scripts/release-check.sh",
+    "check:release": "bash scripts/release-check.sh",
     "check:canon": "bash .github/scripts/run-all-guards.sh",
     "check:env": "bash scripts/check-env-layout.sh",
     "check:layout": "bash .github/scripts/layout-scaffold-guard.sh",
@@ -20,8 +25,11 @@
     "journal:genesis": "tsx scripts/ast-cli.ts journal genesis",
     "journal:first": "tsx scripts/ast-cli.ts journal first-record",
     "demo:tokenize": "tsx scripts/tokenize-demo.ts",
+    "smoke:operator": "tsx scripts/operator-smoke.ts",
     "journal:status": "tsx scripts/ast-cli.ts journal status",
-    "journal:verify": "tsx scripts/ast-cli.ts journal verify"
+    "journal:verify": "tsx scripts/ast-cli.ts journal verify",
+    "mirror:status": "tsx scripts/ast-cli.ts mirror status",
+    "mirror:replay": "tsx scripts/ast-cli.ts mirror replay"
   },
   "dependencies": {
     "@nestjs/common": "^11.0.0",

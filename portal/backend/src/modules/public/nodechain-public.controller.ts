@@ -39,11 +39,11 @@ export class NodechainPublicController {
     return this.respond(this.nodechain.status());
   }
 
-  /** Latest blocks — blockchain-style feed (tip first). */
-  @Get('blocks')
-  blocks(@Query('limit') limitRaw?: string) {
+  /** Latest NodeChain nodes — tip-first feed (read-only). Not network registry. */
+  @Get('nodes')
+  nodes(@Query('limit') limitRaw?: string) {
     const limit = limitRaw != null ? Number(limitRaw) : 40;
-    return this.respond(this.nodechain.blocks(limit));
+    return this.respond(this.nodechain.nodes(limit));
   }
 
   @Get('tip')

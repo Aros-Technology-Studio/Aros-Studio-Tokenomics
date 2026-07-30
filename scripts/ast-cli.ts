@@ -1,6 +1,9 @@
 #!/usr/bin/env tsx
 import { createNodechainAsync } from '../src/nodechain/journal.factory';
 import type { RocksDbJournalStore } from '../src/nodechain/rocksdb.store';
+import { MemoryIndexMirror } from '../src/index-mirror/index-mirror';
+import { PostgresIndexMirror } from '../src/index-mirror/postgres-index-mirror';
+import type { IndexMirror } from '../src/index-mirror/index-mirror';
 
 function usage(): void {
   console.log(`Usage:
@@ -10,6 +13,9 @@ function usage(): void {
   npm run cli -- journal tip [--dir data/journal] [--engine rocksdb]
   npm run cli -- journal verify [--dir data/journal] [--engine rocksdb]
   npm run cli -- journal dump [--dir data/journal] [--engine rocksdb]
+  npm run cli -- mirror status [--dir data/journal] [--engine file]
+  npm run cli -- mirror replay [--dir data/journal] [--engine file]
+  npm run cli -- mirror process <processId> [--dir data/journal] [--engine file]
 `);
 }
 
@@ -25,6 +31,12 @@ function parseEngine(args: string[]): 'memory' | 'file' | 'rocksdb' {
   return (process.env.AST_JOURNAL_ENGINE as 'memory' | 'file' | 'rocksdb') || 'file';
 }
 
+function createMirror(): IndexMirror {
+  const url = process.env.DATABASE_URL?.trim();
+  if (url) return new PostgresIndexMirror(url);
+  return new MemoryIndexMirror();
+}
+
 async function main(): Promise<void> {
   const args = process.argv.slice(2);
   if (args.length === 0) {
@@ -32,9 +44,77 @@ async function main(): Promise<void> {
     process.exit(1);
   }
 
-  const [domain, cmd] = args;
+  const [domain, cmd, maybeId] = args;
   const dir = parseDir(args) ?? 'data/journal';
   const engine = parseEngine(args);
+
+  if (domain === 'mirror') {
+    const mirror = createMirror();
+    const { store, nodechain: nc } = await createNodechainAsync({ engine, dir });
+    const close = async () => {
+      if (engine === 'rocksdb' && store && 'close' in store) {
+        await (store as RocksDbJournalStore).close();
+      }
+      if (mirror.close) await mirror.close();
+    };
+    try {
+      if (cmd === 'status') {
+        const status = mirror.getStatus
+          ? await mirror.getStatus(nc)
+          : { kind: mirror.kind, role: 'index_mirror_not_sot', ready: true };
+        console.log(
+          JSON.stringify(
+            {
+              ok: true,
+              action: 'mirror-status',
+              sot: 'nodechain',
+              databaseUrl: Boolean(process.env.DATABASE_URL?.trim()),
+              ...status,
+            },
+            null,
+            2,
+          ),
+        );
+        return;
+      }
+      if (cmd === 'replay') {
+        const result = await mirror.replayFrom(nc);
+        const status = mirror.getStatus ? await mirror.getStatus(nc) : null;
+        console.log(
+          JSON.stringify(
+            { ok: true, action: 'mirror-replay', ...result, status, sot: 'nodechain' },
+            null,
+            2,
+          ),
+        );
+        return;
+      }
+      if (cmd === 'process' && maybeId) {
+        const rows = await mirror.getByProcessId(maybeId);
+        console.log(
+          JSON.stringify(
+            {
+              ok: true,
+              action: 'mirror-process',
+              processId: maybeId,
+              count: rows.length,
+              records: rows,
+              source: 'index_mirror',
+              sot: 'nodechain',
+            },
+            null,
+            2,
+          ),
+        );
+        return;
+      }
+      usage();
+      process.exitCode = 1;
+    } finally {
+      await close();
+    }
+    return;
+  }
 
   if (domain !== 'journal') {
     usage();
@@ -77,7 +157,15 @@ async function main(): Promise<void> {
       const verify = await nc.verifyChain();
       console.log(
         JSON.stringify(
-          { ok: true, action: 'first-record', dir, engine, genesis: g, firstRecord: first, chain: verify },
+          {
+            ok: true,
+            action: 'first-record',
+            dir,
+            engine,
+            genesis: g,
+            firstRecord: first,
+            chain: verify,
+          },
           null,
           2,
         ),

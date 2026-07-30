@@ -57,6 +57,22 @@ if [ -d portal ]; then
   echo "NOTE: portal/ present (optional edge; not required by check:env)"
 fi
 
+# A7: local chat/agent dumps must stay out of git
+if ! grep -qE '^sessions/' .gitignore 2>/dev/null; then
+  echo "MISSING: .gitignore must list sessions/ (do not commit agent chat dumps)"
+  fail=1
+else
+  echo "OK: .gitignore sessions/"
+fi
+tracked_sessions="$(git ls-files 'sessions' 'sessions/**' 2>/dev/null | head -1 || true)"
+if [ -n "$tracked_sessions" ]; then
+  echo "FAIL: sessions/ paths are tracked by git — untrack and keep local only"
+  echo "  first: $tracked_sessions"
+  fail=1
+else
+  echo "OK: sessions/ not tracked"
+fi
+
 if [ "$fail" -ne 0 ]; then
   echo "check-env-layout FAILED"
   exit 1

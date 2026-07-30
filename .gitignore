@@ -5,6 +5,12 @@ coverage/
 **/.next/
 .home-run/
 
+# Local agent / chat session dumps — never commit (secrets, prompts, chat noise)
+sessions/
+**/sessions/
+.grok/
+**/.grok/
+
 .env
 .env.*
 !.env.example
@@ -18,3 +24,4 @@ contracts/cache/
 contracts/lib/
 rust/target/
 **/.ast-keys.json
+**/at-rest.key

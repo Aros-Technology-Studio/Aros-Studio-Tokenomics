@@ -24,6 +24,28 @@ export function isValidProcessId(processId: string): boolean {
   return typeof processId === 'string' && PROCESS_ID_PATTERN.test(processId);
 }
 
+/**
+ * Extract institution segment from AST-{INST}-{YYYYMMDD}-{suffix}.
+ * Returns uppercase INST or null if pattern invalid.
+ */
+export function institutionIdFromProcessId(processId: string): string | null {
+  if (!processId?.trim()) return null;
+  const m = processId
+    .trim()
+    .match(/^AST-([A-Z0-9]+)-\d{8}-[A-Z0-9]+$/i);
+  return m ? m[1].toUpperCase() : null;
+}
+
+/** True if processId is owned by institution (Canon processId shape). */
+export function processOwnedByInstitution(
+  processId: string | null | undefined,
+  institutionId: string,
+): boolean {
+  if (!processId?.trim() || !institutionId?.trim()) return false;
+  const inst = institutionIdFromProcessId(processId);
+  return inst != null && inst === institutionId.trim().toUpperCase();
+}
+
 export function assertValidProcessId(processId: string): void {
   if (!isValidProcessId(processId)) {
     throw new Error(

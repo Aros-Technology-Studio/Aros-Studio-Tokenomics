@@ -3,6 +3,7 @@ import { promises as fs } from 'fs';
 import type { JournalStore } from './store.interface';
 import type { JournalRecord, Tip } from './types';
 import { NodeChainError, NcErrorCode } from './errors';
+import type { JournalAtRestCipher } from '../common/crypto/at-rest';
 
 // rocksdb is callback-based LevelDOWN-style
 // eslint-disable-next-line @typescript-eslint/no-require-imports
@@ -71,8 +72,26 @@ export class RocksDbJournalStore implements JournalStore {
   private db!: RocksDbHandle;
   private ready: Promise<void>;
 
-  constructor(private readonly dir: string) {
+  constructor(
+    private readonly dir: string,
+    private readonly atRest?: JournalAtRestCipher | null,
+  ) {
     this.ready = this.init();
+  }
+
+  private encode(value: unknown): string {
+    if (this.atRest) return this.atRest.encode(value);
+    return JSON.stringify(value);
+  }
+
+  private decodeRecord(raw: string): JournalRecord {
+    if (this.atRest) return this.atRest.decode<JournalRecord>(raw);
+    return JSON.parse(raw) as JournalRecord;
+  }
+
+  private decodeTip(raw: string): Tip {
+    if (this.atRest) return this.atRest.decode<Tip>(raw);
+    return JSON.parse(raw) as Tip;
   }
 
   private async init(): Promise<void> {
@@ -91,13 +110,13 @@ export class RocksDbJournalStore implements JournalStore {
   async getTip(): Promise<Tip | null> {
     await this.ensure();
     const raw = await get(this.db, 'tip');
-    return raw ? (JSON.parse(raw) as Tip) : null;
+    return raw ? this.decodeTip(raw) : null;
   }
 
   async getByHeight(height: number): Promise<JournalRecord | null> {
     await this.ensure();
     const raw = await get(this.db, this.hKey(height));
-    return raw ? (JSON.parse(raw) as JournalRecord) : null;
+    return raw ? this.decodeRecord(raw) : null;
   }
 
   async getByRecordId(recordId: string): Promise<JournalRecord | null> {
@@ -137,9 +156,9 @@ export class RocksDbJournalStore implements JournalStore {
     if (existing) {
       throw new NodeChainError(NcErrorCode.STORAGE, `height ${record.height} exists`);
     }
-    const json = JSON.stringify(record);
+    const sealed = this.encode(record);
     try {
-      await put(this.db, this.hKey(record.height), json);
+      await put(this.db, this.hKey(record.height), sealed);
       await put(this.db, `id/${record.recordId}`, String(record.height));
       if (clientRecordId) {
         await put(this.db, `client/${clientRecordId}`, record.recordId);
@@ -147,7 +166,7 @@ export class RocksDbJournalStore implements JournalStore {
       await put(
         this.db,
         'tip',
-        JSON.stringify({ height: record.height, tipHash: record.envelopeHash }),
+        this.encode({ height: record.height, tipHash: record.envelopeHash }),
       );
     } catch (e) {
       throw new NodeChainError(NcErrorCode.STORAGE, `rocksdb write failed: ${String(e)}`);

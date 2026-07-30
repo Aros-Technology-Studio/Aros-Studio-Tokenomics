@@ -69,9 +69,64 @@ npm --prefix portal/frontend run build && npm --prefix portal/frontend start
 
 ## Pre-release check
 
+One gate for **core + portal** tests and production builds:
+
 ```bash
-bash scripts/release-check.sh
+npm run check:release
+# same as: bash scripts/release-check.sh
+# alias:   npm run test:all
 ```
+
+| Step | What runs |
+|------|-----------|
+| Core tests | `npm test` (Jest) |
+| Portal shared | `npm --prefix portal/shared test` |
+| Portal edge | `npm --prefix portal/backend test` |
+| Builds | portal edge, portal UI (Next), core `tsc` |
+
+Optional env:
+
+| Var | Effect |
+|-----|--------|
+| `SKIP_FRONTEND_BUILD=1` | Skip Next.js build (faster local loop) |
+| `SKIP_INSTALL=1` | Assume `node_modules` already installed (CI) |
+
+CI runs the same gate via `npm run check:release` (see `.github/workflows/ci.yml`).
+
+### Operator smoke (C5)
+
+```bash
+npm run smoke:operator
+# expect: SMOKE PASS (C5)
+```
+
+Covers Orchestrator primary path, Oracle M-of-N + fail-closed, Release I8 gate + daemon tick, Partial release.  
+Checklist: `docs/OPERATOR-SMOKE-C5.md`. Included in `npm run check:release`.
+
+### Contracts (Foundry)
+
+```bash
+brew install foundry   # once
+npm run test:contracts # forge test --root contracts
+```
+
+CI job `contracts` installs Foundry and runs `forge test` under `contracts/`.  
+`check:release` runs forge tests when `forge` is on `PATH` (skips with a note otherwise).
+
+### Rust companion
+
+```bash
+# once
+curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | sh -s -- -y
+source "$HOME/.cargo/env"
+
+# from repo root (not ~)
+cd /path/to/Aros-Studio-Tokenomics
+npm run test:rust
+```
+
+CI job `rust` runs `cargo test --workspace` under `rust/`.  
+`check:release` sources `$HOME/.cargo/env` when present and runs cargo if available.
 
 ## Dev-only demo (not production)
 

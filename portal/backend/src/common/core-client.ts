@@ -128,11 +128,11 @@ export class CoreApiClient {
     );
   }
 
-  async getNodechainBlocks(
+  async getNodechainNodes(
     limit?: number,
   ): Promise<{ statusCode: number; body: Record<string, unknown> }> {
     const q = limit != null ? `?limit=${limit}` : '';
-    return this.request('GET', `/v1/core/nodechain/blocks${q}`);
+    return this.request('GET', `/v1/core/nodechain/nodes${q}`);
   }
 
   private async request(

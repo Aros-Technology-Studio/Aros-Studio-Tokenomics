@@ -824,7 +824,7 @@ button.ghost {
   word-break: break-all;
 }
 
-/* —— Blockchain-style NodeChain explorer —— */
+/* —— NodeChain explorer (nodes list, not blockchain “blocks”) —— */
 .nc-hero h1 { letter-spacing: -0.02em; }
 .nc-how-list {
   margin: 0.5rem 0 0;
@@ -860,7 +860,7 @@ button.ghost {
 .nc-table tbody tr { cursor: pointer; }
 .nc-table tbody tr:hover { background: rgba(61, 139, 253, 0.06); }
 .nc-row-on { background: rgba(61, 139, 253, 0.1) !important; }
-.nc-block-num {
+.nc-node-num {
   font-weight: 700;
   color: var(--accent);
 }
@@ -883,24 +883,24 @@ button.ghost {
   color: var(--muted);
   max-width: 280px;
 }
-.nc-block-detail-head {
+.nc-node-detail-head {
   display: flex;
   justify-content: space-between;
   gap: 1rem;
   align-items: flex-start;
   margin-bottom: 1rem;
 }
-.nc-block-meta {
+.nc-node-meta {
   display: grid;
   grid-template-columns: 1fr 1fr;
   gap: 0.75rem 1.25rem;
   margin-bottom: 1rem;
 }
 @media (max-width: 700px) {
-  .nc-block-meta { grid-template-columns: 1fr; }
+  .nc-node-meta { grid-template-columns: 1fr; }
   .nc-sense { max-width: none; }
 }
-.nc-block-meta .label,
+.nc-node-meta .label,
 .nc-parent-link .label {
   display: block;
   font-size: 0.75rem;
@@ -1030,7 +1030,7 @@ button.linkish {
 }
 
 /* Certificate preview with QR */
-.cert-preview .nc-block-detail-head {
+.cert-preview .nc-node-detail-head {
   align-items: flex-start;
 }
 .cert-qr-inline {

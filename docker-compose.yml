@@ -34,6 +34,8 @@ services:
       # Demo institution token (override in real deploy)
       AST_INSTITUTION_TOKEN: ${AST_INSTITUTION_TOKEN:-demo-institution-token}
       AST_REQUIRE_INSTITUTION_AUTH: ${AST_REQUIRE_INSTITUTION_AUTH:-0}
+      # Index mirror (B6) — set when using profile with-postgres
+      DATABASE_URL: ${DATABASE_URL:-}
     ports:
       - "3000:3000"
     volumes:

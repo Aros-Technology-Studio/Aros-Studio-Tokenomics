@@ -2,7 +2,7 @@
 
 **Status:** Target layout (v1.1)  
 **Location:** `portal/`  
-**Role:** AFC-side institutional edge. **Not** NodeChain SoT. **No mint** on portal.
+**Role:** Institutional edge. **Not** NodeChain SoT. **No mint** on portal.
 
 ## Target tree
 

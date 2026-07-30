@@ -33,3 +33,10 @@ npm test -- --testPathPattern=pot
 # expect ≥ 19 tests under src/pot
 npm run check:canon
 ```
+
+**Status (C4):** v1 **Done** (in-process PoT + journal write-ahead).
+
+## Residual (honest, not blocking v1)
+
+- [ ] Multi-node BFT / network consensus for confirmers (Canon: later; v1 PoT+quorum module)  
+- [ ] Distributed timeout daemon fleet (module timeout exists; ops mesh later)  

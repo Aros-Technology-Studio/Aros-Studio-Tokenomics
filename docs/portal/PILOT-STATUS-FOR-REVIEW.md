@@ -40,7 +40,7 @@ Typical form: `https://*.trycloudflare.com`
 | 1 | Open home page | AST branding, EN/RU/KA language switch |
 | 2 | `/system` | Can / cannot boundaries |
 | 3 | `/explore` | Public process lookup form (no login) |
-| 4 | `/nodechain` | Journal blocks, verify chain, English/UI i18n |
+| 4 | `/nodechain` | Nodes list, verify chain, EN/RU/KA i18n |
 | 5 | `/login` | Login `pilot` · Salt `pilot` |
 | 6 | Cabinet → Tokenization | Document-first wizard |
 | 7 | Complete process | Status progress, certificate print + QR |
@@ -100,7 +100,7 @@ Expect: edge `status: ok`, NodeChain `chain.ok: true`, genesis present, tip heig
 | Production mTLS / OIDC | Not required for pilot | Session + institution token path today |
 | Multi-region replication mesh | Beyond single-node pilot | Specs/later |
 | External security audit | Not done | Operator responsibility before real institutions |
-| AFC product shell | Out of scope for this pilot | Positioning later; AST is the economic tool |
+| Outer product shell | Out of scope for this pilot | Positioning later; AST is the economic tool |
 
 ---
 

@@ -52,7 +52,7 @@ export class NodechainPublicService {
     return this.proxy(() => this.core.getNodechainByProcess(processId, limit));
   }
 
-  blocks(limit?: number) {
-    return this.proxy(() => this.core.getNodechainBlocks(limit));
+  nodes(limit?: number) {
+    return this.proxy(() => this.core.getNodechainNodes(limit));
   }
 }

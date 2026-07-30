@@ -1,6 +1,6 @@
 name: AST CI
 
-# Merged pipeline: build → tests → env layout → canon guards → journal → RocksDB demo.
+# Merged pipeline: release-check (core + portal) → env → canon → journal → RocksDB demo.
 on:
   push:
     branches: [main]
@@ -12,7 +12,7 @@ permissions:
 
 jobs:
   build-test-guards-demo:
-    name: build · test · canon · journal · tokenize
+    name: release-check · canon · journal · tokenize
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
@@ -25,14 +25,28 @@ jobs:
           node-version: 20
           cache: npm
 
-      - name: Install dependencies
+      - name: Install core dependencies
         run: npm ci
 
-      - name: Build
-        run: npm run build
+      - name: Install portal shared dependencies
+        run: npm ci
+        working-directory: portal/shared
 
-      - name: Test
-        run: npm test
+      - name: Install portal edge dependencies
+        run: npm ci
+        working-directory: portal/backend
+
+      - name: Install portal frontend dependencies
+        run: npm ci
+        working-directory: portal/frontend
+
+      # Single gate: core tests + portal tests + all production builds
+      - name: Release check (core + portal)
+        run: npm run check:release
+        env:
+          SKIP_INSTALL: "1"
+          AST_ALLOW_DEMO: "1"
+          NODE_ENV: test
 
       - name: ENV layout (Docker, rules, contracts, rust, layers — no portal gate)
         run: npm run check:env
@@ -45,3 +59,37 @@ jobs:
 
       - name: Tokenization demo (RocksDB + ed25519 + L1/L2/L3)
         run: npm run demo:tokenize -- --dir /tmp/ast-tokenize-ci --engine rocksdb
+
+  contracts:
+    name: forge test (representation)
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Install Foundry
+        uses: foundry-rs/foundry-toolchain@v1
+        with:
+          version: stable
+
+      - name: Forge version
+        run: forge --version
+
+      - name: Forge test
+        run: forge test -vv
+        working-directory: contracts
+
+  rust:
+    name: cargo test (companion crates)
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Install Rust toolchain
+        uses: dtolnay/rust-toolchain@stable
+
+      - name: Cargo version
+        run: cargo --version
+
+      - name: Cargo test workspace
+        run: cargo test --workspace
+        working-directory: rust

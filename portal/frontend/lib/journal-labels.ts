@@ -1,5 +1,5 @@
 /**
- * Human-readable labels for NodeChain journal records (blockchain-style explorer).
+ * Human-readable labels for NodeChain journal nodes (height-linked explorer).
  * Technical codes stay in API; UI shows plain language. English only.
  */
 

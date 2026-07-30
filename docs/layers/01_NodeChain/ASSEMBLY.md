@@ -31,8 +31,12 @@ Law remains Core Canon + layer docs under this tree.
 | Variable | Default | Meaning |
 |----------|---------|---------|
 | `AST_JOURNAL_ENGINE` | `file` (Nest module) / `memory` (factory default) | `memory` \| `file` \| `rocksdb` |
-| `AST_JOURNAL_DIR` | `data/journal` | Path for file/rocksdb + key files |
+| `AST_JOURNAL_DIR` | `data/journal` | Path for file/rocksdb + signing + at-rest keys |
+| `AST_JOURNAL_ENCRYPT` | `1` | AES-256-GCM at rest for file/rocksdb (`0` = plaintext, dev only) |
+| `AST_JOURNAL_AT_REST_KEY` | unset → `at-rest.key` in dir | Hex master key for journal blobs |
 | `AST_VERIFY_EVERY_N` | `5` | Full chain verify every N appends (`0` = off) |
+| `AST_OPS_READ_TOKEN` | unset | If set, `X-Ops-Token` grants full NodeChain read |
+| `AST_NODECHAIN_PUBLIC_READ` | `1` | Anonymous process-bound reads; `0` = system-only for anonymous |
 | `AST_SKIP_GENESIS_BOOT` | unset | If `1`/`true`, Nest does not call `ensureGenesis` on boot |
 | `KILL_SWITCH` | unset | Engaged via runtime kill-switch (read-only) |
 | `PORT` | `3000` | Nest core listen port |
@@ -69,13 +73,14 @@ Base: `http://localhost:3000` (or `$PORT`).
 | GET | `/v1/core/nodechain/status` | tip, hasGenesis, chain, engine, killSwitch |
 | GET | `/v1/core/nodechain/tip` | `{ tip }` |
 | GET | `/v1/core/nodechain/verify` | `409` if chain broken |
-| GET | `/v1/core/nodechain/blocks?limit=` | latest blocks tip-first (explorer feed) |
-| GET | `/v1/core/nodechain/records/height/:height` | single record (= block) |
-| GET | `/v1/core/nodechain/records/id/:recordId` | single record |
+| GET | `/v1/core/nodechain/nodes?limit=` | **Nodes list** tip-first (explorer feed) |
+| GET | `/v1/core/nodechain/records/height/:height` | single node by height |
+| GET | `/v1/core/nodechain/records/id/:recordId` | single node by recordId |
 | GET | `/v1/core/nodechain/processes/:processId?limit=` | process history (capped) |
 | POST | `/v1/core/nodechain/genesis` | idempotent ensureGenesis |
 
-**Model (blockchain analogy):** height = block number · envelopeHash = block hash · prevHash = parent · append-only.
+**Model:** height · envelopeHash · prevHash · append-only **nodes** (not product-API “blocks”).  
+Network participants remain separate: `GET /v1/core/nodes`.
 
 Also: `GET /health` includes `tip` and `chainOk` when journal is wired.
 

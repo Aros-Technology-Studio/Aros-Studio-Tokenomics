@@ -18,7 +18,11 @@
 - Third-party custody  
 - Fake “Done” without acceptance evidence  
 - Portal unless owner re-opens scope  
+- **Commit local agent/chat dumps** — `sessions/`, `.grok/` are gitignored (prompts, secrets, firewall-noisy history)
 
 ## Commits
 
 Imperative mood, English. Prefer small commits with clear scope.
+
+Before PR: `git status` must not show `sessions/` or chat export trees.  
+If you force-add them, CI firewall/canon scans may fail and secrets may leak.

@@ -1,6 +1,6 @@
 'use client';
 
-import { useCallback, useEffect, useMemo, useState } from 'react';
+import { Suspense, useCallback, useEffect, useMemo, useState } from 'react';
 import { useParams, useRouter, useSearchParams } from 'next/navigation';
 import Link from 'next/link';
 import QRCode from 'qrcode';
@@ -17,7 +17,7 @@ import { buildVerifyUrl, certificatePrintHtml } from '../../../../lib/certificat
 const POLL_MS = 3000;
 const POLL_MAX = 60;
 
-export default function ProcessStatusPage() {
+function ProcessStatusPageInner() {
   const params = useParams();
   const search = useSearchParams();
   const processId = decodeURIComponent(String(params.processId ?? ''));
@@ -497,8 +497,8 @@ export default function ProcessStatusPage() {
       )}
 
       {cert && (
-        <section className="card flat nc-block-detail cert-preview" style={{ marginTop: '1.25rem' }}>
-          <div className="nc-block-detail-head">
+        <section className="card flat nc-node-detail cert-preview" style={{ marginTop: '1.25rem' }}>
+          <div className="nc-node-detail-head">
             <div>
               <p className="eyebrow">Exit document</p>
               <h2 style={{ margin: '0.2rem 0' }}>
@@ -583,6 +583,14 @@ export default function ProcessStatusPage() {
         </details>
       )}
     </div>
+  );
+}
+
+export default function ProcessStatusPage() {
+  return (
+    <Suspense fallback={<div className="card"><p className="muted">Loading process…</p></div>}>
+      <ProcessStatusPageInner />
+    </Suspense>
   );
 }
 

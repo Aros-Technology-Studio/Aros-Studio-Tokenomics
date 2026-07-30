@@ -1,5 +1,7 @@
 # Acceptance — TxEncoding
 
+**Status (C4):** v1 **Done** for in-process encoding used by Processing / Intake / PoT.
+
 - [x] Deterministic hash independent of key order  
 - [x] Schema per process type (`primary_tokenization`, `revaluation`, `ownership_transfer`)  
 - [x] Reject floats / scientific amounts / extra keys / missing fields  
@@ -15,3 +17,7 @@
 ```bash
 npm test -- --testPathPattern='tx-encoding|process.service|pot.service|tokenization'
 ```
+
+## Residual (honest, not blocking v1)
+
+- [ ] Dedicated public HTTP “encode only” API (today: in-process `EncodingService` only)  

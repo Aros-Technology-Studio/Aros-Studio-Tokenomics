@@ -15,4 +15,10 @@ Real evaluators in `src/governance/l3-agents.ts`:
 4. `anomaly_watch`
 5. `release_risk`
 
-Each returns score, pass/fail, reasons. Optional remote agents: set `AST_L3_HTTP_<AGENT_ID>` to a POST URL (`HttpL3Agent` uses real `fetch`). Journal records L3 opinions. **No mint authority.**
+Each returns score, pass/fail, reasons. Optional remote agents: set `AST_L3_HTTP_<AGENT_ID>` to a POST URL (`HttpL3Agent` uses real `fetch`).  
+
+Optional LLM upgrade: `AST_L3_USE_LLM=1` + provider env (`llm-adapters.ts`, issue #70). Fail-closed on bad LLM output. CI default remains **policy** backend.
+
+Journal may record L3 opinions via governance `param_change` events. **No mint authority.**
+
+Acceptance: `09_acceptance/acceptance.md` (C1).

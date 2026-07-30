@@ -2,7 +2,7 @@
 
 | ID | Path | Code | Status |
 |----|------|------|--------|
-| 01 | docs/layers/01_NodeChain | src/nodechain | SoT journal + HTTP `/v1/core/nodechain/*` + CLI (ASSEMBLY.md) |
+| 01 | docs/layers/01_NodeChain | src/nodechain | SoT journal + HTTP `/v1/core/nodechain/*` (ListNodes) + CLI |
 | — | Core Canon §XI | src/invariants | I1–I9 fail-closed + ok-to-emit |
 | — | common money / processId | src/common | decimal ARO + AST processId |
 | 02 | docs/layers/02_TxEncoding | src/tx-encoding | done v1 |
@@ -13,8 +13,9 @@
 | 06 | docs/layers/06_FeeCommission | src/commission | post-factum 70/30 |
 | 07 | docs/layers/07_Reserve | src/reserve | own funds + reserveIndex |
 | — | orchestrator | src/orchestrator | sole-entry happy path |
-| — | nodes | src/nodes | registry + reputation |
+| — | nodes (network) | src/nodes | registry + reputation · HTTP `/v1/core/nodes` (≠ ListNodes) |
 | — | release | src/release | velocity + daemon + I8 gate |
+| — | event-stream | src/event-stream | observer bus · `/v1/core/eye/stream` |
 | — | core API | src/core-api | `/v1/core/*` for portal |
 | — | oracle-gateway | src/oracle-gateway | multi-oracle Ed25519 fail-closed |
 | — | partial-release | src/partial-release | burn + reserve child + remint |

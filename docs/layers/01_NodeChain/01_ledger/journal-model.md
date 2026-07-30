@@ -19,7 +19,7 @@ Each accepted record receives a monotonic **height** (sequence number) on the ma
 
 - **Main chain:** linear sequence of journal records (v1 default).  
 - **Inside one `processId`:** optional DAG or ordered sub-sequence of related records for stages — still projected onto the main chain as appends.  
-- Product API does not use “blocks”.
+- Product API uses **nodes** (not “blocks”). See `VOCABULARY.md`.
 
 ## Record envelope (logical)
 
@@ -49,7 +49,7 @@ Every journal record includes at least:
 ## Batching
 
 Operational **batches** may group appends for storage efficiency.  
-A batch is not a product “block”: each record still has its own height and hash links.  
+A batch is not a product “node list shortcut”: each append still has its own height and hash links.  
 **ExecutionSnapshot** may cover a range of heights (see `execution-snapshot.md`).
 
 ## Genesis

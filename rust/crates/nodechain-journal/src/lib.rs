@@ -65,4 +65,47 @@ mod tests {
         };
         assert!(verify_link(None, &g));
     }
+
+    #[test]
+    fn chain_link_and_reject_bad_prev() {
+        let g = JournalRecord {
+            height: 0,
+            record_id: "g".into(),
+            record_type: "genesis".into(),
+            process_id: None,
+            content_hash: "aa".into(),
+            prev_hash: GENESIS_PREV_HASH.into(),
+            envelope_hash: "env0".into(),
+        };
+        let n1 = JournalRecord {
+            height: 1,
+            record_id: "n1".into(),
+            record_type: "system_boot".into(),
+            process_id: None,
+            content_hash: "bb".into(),
+            prev_hash: "env0".into(),
+            envelope_hash: "env1".into(),
+        };
+        assert!(verify_link(Some(&g), &n1));
+        let bad = JournalRecord {
+            height: 1,
+            record_id: "bad".into(),
+            record_type: "system_boot".into(),
+            process_id: None,
+            content_hash: "bb".into(),
+            prev_hash: "wrong".into(),
+            envelope_hash: "env1".into(),
+        };
+        assert!(!verify_link(Some(&g), &bad));
+    }
+
+    #[test]
+    fn content_hash_stable() {
+        let a = content_hash("1", "genesis", None, "{}");
+        let b = content_hash("1", "genesis", None, "{}");
+        assert_eq!(a, b);
+        assert_eq!(a.len(), 64);
+        let c = content_hash("1", "genesis", Some("AST-DEMO-20260730-x"), "{}");
+        assert_ne!(a, c);
+    }
 }

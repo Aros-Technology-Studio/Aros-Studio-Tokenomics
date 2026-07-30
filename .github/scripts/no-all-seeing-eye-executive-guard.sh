@@ -5,7 +5,7 @@ ROOT="$(cd "$(dirname "$0")/../.." && pwd)"
 cd "$ROOT"
 fail=0
 
-EXCLUDES=(--exclude-dir=.git --exclude-dir=node_modules --exclude-dir=dist --exclude-dir=.github)
+EXCLUDES=(--exclude-dir=.git --exclude-dir=node_modules --exclude-dir=dist --exclude-dir=.github --exclude-dir=sessions --exclude-dir=.grok)
 SCAN=(src docs)
 
 # Positive executive powers (filter out explicit negations)

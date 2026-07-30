@@ -12,12 +12,30 @@ contracts/
   test/ArosCoinView.t.sol
 ```
 
-## Commands (Foundry)
+## Tooling — Foundry
+
+Install once (macOS):
 
 ```bash
-# install foundry if needed: https://book.getfoundry.sh/getting-started/installation
-cd contracts && forge test
+brew install foundry
+# or: curl -L https://foundry.paradigm.xyz | bash && foundryup
 ```
+
+Requires `forge` on `PATH` (Homebrew: `/opt/homebrew/bin/forge`).
+
+## Commands
+
+```bash
+# from repo root
+npm run test:contracts
+
+# or
+cd contracts && forge test -vv
+```
+
+## CI
+
+GitHub Actions job `contracts` installs Foundry and runs `forge test` (see `.github/workflows/ci.yml`).
 
 ## Forbidden
 

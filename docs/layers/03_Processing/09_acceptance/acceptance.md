@@ -17,3 +17,9 @@
 ```bash
 npm test -- --testPathPattern='processing|process.service'
 ```
+
+**Status (C4):** v1 **Done**.
+
+## Residual (honest, not blocking v1)
+
+- [ ] Cross-instance process RAM without hydrate (hydrate-from-journal covers crash recovery)  

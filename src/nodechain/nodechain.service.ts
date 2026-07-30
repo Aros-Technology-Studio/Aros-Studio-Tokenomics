@@ -18,6 +18,11 @@ export interface NodechainOptions {
   keys: KeyRegistry;
   /** Verify full chain every N appends (0=off). */
   verifyEveryN?: number;
+  /**
+   * Outbound observer hook after durable append (B4 event stream).
+   * Must not throw into append path — implementers catch internally.
+   */
+  onRecordAppended?: (record: JournalRecord) => void | Promise<void>;
 }
 
 export class NodechainService {
@@ -25,6 +30,7 @@ export class NodechainService {
   private appendCount = 0;
   private readonly keys: KeyRegistry;
   private readonly verifyEveryN: number;
+  private onRecordAppended?: (record: JournalRecord) => void | Promise<void>;
 
   constructor(
     private readonly store: JournalStore,
@@ -35,6 +41,14 @@ export class NodechainService {
     }
     this.keys = options.keys;
     this.verifyEveryN = options.verifyEveryN ?? 0;
+    this.onRecordAppended = options.onRecordAppended;
+  }
+
+  /** Attach or replace observer sink after construction (Nest wiring). */
+  setOnRecordAppended(
+    fn: ((record: JournalRecord) => void | Promise<void>) | undefined,
+  ): void {
+    this.onRecordAppended = fn;
   }
 
   setReadOnly(value: boolean): void {
@@ -66,8 +80,8 @@ export class NodechainService {
   }
 
   /**
-   * Latest N blocks (records), tip-first — blockchain explorer feed.
-   * Height is monotonic like block number; each record links prevHash → parent.
+   * Latest N journal records, tip-first — explorer feed.
+   * Height is monotonic; each node links prevHash → previous envelopeHash.
    */
   async listRecent(limit = 25): Promise<JournalRecord[]> {
     const n = Math.min(200, Math.max(1, limit));
@@ -275,6 +289,14 @@ export class NodechainService {
         this.setReadOnly(true);
         globalKillSwitch.engage(`chain verify failed: ${v.error}`);
         throw new NodeChainError(NcErrorCode.HASH_MISMATCH, v.error ?? 'chain broken');
+      }
+    }
+
+    if (this.onRecordAppended) {
+      try {
+        await this.onRecordAppended(record);
+      } catch {
+        /* observer stream must not fail SoT append */
       }
     }
 

@@ -1,7 +1,7 @@
 # Portal + AST MVP — finish track
 
 **Status:** Working MVP core + institutional edge. Polish and harden in order.  
-**Positioning:** AST is an institutional **tool** (not a competing market player). AFC builds on AST later.
+**Positioning:** AST is an institutional **tool** (not a competing market player). Outer product shells build on AST later.
 
 ## Already in place
 
@@ -65,9 +65,9 @@ Do **one slice at a time**. Do not mark Done without real acceptance.
 4. [x] Docs: `docs/portal/INSTITUTION-SECRETS.md`  
 5. [ ] Owner rotates token if shared; TLS / domain when ready
 
-### Track E — AFC shell (later)
+### Track E — Outer product shell (later)
 
-AST is the main economic link. AFC wraps product surface around AST — **after** AST pilot path is stable. Not freelanced ahead of specs.
+AST is the main economic link. Any outer product surface wraps AST — **after** AST pilot path is stable. Not freelanced ahead of specs.
 
 ## Explicit out of scope for this finish track
 

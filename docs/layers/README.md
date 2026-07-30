@@ -13,13 +13,15 @@
 | 09 | [09_Governance](09_Governance/) | `src/governance` | #26 #62 |
 | 10 | [10_AssetTokenization](10_AssetTokenization/) | `src/intake` | #27 #40 |
 
-Full mapping: [LAYER_ISSUE_MAP.md](LAYER_ISSUE_MAP.md)
+Full mapping: [LAYER_ISSUE_MAP.md](LAYER_ISSUE_MAP.md)  
+Acceptance rollup (C4): [ACCEPTANCE-ROLLUP-C4.md](ACCEPTANCE-ROLLUP-C4.md)
 
 ## Pipeline
 
 ```bash
 npm test
+npm run check:canon
 npm run demo:tokenize -- --dir data/journal-rocks --engine rocksdb
 ```
 
-Portal / Issuer UI is **not** a layer in this map (out of scope).
+Portal / Issuer UI is **not** a layer in this map (edge under `portal/`).

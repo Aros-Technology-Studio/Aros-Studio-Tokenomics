@@ -38,4 +38,32 @@ mod tests {
         };
         assert!(c.all_pass());
     }
+
+    #[test]
+    fn any_fail_blocks() {
+        let c = CriteriaResult {
+            p1: true,
+            p2: true,
+            p3: false,
+            p4: true,
+        };
+        assert!(!c.all_pass());
+    }
+
+    #[test]
+    fn verdict_verified_binary() {
+        let v = PotVerdict {
+            process_id: "AST-DEMO-20260730-x".into(),
+            verified: 1,
+            reason_codes: vec![],
+            criteria: CriteriaResult {
+                p1: true,
+                p2: true,
+                p3: true,
+                p4: true,
+            },
+        };
+        assert_eq!(v.verified, 1);
+        assert!(v.criteria.all_pass());
+    }
 }
