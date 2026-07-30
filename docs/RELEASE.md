@@ -1,9 +1,16 @@
+# AST releases
+
+**Current pilot-ready tag:** [`v1.2.0`](RELEASE-1.2.0.md) (2026-07-30) — foundation for outer process work *on* AST.  
+**Previous production-portal tag:** `v1.1.0` (2026-07-20).
+
+---
+
 # AST Release v1.1.0 — Production portal (no demo)
 
 **Status:** Real operational release  
 **Date:** 2026-07-20  
 **Tag:** `v1.1.0`  
-**Field go-live (after A–I engineering):** see [`GO-LIVE-F1.md`](GO-LIVE-F1.md) · [`FIELD-RELEASE-F4.md`](FIELD-RELEASE-F4.md)
+**Field go-live:** see [`GO-LIVE-F1.md`](GO-LIVE-F1.md) · [`FIELD-RELEASE-F4.md`](FIELD-RELEASE-F4.md) · **v1.2.0** notes
 
 ## What “real” means
 

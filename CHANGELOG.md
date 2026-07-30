@@ -1,27 +1,47 @@
 # Changelog
 
-## Unreleased — engineering finish (2026-07-30)
+## 1.2.0 — 2026-07-30
 
-Repo completion blocks **A–G · E · F · I** on `main` (not a semver tag by itself).
+**Pilot-ready foundation release** after completion track A–G · E · F · I.  
+Suitable as a **versioned dependency for outer process-layer work** that sits *on* AST (not inside Core SoT). Portal still never mints. Not a claim of regulated production audit.
 
 ### Nodes list + vocabulary (A8 / B5)
 
-- Product API/UI use **nodes** / **Nodes list** for chain units — not “blocks”  
-- Core: `GET /v1/core/nodechain/nodes` · Public: `GET /v1/public/nodechain/nodes`  
-- Network registry remains `GET /v1/core/nodes` (participants)  
-- Layer law: `docs/layers/01_NodeChain/VOCABULARY.md` · domain-invariants guard  
-- Portal NodeChain explorer copy aligned with ListNodes  
+- Product API/UI use **nodes** / **Nodes list** for chain units — not “blocks”
+- Core: `GET /v1/core/nodechain/nodes` · Public: `GET /v1/public/nodechain/nodes`
+- Network registry remains `GET /v1/core/nodes` (participants)
+- Layer law: `docs/layers/01_NodeChain/VOCABULARY.md` · domain-invariants guard
 
-### Other engineering packages
+### Portal pilot finish (D)
 
-- Portal pilot finish: home-up, PDF e2e, X.509 detached, OCR, mTLS/OIDC hooks, showcase, content packs  
-- Infra package: Postgres/Redis/Kafka profiles, JSON logs, K8s skeleton, `/metrics`  
-- Host cutover packages (`docs/cutover/`, `cutover:env|preflight|health`)  
-- Solidity Block E: ArosCoinView Foundry tests, testnet deploy, journal tip reporter; E4 free-mint out  
-- Hardening Block F (Bar B): audit prep, KMS residual, mesh residual, L3 key env, `drill:backup-restore`, `monitor:smoke`  
-- Docs process Block G: trackers sync, pilot brief refresh (Nodes + iMac path), B1 owner package link  
-- Block H documented as **not** AST core track (outer shell, market listing, BFT mainnet, Eye veto forbid)  
-- CI: `require-canon-update` ignores lockfile / dep-only noise
+- Owner alone start: `npm run home:up` / READY card
+- Document-first e2e: `demo:pdf-e2e`
+- X.509 detached verify + demo e2e; OCR assist; mTLS/OIDC pilot hooks
+- Secrets rotation, domain ops card, showcase + content packs
+
+### Infrastructure & cutover (I + ops)
+
+- Postgres / Redis / Kafka compose profiles; JSON logs; K8s skeleton; `/metrics`
+- Cutover helpers: `cutover:env`, `cutover:preflight`, `cutover:health`
+
+### Solidity representation (E)
+
+- ArosCoinView Foundry tests; testnet deploy + journal tip reporter
+- Free mint / ERC-as-SoT explicitly out
+
+### Hardening Bar B packages (F)
+
+- Audit prep, soft-HSM + KMS residual docs, mesh residual, L3 key env
+- Offline drill: `drill:backup-restore` · monitor smoke: `monitor:smoke`
+
+### Process & scope (G · H)
+
+- Trackers and pilot brief synchronized
+- Block H: outer process shell / market listing / BFT mainnet / Eye veto — **not** AST core track
+
+### CI
+
+- `require-canon-update` ignores lockfile / dep-only noise
 
 ## 1.1.0 — 2026-07-20
 

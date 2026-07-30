@@ -1,9 +1,12 @@
 # AST Completion Track — finish remaining repo components
 
 **Status:** Blocks **A · B · C · D · E · F · G · I engineering complete** (2026-07-30) · **H = not AST core track**  
+**Release:** **`v1.2.0`** pilot-ready foundation (2026-07-30) — baseline for outer process-layer work *on* AST  
 **Law:** `docs/AST-CORE-CANON.md` · decisions · layer acceptances  
 **Rule:** No fake Done. Docs first when a unit lacks a written contract.  
-**Owner residual:** `B1 approved` · host cutover · auditor · field tag · Bar B live ops.
+**Owner residual:** `B1 approved` · host cutover · auditor · Bar B live ops  
+
+Release notes: [`RELEASE-1.2.0.md`](RELEASE-1.2.0.md)
 
 ---
 
