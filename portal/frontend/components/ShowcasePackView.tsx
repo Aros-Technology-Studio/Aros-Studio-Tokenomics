@@ -10,7 +10,7 @@ export function ShowcasePackView({ pack }: { pack: ContentPack }) {
       </p>
       <h1 style={{ marginTop: '0.35rem', lineHeight: 1.2 }}>{h.h1 ?? pack.page}</h1>
       {h.lead && (
-        <p style={{ fontSize: '1.1rem', maxWidth: 640, color: 'var(--muted, #555)' }}>{h.lead}</p>
+        <p style={{ fontSize: '1.1rem', maxWidth: 640, color: 'var(--muted, #a3a3a3)' }}>{h.lead}</p>
       )}
       <div style={{ display: 'flex', flexWrap: 'wrap', gap: '0.75rem', margin: '1.25rem 0 2rem' }}>
         {h.cta_primary_label && h.cta_primary_href && (
