@@ -15,9 +15,10 @@
 | **C** | Acceptance depth + operator smoke |
 | **D** | Portal pilot finish D1–D12 |
 | **I** | Infra package I1–I7 |
+| **E** | Live production cutover packages (E1–E4) |
 | **F** | Final go-live / audit prep / CI noise / field release |
 
-Track: [`COMPLETION-TRACK.md`](COMPLETION-TRACK.md)
+Track: [`COMPLETION-TRACK.md`](COMPLETION-TRACK.md) · Cutover: [`cutover/BLOCK-E.md`](cutover/BLOCK-E.md)
 
 ---
 

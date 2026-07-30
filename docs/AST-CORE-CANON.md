@@ -106,7 +106,7 @@ Holding participants’ third-party funds is **forbidden**.
    - Document assist may use optional OCR for image-only scans (`docs/portal/OCR-D5.md`); human confirmation remains mandatory; AST does not appraise.
    - Institution auth at the edge: shared secret (pilot), and/or proxy-terminated **mTLS** map, and/or **OIDC** bearer pilot hooks (`docs/portal/MTLS-OIDC-D6.md`). Full national IdP/JWKS remains residual.
    - Optional infra (Postgres index mirror, Redis session assist, Kafka/event out, JSON logs, K8s skeleton) must not become source of truth — journal remains SoT (`docs/infra/BLOCK-I.md`). Runtime stack remains NestJS (I6 S1).
-   - Field go-live and external audit are owner ops after engineering packages (`docs/GO-LIVE-F1.md`, `docs/AUDIT-PREP-F2.md`); they do not change economic invariants.
+   - Field go-live and external audit are owner ops after engineering packages (`docs/GO-LIVE-F1.md`, `docs/AUDIT-PREP-F2.md`, `docs/cutover/BLOCK-E.md`); they do not change economic invariants.
 3. PoT confirms the fact that a confirmed valuation was provided.
 4. NodeChain records creation of the token.
 5. Primary minting of tokens occurs **strictly at the fixed institutional price**.

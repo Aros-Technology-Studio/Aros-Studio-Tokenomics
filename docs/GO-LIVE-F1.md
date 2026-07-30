@@ -35,9 +35,14 @@
 |------|-----|
 | Local only | D1 home-up |
 | Temporary public URL | [`HOME-ACCESS.md`](HOME-ACCESS.md) tunnel |
-| Permanent domain | [`DOMAIN-D8.md`](DOMAIN-D8.md) |
-| Docker prod compose | [`RELEASE.md`](RELEASE.md) |
-| Kubernetes | [`deploy/k8s/README.md`](../deploy/k8s/README.md) · Block I5 |
+| Permanent domain | [`DOMAIN-D8.md`](DOMAIN-D8.md) · **E1** [`cutover/E1-DOMAIN.md`](cutover/E1-DOMAIN.md) |
+| Docker prod compose | [`RELEASE.md`](RELEASE.md) · **E2/E3** preflight |
+| Kubernetes | [`deploy/k8s/README.md`](../deploy/k8s/README.md) · **E4** |
+
+```bash
+npm run cutover:env && npm run cutover:preflight
+npm run cutover:health   # after deploy
+```
 
 ---
 

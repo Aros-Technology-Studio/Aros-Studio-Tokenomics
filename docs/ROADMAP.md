@@ -13,13 +13,13 @@
 
 ## Engineering complete (repo) — 2026-07-30
 
-Blocks **A · B · C · D · I · F** — see `docs/COMPLETION-TRACK.md` · `docs/FINAL-ENGINEERING-F5.md`.
+Blocks **A · B · C · D · E · I · F** — see `docs/COMPLETION-TRACK.md` · `docs/cutover/BLOCK-E.md`.
 
 ## Next (owner-driven)
 
 | Priority | Item |
 |----------|------|
-| A | Live domain + secrets vault cutover ([`GO-LIVE-F1.md`](GO-LIVE-F1.md)) |
+| A | Execute cutover E1–E4 on real hosts ([`docs/cutover/BLOCK-E.md`](cutover/BLOCK-E.md)) |
 | B | Production IdP/JWKS + national QTSP residual |
 | B | Managed multi-tenant deploy / monitoring |
 | C | External audit engagement ([`AUDIT-PREP-F2.md`](AUDIT-PREP-F2.md)) |

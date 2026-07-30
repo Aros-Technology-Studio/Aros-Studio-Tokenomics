@@ -7,6 +7,7 @@ Repo completion blocks **A–D · I · F** on `main` (not a semver tag by itself
 - Portal pilot finish: home-up, PDF e2e, X.509 detached, OCR, mTLS/OIDC hooks, showcase, content packs  
 - Infra package: Postgres/Redis/Kafka profiles, JSON logs, K8s skeleton, `/metrics`  
 - Final go-live + audit prep packages (`docs/GO-LIVE-F1.md`, `docs/AUDIT-PREP-F2.md`)  
+- Live cutover packages E1–E4 (`docs/cutover/`, `cutover:env|preflight|health`)  
 - CI: `require-canon-update` ignores lockfile / dep-only noise (F3)
 
 ## 1.1.0 — 2026-07-20
