@@ -1,9 +1,9 @@
 # AST Completion Track — finish remaining repo components
 
-**Status:** Blocks **A · B · C · D · E · I · F engineering complete** (2026-07-30)  
+**Status:** Blocks **A · B · C · D · E · F · G · I engineering complete** (2026-07-30)  
 **Law:** `docs/AST-CORE-CANON.md` · decisions · layer acceptances  
 **Rule:** No fake Done. Docs first when a unit lacks a written contract.  
-**Owner residual:** execute host cutover, auditor, field tag; optional mainnet view deploy.
+**Owner residual:** `B1 approved` · host cutover · auditor · field tag · Bar B live ops.
 
 ---
 
@@ -11,13 +11,14 @@
 
 | Block | Scope | Status |
 |-------|--------|--------|
-| **A** | Repo hygiene / CI / companions / issues / vocabulary | **Done** (A1–A8) |
-| **B** | NodeChain Core residuals | **Done** code path (B2–B6); **B1** owner sign-off still optional |
+| **A** | Repo hygiene / CI / companions / issues / vocabulary | **Done** (A1–A8) · Nodes list vocab |
+| **B** | NodeChain Core residuals | **Done** code (B2–B6); **B1** owner sign-off **open** |
 | **C** | Acceptance depth + operator smoke | **Done** (C1–C5) |
-| **D** | Portal / pilot finish | **Done** engineering D1–D12 · owner ops residual (see D8/D11) |
-| **E** | Solidity / representation (ArosCoinView) | **Done** E1–E3 · **E4 out** (no free mint / ERC-as-SoT) |
-| **I** | Infra Postgres · Redis · Kafka · logs · K8s · Nest · alerts | **Done** engineering I1–I7 · owner cluster residual |
-| **F** | Hardening / ops / prod (Bar B) | **Done** package F1–F6 · owner residual (audit, KMS, mesh, drills live) |
+| **D** | Portal / pilot finish | **Done** engineering D1–D12 · owner ops residual |
+| **E** | Solidity / representation (ArosCoinView) | **Done** E1–E3 · **E4 out** |
+| **F** | Hardening / ops / prod (Bar B) | **Done** package F1–F6 · owner residual |
+| **G** | Documents / process | **Done** G1–G5 · **G2 owner reply open** |
+| **I** | Infra Postgres · Redis · Kafka · logs · K8s · Nest · alerts | **Done** engineering I1–I7 |
 | **Cutover** | Live host packages (domain/secrets/data/health) | **Done** package `docs/cutover/` · owner executes |
 
 ---
@@ -135,20 +136,33 @@ Prior field packages (still valid, not F1–F6 IDs): `GO-LIVE-F1.md`, `FIELD-REL
 
 ---
 
-## Next (owner Bar B residual)
+## Block G — Documents / process ✅
+
+| ID | Item | Status |
+|----|------|--------|
+| **G1** | Sync COMPLETION-TRACK / BACKLOG / ROADMAP after triage | ✅ this pass |
+| **G2** | Owner review Canon (B1-related) | ✅ package ready · **owner: `B1 approved`** |
+| **G3** | Pilot status brief (Nodes list, iMac path) | ✅ `PILOT-STATUS-FOR-REVIEW.md` 2026-07-30 |
+| **G4** | CHANGELOG Nodes list + vocabulary | ✅ Unreleased section |
+| **G5** | Commit + push | ✅ with G block |
+
+Rollup: [`docs/docs-process/BLOCK-G.md`](docs-process/BLOCK-G.md).  
+B1 package: [`layers/01_NodeChain/09_acceptance/OWNER-REVIEW.md`](layers/01_NodeChain/09_acceptance/OWNER-REVIEW.md).
+
+---
+
+## Next (owner only)
 
 ```bash
 npm run drill:backup-restore
 npm run monitor:smoke
-npm run cutover:preflight   # host cutover still via docs/cutover/
+npm run cutover:preflight
 ```
 
+- Reply **`B1 approved`** (or amendments) — G2 / B1  
 - Engage external auditor (F1)  
-- Real KMS/PKCS#11 when required (F2)  
-- Multi-region mesh design (F3)  
-- L3 keys in vault (F4)  
-- Quarterly prod restore drill log (F5)  
-- Prometheus/Alertmanager (F6)  
+- Host cutover · quarterly restore drill · Prometheus wire  
+- Optional: real KMS, multi-region mesh, L3 vault keys  
 
 ---
 
@@ -224,6 +238,7 @@ curl -s http://127.0.0.1:3000/metrics | head
 | 2026-07-30 | Field packages | Go-live / audit prep / field release / final rollup docs (pre-F redefine) |
 | 2026-07-30 | **F1–F6** Hardening Bar B | Audit prep · KMS residual · mesh residual · L3 keys · drill script · monitor smoke |
 | 2026-07-30 | List refresh | Block **F** = hardening/ops/prod package |
+| 2026-07-30 | **G1–G5** | Docs process: trackers sync · B1 owner package · pilot brief · CHANGELOG Nodes · push |
 | 2026-07-30 | Cutover ops packages | `docs/cutover/*` (domain/secrets/data/health) — not Solidity |
 | 2026-07-30 | **E1–E3** Solidity | Foundry green · testnet deploy · report-tip; **E4 out** no free mint |
 | 2026-07-30 | List refresh | Block **E** = Solidity representation complete |

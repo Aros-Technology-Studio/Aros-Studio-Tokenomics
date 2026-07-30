@@ -1,30 +1,44 @@
 # ROADMAP
 
-## Done — v1.0.0 public release
+## Done — v1.0.0 / v1.1.0 public releases
 
 - Core Canon + P0–P4 decisions  
 - Layers 01–10 documentation map  
 - NodeChain journal + tokenize pipeline  
 - RocksDB / Ed25519 / L1–L3 / guards  
 - ENV: Docker, Postgres schema, Solidity view, Rust companion, CI  
-- Hardening #68–#70 (HSM, replication, L3 LLM adapters)  
-- **Institutional portal** edge (`portal/`): login, document hash, submit, status UI → Core  
-- **Release packaging:** Docker Compose full stack, GHCR images, tag `v1.0.0`  
+- Hardening #68–#70 (soft-HSM, replication catch-up, L3 LLM adapters)  
+- **Institutional portal** edge (`portal/`): login, document path, status, certificate  
+- **Release packaging:** Docker Compose, GHCR, tags `v1.0.0` / `v1.1.0`  
+- **Nodes list** vocabulary (not product “blocks”) — A8 / B5  
 
-## Engineering complete (repo) — 2026-07-30
+## Engineering complete on `main` (2026-07-30)
 
-Blocks **A · B · C · D · E (Solidity) · I · F (Hardening Bar B)** — see `docs/COMPLETION-TRACK.md` · `docs/hardening/BLOCK-F.md`.
+| Block | Scope |
+|-------|--------|
+| **A** | Repo hygiene / CI / companions / Nodes vocabulary |
+| **B** | NodeChain residuals (B1 package open for owner) |
+| **C** | Acceptance depth + operator smoke |
+| **D** | Portal pilot finish D1–D12 |
+| **E** | Solidity representation (ArosCoinView); free-mint out |
+| **F** | Hardening Bar B packages F1–F6 |
+| **G** | Documents / process (this sync) |
+| **I** | Infra compose / k8s / metrics |
 
-## Next (owner-driven · Bar B residual)
+Source: [`docs/COMPLETION-TRACK.md`](COMPLETION-TRACK.md).
 
-| Priority | Item |
-|----------|------|
-| A | External audit engagement (F1) |
-| B | Host cutover + quarterly restore drill (F5) · monitoring wire (F6) |
-| B | Cloud KMS / PKCS#11 (F2) · multi-region mesh (F3) when required |
-| C | L3 multi-vendor keys in vault (F4) · IdP/QTSP residuals |
+## Next (owner-driven)
+
+| Priority | Item | Doc |
+|----------|------|-----|
+| **P0** | Sign B1 / Canon NodeChain review | `OWNER-REVIEW.md` · reply **`B1 approved`** |
+| **P1** | External audit engagement | F1 · `EXTERNAL-AUDIT-F1.md` |
+| **P1** | Host cutover + domain | `docs/cutover/` · D8 |
+| **P2** | Quarterly restore drill (prod) · monitoring wire | F5 · F6 |
+| **P2** | Real KMS/PKCS#11 · multi-region mesh when required | F2 · F3 |
+| **P3** | L3 multi-vendor keys in vault · IdP/QTSP | F4 · D6 residual |
 
 ## Later
 
 - Optional multi-node BFT  
-- Cloud KMS / multi-region replication mesh
+- Mainnet representation deploy if product needs it  

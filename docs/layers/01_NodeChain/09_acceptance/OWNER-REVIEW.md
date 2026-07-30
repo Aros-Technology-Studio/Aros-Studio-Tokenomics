@@ -1,8 +1,9 @@
-# Owner review — 01_NodeChain (B1)
+# Owner review — 01_NodeChain (B1 · G2)
 
 **Date prepared:** 2026-07-30  
 **Purpose:** Product-owner sign-off that NodeChain **v1 pilot** docs + implementation meet acceptance (no fake Done).  
 **Law:** Core Canon · this layer tree · `VOCABULARY.md`  
+**Track:** Completion **B1** + docs process **G2** (owner reply still open).
 
 ---
 
@@ -13,7 +14,8 @@
 | **Approve B1** | Docs + implementation are accepted for pilot; residual ops tracked as B2–B4 only |
 | **Reject / amend** | List gaps; do not check “Owner review pass” |
 
-Reply in chat: **`B1 approved`** or list amendments.
+Reply in chat: **`B1 approved`** or list amendments.  
+After approve: check Owner review pass in `acceptance-criteria.md` and log in `docs/COMPLETION-TRACK.md`.
 
 ---
 

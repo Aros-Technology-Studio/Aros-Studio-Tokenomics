@@ -2,14 +2,24 @@
 
 ## Unreleased — engineering finish (2026-07-30)
 
-Repo completion blocks **A–D · I · F** on `main` (not a semver tag by itself).
+Repo completion blocks **A–G · E · F · I** on `main` (not a semver tag by itself).
+
+### Nodes list + vocabulary (A8 / B5)
+
+- Product API/UI use **nodes** / **Nodes list** for chain units — not “blocks”  
+- Core: `GET /v1/core/nodechain/nodes` · Public: `GET /v1/public/nodechain/nodes`  
+- Network registry remains `GET /v1/core/nodes` (participants)  
+- Layer law: `docs/layers/01_NodeChain/VOCABULARY.md` · domain-invariants guard  
+- Portal NodeChain explorer copy aligned with ListNodes  
+
+### Other engineering packages
 
 - Portal pilot finish: home-up, PDF e2e, X.509 detached, OCR, mTLS/OIDC hooks, showcase, content packs  
 - Infra package: Postgres/Redis/Kafka profiles, JSON logs, K8s skeleton, `/metrics`  
-- Final go-live + audit prep packages (`docs/GO-LIVE-F1.md`, `docs/AUDIT-PREP-F2.md`)  
 - Host cutover packages (`docs/cutover/`, `cutover:env|preflight|health`)  
 - Solidity Block E: ArosCoinView Foundry tests, testnet deploy, journal tip reporter; E4 free-mint out  
 - Hardening Block F (Bar B): audit prep, KMS residual, mesh residual, L3 key env, `drill:backup-restore`, `monitor:smoke`  
+- Docs process Block G: trackers sync, pilot brief refresh (Nodes + iMac path), B1 owner package link  
 - CI: `require-canon-update` ignores lockfile / dep-only noise
 
 ## 1.1.0 — 2026-07-20
