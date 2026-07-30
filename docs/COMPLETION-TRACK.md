@@ -1,9 +1,9 @@
 # AST Completion Track — finish remaining repo components
 
-**Status:** Blocks **A · B · C · D engineering complete** (2026-07-30)  
+**Status:** Blocks **A · B · C · D · I engineering complete** (2026-07-30)  
 **Law:** `docs/AST-CORE-CANON.md` · decisions · layer acceptances  
 **Rule:** No fake Done. Docs first when a unit lacks a written contract.  
-**Owner residual:** live domain cutover, IdP/JWKS, prod OCR engine, content languages, Block **I**.
+**Owner residual:** live domain/IdP cutover, managed data plane, k8s cluster apply.
 
 ---
 
@@ -15,7 +15,7 @@
 | **B** | NodeChain Core residuals | **Done** code path (B2–B6); **B1** owner sign-off still optional |
 | **C** | Acceptance depth + operator smoke | **Done** (C1–C5) |
 | **D** | Portal / pilot finish | **Done** engineering D1–D12 · owner ops residual (see D8/D11) |
-| **I** | Infra Kafka · K8s · Redis · logging · Spring decision | **Open** (owner decide) |
+| **I** | Infra Postgres · Redis · Kafka · logs · K8s · Nest · alerts | **Done** engineering I1–I7 · owner cluster residual |
 
 ---
 
@@ -78,19 +78,27 @@
 
 ---
 
-## Next (open)
+## Block I — Infrastructure ✅ engineering
 
-### I — Infrastructure (owner decision)
-
-| ID | Item | Notes |
+| ID | Item | Status |
 |----|------|--------|
-| I1 | PostgreSQL mirror in default prod | Schema + B6 exist |
-| I2 | Redis | Sessions/cache — not SoT |
-| I3 | Kafka | Events out — optional beyond B4 file stream |
-| I4 | Logging stack | JSON stdout → pick Loki/ELK |
-| I5 | Kubernetes | After compose-stable |
-| I6 | Spring Boot | **S1 recommended** (keep Nest); confirm |
-| I7 | Observability alerts | Metrics + health |
+| **I1** | PostgreSQL index mirror prod path | ✅ compose profile + prod `with-postgres` · `docs/infra/I1-POSTGRES.md` · B6 code |
+| **I2** | Redis sessions/cache | ✅ infra compose · portal dual-write · `I2-REDIS.md` · not SoT |
+| **I3** | Kafka / event out | ✅ Redpanda profile · HTTP/rpk fan-out · `I3-KAFKA.md` |
+| **I4** | Logging | ✅ `AST_LOG_JSON=1` · `json-log.ts` · `I4-LOGGING.md` |
+| **I5** | Kubernetes skeleton | ✅ `deploy/k8s/*` · apply residual owner |
+| **I6** | Spring vs Nest | ✅ **S1 Nest** · `SPRING-DECISION-I6.md` |
+| **I7** | Observability alerts | ✅ `GET /metrics` · `deploy/alerts/*` · `I7-OBSERVABILITY.md` |
+
+Rollup: [`docs/infra/BLOCK-I.md`](infra/BLOCK-I.md).
+
+---
+
+## Next (owner ops)
+
+- Live DNS / IdP / managed Postgres-Redis-Kafka  
+- `kubectl apply` + secrets in real cluster  
+- Optional: owner reply `I6 Nest confirmed`
 
 ---
 
@@ -111,8 +119,9 @@
 | Bar | Meaning |
 |-----|---------|
 | **A — Repo engineering** | Specs ↔ code ↔ tests ↔ guards — **A/B/C done** |
-| **B — Pilot portal path** | D1–D12 engineering — **done** (owner DNS/IdP/copy residual) |
-| **C — Regulated production infra** | Block **I** + live cutover — **open** |
+| **B — Pilot portal path** | D1–D12 engineering — **done** |
+| **C — Infra package** | I1–I7 engineering — **done** (live cluster residual) |
+| **D — Live production cutover** | Owner DNS, secrets vault, managed data plane — **open** |
 
 ---
 
@@ -132,6 +141,9 @@ npm run demo:pdf-e2e
 npm run demo:x509-e2e
 npm run secrets:rotate -- --help
 # Showcase: http://127.0.0.1:3200/showcase
+# Infra (optional):
+# docker compose -f docker-compose.yml -f docker-compose.infra.yml --profile with-postgres --profile with-redis --profile with-kafka up -d
+curl -s http://127.0.0.1:3000/metrics | head
 ```
 
 ---
@@ -155,6 +167,8 @@ npm run secrets:rotate -- --help
 | 2026-07-30 | List refresh | **D1–D4 Done**; D5+ / I remain open |
 | 2026-07-30 | **D5–D12** | OCR · mTLS/OIDC · rotate · domain card · showcase · packs · readiness · rollup |
 | 2026-07-30 | List refresh | Block **D** engineering complete; **I** open |
+| 2026-07-30 | **I1–I7** | Infra package: postgres/redis/kafka/logs/k8s/Nest/metrics · `docs/infra/BLOCK-I.md` |
+| 2026-07-30 | List refresh | Block **I** engineering complete; live cutover residual |
 
 ---
 

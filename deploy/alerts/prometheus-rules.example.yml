@@ -1,0 +1,36 @@
+# I7 — example Prometheus rules (not auto-loaded).
+# Wire into your Prometheus / Grafana Alloy / operator.
+groups:
+  - name: ast-core
+    rules:
+      - alert: AstCoreDown
+        expr: up{job="ast-core"} == 0
+        for: 2m
+        labels:
+          severity: critical
+        annotations:
+          summary: AST core scrape target down
+
+      - alert: AstKillSwitchEngaged
+        expr: ast_kill_switch == 1
+        for: 1m
+        labels:
+          severity: critical
+        annotations:
+          summary: AST kill switch is engaged
+
+      - alert: AstChainVerifyFailed
+        expr: ast_chain_ok == 0
+        for: 5m
+        labels:
+          severity: critical
+        annotations:
+          summary: NodeChain full verify failed
+
+      - alert: AstJournalStalled
+        expr: increase(ast_journal_height[30m]) == 0 and ast_up == 1
+        for: 30m
+        labels:
+          severity: warning
+        annotations:
+          summary: Journal height did not advance for 30m (may be idle — tune)

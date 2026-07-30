@@ -1,7 +1,28 @@
 # AST production stack — no demo institutions
 # cp .env.production.example .env.production  # fill secrets
 # docker compose -f docker-compose.prod.yml --env-file .env.production up --build -d
+#
+# Optional Postgres index mirror (I1, not SoT):
+#   docker compose -f docker-compose.prod.yml --profile with-postgres \
+#     --env-file .env.production up --build -d
 services:
+  postgres:
+    image: postgres:16-alpine
+    profiles: ["with-postgres"]
+    restart: unless-stopped
+    environment:
+      POSTGRES_USER: ${POSTGRES_USER:-ast}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:?set POSTGRES_PASSWORD when using with-postgres}
+      POSTGRES_DB: ${POSTGRES_DB:-ast_index}
+    volumes:
+      - ast_pg_prod:/var/lib/postgresql/data
+      - ./docs/db/postgres-index-schema.sql:/docker-entrypoint-initdb.d/01-schema.sql:ro
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U $$POSTGRES_USER -d $$POSTGRES_DB"]
+      interval: 5s
+      timeout: 5s
+      retries: 12
+
   core:
     build: .
     image: ghcr.io/aros-technology-studio/ast-core:${AST_IMAGE_TAG:-1.1.0}
@@ -17,6 +38,14 @@ services:
       AST_REQUIRE_INSTITUTION_AUTH: "1"
       AST_INSTITUTION_TOKEN: ${AST_INSTITUTION_TOKEN:?set AST_INSTITUTION_TOKEN}
       AST_INSTITUTION_SECRETS_JSON: ${AST_INSTITUTION_SECRETS_JSON:-}
+      # I1 index mirror (optional) — journal remains SoT
+      DATABASE_URL: ${DATABASE_URL:-}
+      # I3 optional event out
+      AST_EVENT_OUT_URL: ${AST_EVENT_OUT_URL:-}
+      AST_EVENT_OUT_KAFKA_BROKERS: ${AST_EVENT_OUT_KAFKA_BROKERS:-}
+      AST_EVENT_OUT_KAFKA_TOPIC: ${AST_EVENT_OUT_KAFKA_TOPIC:-ast.journal.events}
+      # I4
+      AST_LOG_JSON: ${AST_LOG_JSON:-1}
     ports:
       - "${CORE_PUBLISH_PORT:-3000}:3000"
     volumes:
@@ -46,6 +75,9 @@ services:
       AST_ALLOW_DEMO: "0"
       AST_INSTITUTION_TOKEN: ${AST_INSTITUTION_TOKEN}
       AST_INSTITUTION_SECRETS_JSON: ${AST_INSTITUTION_SECRETS_JSON:?set AST_INSTITUTION_SECRETS_JSON}
+      # I2 optional Redis sessions (not SoT)
+      REDIS_URL: ${REDIS_URL:-}
+      AST_LOG_JSON: ${AST_LOG_JSON:-1}
     ports:
       - "${PORTAL_EDGE_PUBLISH_PORT:-3100}:3100"
     depends_on:
@@ -70,3 +102,4 @@ services:
 
 volumes:
   ast_journal_prod:
+  ast_pg_prod:

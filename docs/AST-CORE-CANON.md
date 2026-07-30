@@ -105,6 +105,7 @@ Holding participants’ third-party funds is **forbidden**.
    - Portal edge (admission only, never mints): institutional attestation and/or cryptographic **X.509 detached** verification of the document package hash against configured trust anchors (`docs/portal/QES-X509-D4.md`). National QTSP/eIDAS profiles, CMS/PAdES-in-PDF, and OCSP/CRL remain residual.
    - Document assist may use optional OCR for image-only scans (`docs/portal/OCR-D5.md`); human confirmation remains mandatory; AST does not appraise.
    - Institution auth at the edge: shared secret (pilot), and/or proxy-terminated **mTLS** map, and/or **OIDC** bearer pilot hooks (`docs/portal/MTLS-OIDC-D6.md`). Full national IdP/JWKS remains residual.
+   - Optional infra (Postgres index mirror, Redis session assist, Kafka/event out, JSON logs, K8s skeleton) must not become source of truth — journal remains SoT (`docs/infra/BLOCK-I.md`). Runtime stack remains NestJS (I6 S1).
 3. PoT confirms the fact that a confirmed valuation was provided.
 4. NodeChain records creation of the token.
 5. Primary minting of tokens occurs **strictly at the fixed institutional price**.

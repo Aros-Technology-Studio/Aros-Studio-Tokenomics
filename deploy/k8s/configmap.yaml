@@ -1,0 +1,13 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: ast-config
+  namespace: ast
+data:
+  NODE_ENV: "production"
+  AST_JOURNAL_ENGINE: "file"
+  AST_REQUIRE_CRYPTO: "1"
+  AST_LOG_JSON: "1"
+  PORTAL_CORE_HANDOFF: "true"
+  AST_ALLOW_DEMO: "0"
+  CORE_API_URL: "http://ast-core:3000"

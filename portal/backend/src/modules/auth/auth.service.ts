@@ -10,6 +10,7 @@ import {
   subjectFromMtlsHeaders,
   verifyOidcHs256,
 } from './mtls-oidc';
+import { RedisSessionStore } from '../../common/redis-session-store';
 
 export interface InstitutionAccount {
   institutionId: string;
@@ -34,6 +35,8 @@ const SESSION_TTL_MS = 8 * 60 * 60 * 1000;
 export class AuthService {
   private readonly accounts = new Map<string, InstitutionAccount>();
   private readonly sessions = new Map<string, Session>();
+  /** I2 optional Redis dual-write (not SoT; multi-replica still needs sticky or async resolve). */
+  private readonly redis = RedisSessionStore.fromEnv();
 
   constructor() {
     for (const a of loadAccounts()) {
@@ -222,11 +225,17 @@ export class AuthService {
       expiresAt: new Date(now + SESSION_TTL_MS).toISOString(),
     };
     this.sessions.set(sessionId, session);
+    void this.redis
+      ?.setJson(sessionId, session, Math.floor(SESSION_TTL_MS / 1000))
+      .catch(() => undefined);
     return { ok: true, session };
   }
 
   logout(sessionId: string | undefined): void {
-    if (sessionId) this.sessions.delete(sessionId);
+    if (sessionId) {
+      this.sessions.delete(sessionId);
+      void this.redis?.del(sessionId).catch(() => undefined);
+    }
   }
 
   resolve(sessionId: string | undefined): Session | null {
@@ -235,6 +244,7 @@ export class AuthService {
     if (!s) return null;
     if (Date.parse(s.expiresAt) < Date.now()) {
       this.sessions.delete(sessionId);
+      void this.redis?.del(sessionId).catch(() => undefined);
       return null;
     }
     return s;

@@ -1,7 +1,8 @@
-# PostgreSQL index mirror (B6)
+# PostgreSQL index mirror (B6 · I1)
 
-**Issue:** ENV #47 · Completion **B6**  
-**Role:** Query / dashboard convenience only. **Not** source of truth.
+**Issue:** ENV #47 · Completion **B6** · Block **I1**  
+**Role:** Query / dashboard convenience only. **Not** source of truth.  
+**Infra rollup:** [`docs/infra/I1-POSTGRES.md`](../infra/I1-POSTGRES.md) · [`BLOCK-I.md`](../infra/BLOCK-I.md)
 
 | Layer | Authority |
 |-------|-----------|

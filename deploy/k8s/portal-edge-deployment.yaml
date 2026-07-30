@@ -1,0 +1,45 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: ast-portal-edge
+  namespace: ast
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: ast-portal-edge
+  template:
+    metadata:
+      labels:
+        app: ast-portal-edge
+    spec:
+      containers:
+        - name: edge
+          image: ghcr.io/aros-technology-studio/ast-portal-edge:1.1.0
+          ports:
+            - containerPort: 3100
+          envFrom:
+            - configMapRef:
+                name: ast-config
+          env:
+            - name: PORTAL_PORT
+              value: "3100"
+            - name: CORE_API_URL
+              value: http://ast-core:3000
+            - name: AST_INSTITUTION_SECRETS_JSON
+              valueFrom:
+                secretKeyRef:
+                  name: ast-secrets
+                  key: AST_INSTITUTION_SECRETS_JSON
+            - name: REDIS_URL
+              valueFrom:
+                secretKeyRef:
+                  name: ast-secrets
+                  key: REDIS_URL
+                  optional: true
+          readinessProbe:
+            httpGet:
+              path: /v1/health
+              port: 3100
+            initialDelaySeconds: 5
+            periodSeconds: 10

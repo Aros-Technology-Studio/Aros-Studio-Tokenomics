@@ -91,8 +91,9 @@ export const EVENT_STREAM = 'EVENT_STREAM';
       ) => {
         // B4 event stream + B6 continuous mirror upsert (journal remains SoT)
         nc.setOnRecordAppended(async (record) => {
+          let lastEvent: import('./event-stream/types').ObserverEvent | null = null;
           try {
-            await stream.onRecordAppended(record);
+            lastEvent = await stream.onRecordAppended(record);
           } catch {
             /* non-fatal */
           }
@@ -100,6 +101,19 @@ export const EVENT_STREAM = 'EVENT_STREAM';
             await mirror.upsert(record);
           } catch {
             /* lag allowed; rebuild via POST /v1/core/mirror/replay */
+          }
+          // I3 optional outbound (HTTP / Kafka CLI) — never blocks SoT
+          if (lastEvent) {
+            try {
+              const { fanOutObserverEvent, eventOutConfigured } = await import(
+                './event-stream/event-out-bridge'
+              );
+              if (eventOutConfigured()) {
+                await fanOutObserverEvent(lastEvent);
+              }
+            } catch {
+              /* non-fatal */
+            }
           }
         });
         return true;

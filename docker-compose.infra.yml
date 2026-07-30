@@ -1,0 +1,50 @@
+# Optional data-plane services (Block I) — never SoT.
+# Usage:
+#   docker compose -f docker-compose.yml -f docker-compose.infra.yml \
+#     --profile with-postgres --profile with-redis --profile with-kafka up -d
+#
+# Postgres is defined in docker-compose.yml (profile with-postgres).
+# This file adds Redis + Redpanda (Kafka API) for local pilot infra.
+
+services:
+  redis:
+    image: redis:7-alpine
+    profiles: ["with-redis"]
+    ports:
+      - "6379:6379"
+    command: ["redis-server", "--save", "", "--appendonly", "no"]
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 5s
+      timeout: 3s
+      retries: 10
+
+  redpanda:
+    image: redpandadata/redpanda:v24.2.4
+    profiles: ["with-kafka"]
+    command:
+      - redpanda
+      - start
+      - --overprovisioned
+      - --smp
+      - "1"
+      - --memory
+      - 512M
+      - --reserve-memory
+      - 0M
+      - --node-id
+      - "0"
+      - --check=false
+      - --kafka-addr
+      - PLAINTEXT://0.0.0.0:9092
+      - --advertise-kafka-addr
+      - PLAINTEXT://127.0.0.1:9092
+    ports:
+      - "9092:9092"
+      - "9644:9644"
+    healthcheck:
+      test: ["CMD-SHELL", "rpk cluster health | grep -q 'Healthy'"]
+      interval: 10s
+      timeout: 5s
+      retries: 12
+      start_period: 20s

@@ -1,6 +1,9 @@
 # AST v1 stack — Core + Institutional Portal + optional Postgres index mirror
 # Usage: docker compose up --build
 # UI: http://localhost:3200  Edge: :3100  Core: :3000
+# Optional data plane (I): docker compose -f docker-compose.yml -f docker-compose.infra.yml \
+#   --profile with-postgres --profile with-redis --profile with-kafka up -d
+# See docs/infra/BLOCK-I.md
 services:
   postgres:
     image: postgres:16-alpine

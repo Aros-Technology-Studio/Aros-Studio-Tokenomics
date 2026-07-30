@@ -1,0 +1,27 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: ast-portal-ui
+  namespace: ast
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: ast-portal-ui
+  template:
+    metadata:
+      labels:
+        app: ast-portal-ui
+    spec:
+      containers:
+        - name: ui
+          image: ghcr.io/aros-technology-studio/ast-portal-ui:1.1.0
+          ports:
+            - containerPort: 3200
+          env:
+            - name: PORT
+              value: "3200"
+            - name: HOSTNAME
+              value: "0.0.0.0"
+            - name: NODE_ENV
+              value: production
