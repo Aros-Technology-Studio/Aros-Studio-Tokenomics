@@ -98,4 +98,5 @@ Full house/LAN/tunnel notes: [`HOME-ACCESS.md`](HOME-ACCESS.md).
 | Browser opens UI + login works | pilot / pilot or DEMO |
 | READY card printed + saved | `.home-run/READY.txt` |
 
-**Not** D1: real institution PDF demo (D2), production domain (D6/D8).
+**Not** D1: real institution PDF demo (D2), production domain ([`DOMAIN-D8.md`](DOMAIN-D8.md)).  
+Showcase front door: http://127.0.0.1:3200/showcase (D9).

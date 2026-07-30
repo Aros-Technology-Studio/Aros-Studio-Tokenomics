@@ -1,6 +1,6 @@
 # Portal + AST MVP — finish track
 
-**Status:** Working MVP core + institutional edge. **D1–D4 done** (home-up · PDF e2e · sign-off package · X.509 detached). D5+ residual.  
+**Status:** Working MVP core + institutional edge. **D1–D12 engineering done** (see `docs/PORTAL-FINISH-D5-D12.md`). Owner residual: DNS, IdP, languages, Block I.  
 **Positioning:** AST is an institutional **tool** (not a competing market player). Outer product shells build on AST later.
 
 ## Already in place
@@ -48,7 +48,7 @@ Do **one slice at a time**. Do not mark Done without real acceptance.
 2. [x] Multi-file package (title + valuation annex)  
 3. [x] PDF / text extract assist (`POST /v1/documents/extract`, human confirms)  
 4. [x] X.509 detached chain verify at edge (D4 — see `docs/portal/QES-X509-D4.md`); national QTSP residual  
-5. [ ] OCR for image-only scans
+5. [x] OCR for image-only scans (D5 — optional engine; `docs/portal/OCR-D5.md`)
 
 ### Track C — Status & certificate
 
@@ -63,7 +63,7 @@ Do **one slice at a time**. Do not mark Done without real acceptance.
 2. [x] `AST_INSTITUTION_SECRETS_FILE` + `scripts/setup-institution-secrets.sh`  
 3. [x] `home-up` auto-loads `data/institution-secrets.json`  
 4. [x] Docs: `docs/portal/INSTITUTION-SECRETS.md`  
-5. [ ] Owner rotates token if shared; TLS / domain when ready
+5. [x] Owner rotates token if shared (D7); domain ops card D8; mTLS/OIDC hooks D6
 
 ### Track E — Outer product shell (later)
 

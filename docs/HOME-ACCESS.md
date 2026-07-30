@@ -64,7 +64,11 @@ cat .home-run/public-url.txt
 
 Machine must stay on; free tunnel URL changes each start.
 
-## Permanent domain
+## Permanent domain (D8 owner card)
+
+Short checklist: [`docs/DOMAIN-D8.md`](DOMAIN-D8.md)
+
+## Permanent domain (detail)
 
 See [`DOMAIN-TUNNEL.md`](DOMAIN-TUNNEL.md).
 

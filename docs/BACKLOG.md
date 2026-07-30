@@ -37,7 +37,9 @@ GitHub Issues are the operational list; this file is the in-repo mirror.
 - [x] Institution session auth (login / `X-Session-Id`) + Core `X-Institution-Token` hand-off  
 - [x] Document package hash API + primary tokenization UI (dashboard / new / status)  
 - [x] X.509 detached chain at portal edge (D4 pilot) — national QTSP residual  
-- [ ] Production mTLS / OIDC (ops deploy, D6)
+- [x] mTLS / OIDC pilot hooks (D6) — full IdP/JWKS residual  
+- [x] OCR image assist (D5) — install engine in prod  
+- [x] Secrets rotation (D7) · domain card (D8) · showcase+packs (D9/D10)
 
 ## Later (owner-driven)
 

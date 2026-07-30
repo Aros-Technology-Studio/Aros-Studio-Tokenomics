@@ -30,6 +30,40 @@ export class AuthController {
       institutionId: r.session.institutionId,
       displayName: r.session.displayName,
       expiresAt: r.session.expiresAt,
+      mode: 'password',
+    };
+  }
+
+  /** D6 — client cert identity from trusted reverse proxy headers. */
+  @Post('login/mtls')
+  loginMtls(@Headers() headers: Record<string, string | string[] | undefined>) {
+    const r = this.auth.loginMtls(headers);
+    if (!r.ok) {
+      throw new HttpException({ code: r.code, message: r.message }, 401);
+    }
+    return {
+      sessionId: r.session.sessionId,
+      institutionId: r.session.institutionId,
+      displayName: r.session.displayName,
+      expiresAt: r.session.expiresAt,
+      mode: 'mtls',
+      subject: r.subject,
+    };
+  }
+
+  /** D6 — OIDC pilot (HS256 bearer). Production: JWKS residual. */
+  @Post('login/oidc')
+  loginOidc(@Headers('authorization') authorization: string | undefined) {
+    const r = this.auth.loginOidc(authorization);
+    if (!r.ok) {
+      throw new HttpException({ code: r.code, message: r.message }, 401);
+    }
+    return {
+      sessionId: r.session.sessionId,
+      institutionId: r.session.institutionId,
+      displayName: r.session.displayName,
+      expiresAt: r.session.expiresAt,
+      mode: 'oidc',
     };
   }
 

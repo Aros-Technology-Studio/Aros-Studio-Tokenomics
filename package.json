@@ -30,6 +30,7 @@
     "demo:pdf-e2e": "tsx scripts/demo-pdf-e2e.ts",
     "demo:x509-package": "tsx scripts/generate-demo-x509.ts",
     "demo:x509-e2e": "tsx scripts/demo-x509-e2e.ts",
+    "secrets:rotate": "bash scripts/rotate-institution-secrets.sh",
     "home:up": "bash scripts/home-up.sh",
     "home:down": "bash scripts/home-down.sh",
     "journal:status": "tsx scripts/ast-cli.ts journal status",

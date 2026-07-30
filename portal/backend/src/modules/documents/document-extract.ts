@@ -1,8 +1,17 @@
 /**
- * Lightweight PDF / text assist for institutional packages.
- * Not a full OCR — helps operators copy figures that already appear in the file.
- * Scanned image-only PDFs yield little text (expected).
+ * Lightweight PDF / text / optional OCR assist for institutional packages.
+ * Helps operators copy figures that already appear in the file.
+ * AST does not appraise — human confirms.
  */
+import { detectImageKind, runOcrOnImage } from './ocr';
+
+export type ExtractMode =
+  | 'pdf_rough'
+  | 'plain_text'
+  | 'empty'
+  | 'image_ocr'
+  | 'image_no_ocr'
+  | 'scan_suspect';
 
 export interface ExtractHints {
   suggestedValuation: string | null;
@@ -12,8 +21,9 @@ export interface ExtractHints {
   identifiersFound: string[];
   textPreview: string;
   textLength: number;
-  mode: 'pdf_rough' | 'plain_text' | 'empty';
+  mode: ExtractMode;
   notes: string[];
+  ocrEngine?: string | null;
 }
 
 /** Pull long-ish printable runs from binary (works on many text PDFs). */
@@ -57,7 +67,10 @@ function normalizeAmount(raw: string): string | null {
   return `${w}.${frac}`;
 }
 
-export function analyzeDocumentText(text: string): ExtractHints {
+export function analyzeDocumentText(
+  text: string,
+  baseMode: ExtractMode = 'pdf_rough',
+): ExtractHints {
   const notes: string[] = [];
   const amountsFound: string[] = [];
   const identifiersFound: string[] = [];
@@ -71,10 +84,11 @@ export function analyzeDocumentText(text: string): ExtractHints {
       identifiersFound: [],
       textPreview: '',
       textLength: 0,
-      mode: 'empty',
+      mode: baseMode === 'pdf_rough' ? 'empty' : baseMode,
       notes: [
         'No extractable text (likely a scanned image PDF). Enter fields from the document manually after e-sign confirm.',
       ],
+      ocrEngine: null,
     };
   }
 
@@ -129,8 +143,9 @@ export function analyzeDocumentText(text: string): ExtractHints {
     identifiersFound,
     textPreview: preview,
     textLength: text.length,
-    mode: 'pdf_rough',
+    mode: baseMode,
     notes,
+    ocrEngine: null,
   };
 }
 
@@ -139,13 +154,59 @@ export function extractFromBuffer(
   fileName?: string,
 ): ExtractHints {
   const name = (fileName ?? '').toLowerCase();
+  const imageKind = detectImageKind(buf, fileName);
+
+  // D5: raster images → optional OCR
+  if (imageKind) {
+    const ocr = runOcrOnImage(buf, imageKind);
+    if (ocr?.text?.trim()) {
+      const h = analyzeDocumentText(ocr.text, 'image_ocr');
+      return {
+        ...h,
+        mode: 'image_ocr',
+        ocrEngine: ocr.engine,
+        notes: [
+          ...h.notes,
+          `OCR assist via ${ocr.engine}. Confirm every figure against the visual document.`,
+        ],
+      };
+    }
+    return {
+      suggestedValuation: null,
+      suggestedHolderId: null,
+      suggestedAssetId: null,
+      amountsFound: [],
+      identifiersFound: [],
+      textPreview: '',
+      textLength: 0,
+      mode: 'image_no_ocr',
+      ocrEngine: null,
+      notes: [
+        `Image package detected (${imageKind}) but no OCR engine available.`,
+        'Install tesseract or set AST_OCR_CMD="{input}" to enable assist.',
+        'Enter valuation fields manually from the signed scan after e-sign confirm.',
+      ],
+    };
+  }
+
   const isPdf = name.endsWith('.pdf') || buf.slice(0, 5).toString('utf8') === '%PDF-';
   if (!isPdf && buf.length < 2_000_000) {
-    // treat as plain text
     const text = buf.toString('utf8');
-    const h = analyzeDocumentText(text);
+    const h = analyzeDocumentText(text, 'plain_text');
     return { ...h, mode: text.trim() ? 'plain_text' : 'empty' };
   }
+
   const text = roughExtractText(buf);
-  return analyzeDocumentText(text);
+  if (!text.trim() || text.replace(/\s+/g, '').length < 40) {
+    const h = analyzeDocumentText(text, 'scan_suspect');
+    return {
+      ...h,
+      mode: text.trim() ? 'scan_suspect' : 'empty',
+      notes: [
+        ...h.notes,
+        'PDF has little extractable text — likely a scan. Export page to PNG and re-upload, or enter fields manually. See docs/portal/OCR-D5.md.',
+      ],
+    };
+  }
+  return analyzeDocumentText(text, 'pdf_rough');
 }

@@ -58,9 +58,19 @@ When secrets **file exists**, `home-up.sh` sets `AST_ALLOW_DEMO=0` by default.
 2. Portal UI: `/tokenization` → upload file(s) → e-sign → fields from document → start.  
 3. Certificate on process page; NodeChain: `/nodechain?processId=…`
 
+## Rotation (D7)
+
+```bash
+bash scripts/rotate-institution-secrets.sh --all
+# or: --id PILOT
+npm run home:down && npm run home:up   # reload accounts
+```
+
+See [`SECRETS-ROTATION-D7.md`](SECRETS-ROTATION-D7.md).
+
 ## Production notes
 
 - Use a secrets manager / sealed file, not chat paste of tokens.  
-- Rotate tokens after any leak.  
+- Rotate tokens after any leak (D7).  
 - `NODE_ENV=production` + `AST_ALLOW_DEMO=0` + secrets file required for login.  
-- Later: mTLS / OIDC instead of shared token.
+- mTLS / OIDC pilot hooks: [`MTLS-OIDC-D6.md`](MTLS-OIDC-D6.md).

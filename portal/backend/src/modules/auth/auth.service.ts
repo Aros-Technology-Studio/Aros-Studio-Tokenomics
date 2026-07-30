@@ -1,6 +1,15 @@
 import { Injectable } from '@nestjs/common';
 import { createHash, randomBytes, timingSafeEqual } from 'crypto';
 import * as fs from 'fs';
+import {
+  institutionIdFromClaims,
+  loadMtlsMap,
+  mapSubjectToInstitution,
+  mtlsTrustProxy,
+  passwordLoginAllowed,
+  subjectFromMtlsHeaders,
+  verifyOidcHs256,
+} from './mtls-oidc';
 
 export interface InstitutionAccount {
   institutionId: string;
@@ -41,6 +50,14 @@ export class AuthService {
   ):
     | { ok: true; session: Session }
     | { ok: false; code: string; message: string } {
+    if (!passwordLoginAllowed()) {
+      return {
+        ok: false,
+        code: 'AUTH_PASSWORD_DISABLED',
+        message:
+          'password login disabled — use POST /v1/auth/login/mtls or /v1/auth/login/oidc (AST_REQUIRE_MTLS / AST_REQUIRE_OIDC)',
+      };
+    }
     if (!institutionId?.trim() || !token?.trim()) {
       return {
         ok: false,
@@ -73,6 +90,127 @@ export class AuthService {
         message: 'institution not allowlisted',
       };
     }
+    return this.issueSession(acc);
+  }
+
+  /**
+   * D6 mTLS: identity from reverse-proxy client cert headers + map file.
+   */
+  loginMtls(
+    headers: Record<string, string | string[] | undefined>,
+  ):
+    | { ok: true; session: Session; subject: string }
+    | { ok: false; code: string; message: string } {
+    if (!mtlsTrustProxy()) {
+      return {
+        ok: false,
+        code: 'MTLS_PROXY_REQUIRED',
+        message: 'set AST_MTLS_TRUST_PROXY=1 only behind a trusted TLS terminator',
+      };
+    }
+    const subject = subjectFromMtlsHeaders(headers);
+    if (!subject) {
+      return {
+        ok: false,
+        code: 'MTLS_CLIENT_MISSING',
+        message: 'missing client certificate subject headers from proxy',
+      };
+    }
+    const map = loadMtlsMap();
+    if (map.length === 0) {
+      return {
+        ok: false,
+        code: 'MTLS_MAP_NOT_CONFIGURED',
+        message: 'set AST_MTLS_MAP_FILE or AST_MTLS_MAP_JSON',
+      };
+    }
+    const hit = mapSubjectToInstitution(subject, map);
+    if (!hit) {
+      return {
+        ok: false,
+        code: 'MTLS_NOT_MAPPED',
+        message: 'client certificate subject not mapped to an institution',
+      };
+    }
+    const acc = this.accounts.get(hit.institutionId);
+    if (acc) {
+      if (!acc.allowlisted) {
+        return { ok: false, code: 'AUTH_NOT_ALLOWLISTED', message: 'institution not allowlisted' };
+      }
+      const r = this.issueSession(acc);
+      if (!r.ok) return r;
+      return { ok: true, session: r.session, subject };
+    }
+    // Allow map-only institution when secrets not preloaded (pilot)
+    const synthetic: InstitutionAccount = {
+      institutionId: hit.institutionId,
+      displayName: hit.displayName ?? hit.institutionId,
+      token: `mtls:${hit.institutionId}`,
+      allowlisted: true,
+    };
+    const r = this.issueSession(synthetic);
+    if (!r.ok) return r;
+    return { ok: true, session: r.session, subject };
+  }
+
+  /**
+   * D6 OIDC pilot: HS256 bearer JWT (JWKS residual).
+   */
+  loginOidc(
+    authorizationHeader: string | undefined,
+  ):
+    | { ok: true; session: Session }
+    | { ok: false; code: string; message: string } {
+    const secret = process.env.AST_OIDC_HS_SECRET?.trim();
+    if (!secret) {
+      return {
+        ok: false,
+        code: 'OIDC_NOT_CONFIGURED',
+        message: 'set AST_OIDC_HS_SECRET for pilot OIDC (JWKS residual for production)',
+      };
+    }
+    const raw = authorizationHeader?.trim() ?? '';
+    const m = raw.match(/^Bearer\s+(.+)$/i);
+    if (!m) {
+      return {
+        ok: false,
+        code: 'OIDC_REQUIRED',
+        message: 'Authorization: Bearer <jwt> required',
+      };
+    }
+    const v = verifyOidcHs256(m[1].trim(), secret, {
+      audience: process.env.AST_OIDC_AUDIENCE?.trim() || undefined,
+      issuer: process.env.AST_OIDC_ISSUER?.trim() || undefined,
+    });
+    if (!v.ok) return v;
+    const instId = institutionIdFromClaims(v.claims);
+    if (!instId) {
+      return {
+        ok: false,
+        code: 'OIDC_NO_INSTITUTION',
+        message: 'JWT missing institution_id / sub',
+      };
+    }
+    const acc = this.accounts.get(instId);
+    if (acc) {
+      if (!acc.allowlisted) {
+        return { ok: false, code: 'AUTH_NOT_ALLOWLISTED', message: 'institution not allowlisted' };
+      }
+      return this.issueSession(acc);
+    }
+    return this.issueSession({
+      institutionId: instId,
+      displayName: instId,
+      token: `oidc:${instId}`,
+      allowlisted: true,
+    });
+  }
+
+  private issueSession(
+    acc: InstitutionAccount,
+  ):
+    | { ok: true; session: Session }
+    | { ok: false; code: string; message: string } {
     const sessionId = randomBytes(24).toString('hex');
     const now = Date.now();
     const session: Session = {

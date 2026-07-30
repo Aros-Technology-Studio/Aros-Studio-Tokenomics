@@ -126,4 +126,54 @@ describe('AuthService (institutional login)', () => {
     process.env.AST_ALLOW_DEMO = '1';
     fs.rmSync(dir, { recursive: true, force: true });
   });
+
+  it('D6 mTLS map login and password disabled when required', () => {
+    process.env.AST_ALLOW_DEMO = '1';
+    process.env.AST_MTLS_TRUST_PROXY = '1';
+    process.env.AST_MTLS_MAP_JSON = JSON.stringify([
+      { subjectContains: 'CN=PILOT', institutionId: 'PILOT', displayName: 'Pilot Institution' },
+    ]);
+    process.env.AST_REQUIRE_MTLS = '1';
+    delete process.env.AST_INSTITUTION_SECRETS_JSON;
+    delete process.env.AST_INSTITUTION_SECRETS_FILE;
+    const auth = new AuthService();
+    const blocked = auth.login('pilot', 'pilot');
+    assert.equal(blocked.ok, false);
+    if (!blocked.ok) assert.equal(blocked.code, 'AUTH_PASSWORD_DISABLED');
+    const r = auth.loginMtls({ 'x-ssl-client-s-dn': 'CN=PILOT,O=Bank' });
+    assert.equal(r.ok, true);
+    if (r.ok) assert.equal(r.session.institutionId, 'PILOT');
+    delete process.env.AST_REQUIRE_MTLS;
+    delete process.env.AST_MTLS_TRUST_PROXY;
+    delete process.env.AST_MTLS_MAP_JSON;
+  });
+
+  it('D6 OIDC HS256 pilot login', () => {
+    const { signOidcHs256 } = require('./mtls-oidc') as typeof import('./mtls-oidc');
+    process.env.AST_ALLOW_DEMO = '1';
+    process.env.AST_OIDC_HS_SECRET = 'test-oidc-secret-d6';
+    process.env.AST_OIDC_ISSUER = 'https://idp.example/ast';
+    process.env.AST_OIDC_AUDIENCE = 'ast-portal';
+    delete process.env.AST_REQUIRE_OIDC;
+    delete process.env.AST_REQUIRE_MTLS;
+    delete process.env.AST_INSTITUTION_SECRETS_JSON;
+    delete process.env.AST_INSTITUTION_SECRETS_FILE;
+    const auth = new AuthService();
+    const jwt = signOidcHs256(
+      {
+        sub: 'DEMO',
+        institution_id: 'DEMO',
+        iss: 'https://idp.example/ast',
+        aud: 'ast-portal',
+        exp: Math.floor(Date.now() / 1000) + 3600,
+      },
+      'test-oidc-secret-d6',
+    );
+    const r = auth.loginOidc(`Bearer ${jwt}`);
+    assert.equal(r.ok, true);
+    if (r.ok) assert.equal(r.session.institutionId, 'DEMO');
+    delete process.env.AST_OIDC_HS_SECRET;
+    delete process.env.AST_OIDC_ISSUER;
+    delete process.env.AST_OIDC_AUDIENCE;
+  });
 });

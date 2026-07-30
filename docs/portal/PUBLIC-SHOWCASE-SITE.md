@@ -1,8 +1,9 @@
 # Public showcase site (“business card”) + AST portal
 
-**Status:** Spec for build order  
-**Date:** 2026-07-26  
-**Languages:** Site UI copy will be provided by owner (EN / RU / KA as needed). Code and this doc: English.
+**Status:** Scaffold live (D9/D10) — demo EN packs under `fixtures/content-packs/`  
+**Date:** 2026-07-26 · updated 2026-07-30  
+**Languages:** Demo EN packs shipped; owner may add RU / KA packs. Code and this doc: English.  
+**Routes:** `/showcase` · `/whitepaper` · `/deep-dive` · `/docs` — see `SHOWCASE-D9-D10.md`.
 
 ## Split of surfaces
 
