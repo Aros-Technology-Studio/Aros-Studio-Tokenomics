@@ -26,7 +26,9 @@ Step “From document”: optional field **Crypto wallet** (`0x` + 40 hex).
 |----------|------|
 | `AST_PUBLIC_PORTAL_ORIGIN` | Absolute URLs in QR (e.g. `https://portal.example.com`) |
 | `AST_REPRESENTATION_CHAIN_ID` | Default `1` (Ethereum mainnet id for CAIP) |
-| `AST_ARO_VIEW_CONTRACT` | Optional deployed ArosCoin view / ERC-20 address |
+| `AST_ARO_VIEW_CONTRACT` | Optional deployed `ArosCoinView` (tip attest only — **not** ERC mint SoT) |
+
+Deploy / report: `docs/contracts/SOLIDITY-BLOCK-E.md` · `npm run contracts:deploy` · `npm run contracts:report-tip`.
 
 ## Not done (follow-on)
 

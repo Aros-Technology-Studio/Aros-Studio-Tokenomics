@@ -13,15 +13,15 @@
 
 ## Engineering complete (repo) — 2026-07-30
 
-Blocks **A · B · C · D · E · I · F** — see `docs/COMPLETION-TRACK.md` · `docs/cutover/BLOCK-E.md`.
+Blocks **A · B · C · D · E (Solidity) · I · F** — see `docs/COMPLETION-TRACK.md` · `docs/contracts/SOLIDITY-BLOCK-E.md`.
 
 ## Next (owner-driven)
 
 | Priority | Item |
 |----------|------|
-| A | Execute cutover E1–E4 on real hosts ([`docs/cutover/BLOCK-E.md`](cutover/BLOCK-E.md)) |
+| A | Host cutover (`docs/cutover/`) + field tag |
+| B | Testnet/mainnet ArosCoinView deploy if explorers need it (E2 residual) |
 | B | Production IdP/JWKS + national QTSP residual |
-| B | Managed multi-tenant deploy / monitoring |
 | C | External audit engagement ([`AUDIT-PREP-F2.md`](AUDIT-PREP-F2.md)) |
 
 ## Later

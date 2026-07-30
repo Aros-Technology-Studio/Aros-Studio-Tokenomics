@@ -1,15 +1,17 @@
-# Block E — Live production cutover
+# Host cutover packages (ops)
+
+**Note:** Completion **Block E** is **Solidity / representation** (`docs/contracts/SOLIDITY-BLOCK-E.md`).  
+This folder is **host cutover ops** (domain, secrets, data plane, health) — not on-chain.
 
 **Status:** Engineering package done · actual cutover is **owner action**  
-**Law:** Journal remains SoT. Demo institutions off. Portal never mints.  
-**Depends on:** A–D · I · F packages already on `main`.
+**Law:** Journal remains SoT. Demo institutions off. Portal never mints.
 
 | ID | Slice | Package |
 |----|--------|---------|
-| **E1** | Public hostname / DNS / TLS | [`E1-DOMAIN.md`](E1-DOMAIN.md) |
-| **E2** | Production secrets & preflight | [`E2-SECRETS.md`](E2-SECRETS.md) |
-| **E3** | Managed data plane (PG / Redis / events) | [`E3-DATA-PLANE.md`](E3-DATA-PLANE.md) |
-| **E4** | Observe + K8s field apply | [`E4-OBSERVE-K8S.md`](E4-OBSERVE-K8S.md) |
+| C1 | Public hostname / DNS / TLS | [`E1-DOMAIN.md`](E1-DOMAIN.md) (filename historical) |
+| C2 | Production secrets & preflight | [`E2-SECRETS.md`](E2-SECRETS.md) |
+| C3 | Managed data plane (PG / Redis / events) | [`E3-DATA-PLANE.md`](E3-DATA-PLANE.md) |
+| C4 | Observe + K8s field apply | [`E4-OBSERVE-K8S.md`](E4-OBSERVE-K8S.md) |
 
 ## Commands
 

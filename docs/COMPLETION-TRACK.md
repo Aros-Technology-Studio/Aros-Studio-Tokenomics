@@ -3,7 +3,7 @@
 **Status:** Blocks **A · B · C · D · E · I · F engineering complete** (2026-07-30)  
 **Law:** `docs/AST-CORE-CANON.md` · decisions · layer acceptances  
 **Rule:** No fake Done. Docs first when a unit lacks a written contract.  
-**Owner residual:** execute cutover on real hosts, auditor, semver field tag.
+**Owner residual:** execute host cutover, auditor, field tag; optional mainnet view deploy.
 
 ---
 
@@ -15,9 +15,10 @@
 | **B** | NodeChain Core residuals | **Done** code path (B2–B6); **B1** owner sign-off still optional |
 | **C** | Acceptance depth + operator smoke | **Done** (C1–C5) |
 | **D** | Portal / pilot finish | **Done** engineering D1–D12 · owner ops residual (see D8/D11) |
-| **E** | Live production cutover packages | **Done** engineering E1–E4 · **owner executes** DNS/secrets/host |
+| **E** | Solidity / representation (ArosCoinView) | **Done** E1–E3 · **E4 out** (no free mint / ERC-as-SoT) |
 | **I** | Infra Postgres · Redis · Kafka · logs · K8s · Nest · alerts | **Done** engineering I1–I7 · owner cluster residual |
-| **F** | Final go-live / audit prep / CI / field release | **Done** engineering F1–F5 · owner cutover residual |
+| **F** | Final go-live / audit prep / CI / field release | **Done** engineering F1–F5 · owner residual |
+| **Cutover** | Live host packages (domain/secrets/data/health) | **Done** package `docs/cutover/` · owner executes |
 
 ---
 
@@ -96,16 +97,24 @@ Rollup: [`docs/infra/BLOCK-I.md`](infra/BLOCK-I.md).
 
 ---
 
-## Block E — Live production cutover ✅ engineering
+## Block E — Solidity / representation ✅ engineering
 
 | ID | Item | Status |
 |----|------|--------|
-| **E1** | Public hostname / DNS / TLS cutover | ✅ `docs/cutover/E1-DOMAIN.md` · D8 scripts |
-| **E2** | Production secrets bootstrap + preflight | ✅ `cutover:env` · `cutover:preflight` · `E2-SECRETS.md` |
-| **E3** | Managed data plane cutover | ✅ `E3-DATA-PLANE.md` · prod postgres profile · I1–I4 |
-| **E4** | Observability + K8s field apply | ✅ `cutover:health` · `E4-OBSERVE-K8S.md` · deploy/k8s |
+| **E1** | ArosCoinView Foundry tests green | ✅ `npm run test:contracts` · access-control coverage |
+| **E2** | Deploy runbook (testnet) + reporter keys | ✅ `DEPLOY-TESTNET-E2.md` · `contracts:deploy` |
+| **E3** | Reporter ↔ journal tip attest (ops) | ✅ `contracts:report-tip` · `REPORTER-TIP-E3.md` |
+| **E4** | Free mint / ERC-as-SoT | ❌ **Out** — Canon · `NON-GOALS-E4.md` |
 
-Rollup: [`docs/cutover/BLOCK-E.md`](cutover/BLOCK-E.md).
+Rollup: [`docs/contracts/SOLIDITY-BLOCK-E.md`](contracts/SOLIDITY-BLOCK-E.md).
+
+---
+
+## Host cutover packages (ops · not Solidity E)
+
+| Package | Status |
+|---------|--------|
+| Domain / secrets / data plane / health | ✅ `docs/cutover/*` · `cutover:env\|preflight\|health` |
 
 ---
 
@@ -156,8 +165,8 @@ npm run cutover:health -- --base https://YOUR_HOST
 | **B — Pilot portal path** | D1–D12 engineering — **done** |
 | **C — Infra package** | I1–I7 engineering — **done** |
 | **D — Final field package** | F1–F5 go-live/audit/CI — **done** |
-| **E — Live cutover packages** | E1–E4 engineering — **done** (owner runs on real hosts) |
-| **F — Live execution residual** | DNS point, real secrets, auditor, tag — **open** |
+| **E — Solidity representation** | E1–E3 done · E4 out (no free mint) |
+| **F — Live execution residual** | DNS, vault, auditor, mainnet view — **open** |
 
 ---
 
@@ -207,8 +216,9 @@ curl -s http://127.0.0.1:3000/metrics | head
 | 2026-07-30 | List refresh | Block **I** engineering complete; live cutover residual |
 | 2026-07-30 | **F1–F5** | Go-live runbook · audit prep · canon-gate fix · field release · final rollup |
 | 2026-07-30 | List refresh | Block **F** engineering complete; owner cutover residual |
-| 2026-07-30 | **E1–E4** | Live cutover packages: domain · secrets preflight · data plane · health/k8s |
-| 2026-07-30 | List refresh | Block **E** engineering complete; owner executes cutover |
+| 2026-07-30 | Cutover ops packages | `docs/cutover/*` (domain/secrets/data/health) — not Solidity |
+| 2026-07-30 | **E1–E3** Solidity | Foundry green · testnet deploy · report-tip; **E4 out** no free mint |
+| 2026-07-30 | List refresh | Block **E** = Solidity representation complete |
 
 ---
 
