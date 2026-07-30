@@ -26,6 +26,8 @@
     "journal:first": "tsx scripts/ast-cli.ts journal first-record",
     "demo:tokenize": "tsx scripts/tokenize-demo.ts",
     "smoke:operator": "tsx scripts/operator-smoke.ts",
+    "home:up": "bash scripts/home-up.sh",
+    "home:down": "bash scripts/home-down.sh",
     "journal:status": "tsx scripts/ast-cli.ts journal status",
     "journal:verify": "tsx scripts/ast-cli.ts journal verify",
     "mirror:status": "tsx scripts/ast-cli.ts mirror status",

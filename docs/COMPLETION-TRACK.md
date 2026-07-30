@@ -63,9 +63,9 @@
 
 ### D — Portal / pilot finish (from MVP track)
 
-| ID | Item | Notes |
-|----|------|--------|
-| D1 | Owner `home-up` alone | Acceptance open |
+| ID | Item | Status / notes |
+|----|------|----------------|
+| **D1** | Owner `home-up` alone | ✅ `OWNER-START-D1.md` · preflight · READY card · `npm run home:up` |
 | D2 | Real PDF e2e | Owner file |
 | D3 | Demo script sign-off | Owner |
 | D4 | Full QES / X.509 | Not v1 flag path |
@@ -132,6 +132,7 @@ npm run test:rust       # needs cargo
 | 2026-07-30 | **C1–C5** | Block C complete |
 | 2026-07-30 | Commit `6f374de` | Pushed to `origin/main` |
 | 2026-07-30 | List refresh | Blocks A/B/C marked **Done** in this file |
+| 2026-07-30 | **D1** | Owner alone start: preflight, READY.txt, OWNER-START-D1.md, npm run home:up/down |
 
 ---
 

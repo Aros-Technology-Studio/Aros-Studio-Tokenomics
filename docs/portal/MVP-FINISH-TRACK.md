@@ -82,7 +82,7 @@ AST is the main economic link. Any outer product surface wraps AST — **after**
 - [x] E-sign attestation gate  
 - [x] Core hand-off when Core up  
 - [x] Digitization certificate  
-- [ ] Owner can start stack alone (`home-up`) without chat help  
+- [x] Owner can start stack alone (`home-up` / `npm run home:up`) — see `docs/OWNER-START-D1.md`  
 - [ ] One real PDF package demo end-to-end (owner file)  
 - [ ] Demo script / checklist owner signs off  
 

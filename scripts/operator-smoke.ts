@@ -63,7 +63,7 @@ async function main(): Promise<void> {
 
   // --- 2. Orchestrator primary path ---
   const primaryPid = pid('o');
-  let primary: Awaited<ReturnType<typeof orch.runPrimary>>;
+  let primary: Awaited<ReturnType<typeof orch.runPrimary>> | undefined;
   try {
     primary = await orch.runPrimary({
       processId: primaryPid,
@@ -79,6 +79,9 @@ async function main(): Promise<void> {
     });
   } catch (e) {
     fail('orchestrator.primary', e instanceof Error ? e.message : String(e));
+  }
+  if (!primary) {
+    fail('orchestrator.primary', 'no result');
   }
 
   if (primary.verdict.verified !== 1 || !primary.okToEmit.okToEmit) {

@@ -1,6 +1,8 @@
 # Home access — connect through your house
 
-Run AST on your home machine and reach it from the LAN or the internet **without your own domain**.
+Run AST on your home machine and reach it from the LAN or the internet.
+
+**Owner start alone (D1):** short card → [`OWNER-START-D1.md`](OWNER-START-D1.md)
 
 ## Architecture
 
@@ -14,84 +16,58 @@ Your home Mac  :3200  Portal UI  ──rewrite /v1──►  :3100 Edge  ──�
         └── LAN: http://192.168.x.x:3200
 ```
 
-Browser talks **only to the UI origin**. `/v1/*` is proxied to the portal edge (same-origin), so one public URL is enough.
-
-## One-time setup
-
-```bash
-cd /path/to/Aros-Studio-Tokenomics
-# optional: brew install cloudflared   # for internet tunnel
-```
+Browser talks **only to the UI origin**. `/v1/*` is proxied to the portal edge (same-origin).
 
 ## Start at home
 
 ```bash
+cd /path/to/Aros-Studio-Tokenomics
 bash scripts/home-up.sh
+# npm run home:up
 ```
 
 | Who | URL |
 |-----|-----|
-| You on this Mac | http://127.0.0.1:3200 |
-| Phone / PC in same Wi‑Fi | http://&lt;LAN-IP&gt;:3200 (script prints it) |
-| Anyone on internet | run tunnel (below) |
+| This Mac | http://127.0.0.1:3200 |
+| Same Wi‑Fi | http://&lt;LAN-IP&gt;:3200 (script prints it) |
+| Internet | `bash scripts/home-tunnel.sh` |
 
-**Quick pilot entry (browser):** Login `pilot` · Salt `pilot`  
-**Wizard (document-first):** http://127.0.0.1:3200/tokenization  
-Each new process gets a unique code `AST-PILOT-YYYYMMDD-…`  
+**Login (local demo):** `pilot` / `pilot`  
+**Alt:** DEMO / `demo-institution-token`  
+**Wizard:** http://127.0.0.1:3200/tokenization  
 
+`home-up.sh`:
 
-`home-up.sh` waits until Core, edge, and UI answer health checks, then prints URLs.  
-If `data/institution-secrets.json` exists, demo is off by default.  
-Edge process list: `data/edge-processes.json` (not NodeChain SoT).  
-Secrets guide: [`docs/portal/INSTITUTION-SECRETS.md`](portal/INSTITUTION-SECRETS.md).
+- Checks Node ≥ 20  
+- Installs deps if missing  
+- Builds Core  
+- Starts Core · edge · UI  
+- Waits for health (prints log tail on failure)  
+- Writes `.home-run/READY.txt`  
 
-## Internet through home (no domain)
-
-```bash
-bash scripts/home-tunnel.sh
-```
-
-Gives a URL like `https://xxxx.trycloudflare.com` that terminates at **your home** UI port.
-
-- Machine must stay on; tunnel process must run.
-- Free quick tunnels are temporary (URL changes each start).
-
-## Permanent domain (named tunnel)
-
-When the domain is on Cloudflare (zone Active), bind it once and keep a stable HTTPS URL:
-
-```bash
-bash scripts/domain-tunnel-setup.sh arosfinancialcore.com   # once (browser login)
-bash scripts/home-up.sh
-bash scripts/domain-tunnel-up.sh
-```
-
-Full checklist: [`docs/DOMAIN-TUNNEL.md`](DOMAIN-TUNNEL.md).
+Journal: `data/journal-pilot/` · Edge store: `data/edge-processes.json`  
+Secrets: [`docs/portal/INSTITUTION-SECRETS.md`](portal/INSTITUTION-SECRETS.md)
 
 ## Stop
 
 ```bash
 bash scripts/home-down.sh
+# npm run home:down
 ```
 
-## Router port-forward (alternative, no Cloudflare)
+## Internet tunnel (no domain)
 
-Only if you control the home router and accept opening ports:
+```bash
+bash scripts/home-tunnel.sh
+cat .home-run/public-url.txt
+```
 
-| External | Internal | Service |
-|----------|----------|---------|
-| TCP 3200 | home-LAN:3200 | Portal UI only |
+Machine must stay on; free tunnel URL changes each start.
 
-Then use `http://&lt;your-public-IP&gt;:3200`. **Not recommended** without TLS; prefer the tunnel.
+## Permanent domain
 
-Do **not** expose Core `:3000` or Edge `:3100` directly if UI rewrite is enough.
-
-## Security notes (home demo)
-
-- Demo institution tokens are for sandbox only.
-- Journal data lives under `data/journal-home/` by default.
-- For real institutions: new tokens, `AST_REQUIRE_INSTITUTION_AUTH=1`, named tunnel + access policy.
+See [`DOMAIN-TUNNEL.md`](DOMAIN-TUNNEL.md).
 
 ## Logs / PID
 
-`.home-run/` (gitignored): `core.log`, `edge.log`, `ui.log`, `tunnel.log`, `public-url.txt`.
+`.home-run/` (gitignored): `core.log`, `edge.log`, `ui.log`, `READY.txt`, `public-url.txt`.
