@@ -25,3 +25,9 @@ contracts/lib/
 rust/target/
 **/.ast-keys.json
 **/at-rest.key
+# Demo X.509 private keys / openssl work products (public PEMs + sample-detached.json are committed)
+fixtures/x509-demo/**/*.key
+fixtures/x509-demo/**/*.csr
+fixtures/x509-demo/**/*.srl
+fixtures/x509-demo/**/*.ext
+fixtures/x509-demo/**/*.serial

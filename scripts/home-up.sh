@@ -56,6 +56,13 @@ export PORTAL_CORE_HANDOFF="${PORTAL_CORE_HANDOFF:-true}"
 export NEXT_PUBLIC_PORTAL_API_URL="${NEXT_PUBLIC_PORTAL_API_URL:-}"
 export PORTAL_EDGE_URL="${PORTAL_EDGE_URL:-http://127.0.0.1:3100}"
 export AST_EDGE_STORE_PATH="${AST_EDGE_STORE_PATH:-$ROOT/data/edge-processes.json}"
+# D4 X.509 trust (demo CA if present; production: point at real roots)
+if [[ -z "${AST_X509_TRUST_DIR:-}" && -d "$ROOT/fixtures/x509-demo/trust" ]]; then
+  export AST_X509_TRUST_DIR="$ROOT/fixtures/x509-demo/trust"
+fi
+export AST_X509_TRUST_DIR="${AST_X509_TRUST_DIR:-}"
+export AST_REQUIRE_X509="${AST_REQUIRE_X509:-0}"
+export AST_X509_ALLOW_SELF_SIGNED="${AST_X509_ALLOW_SELF_SIGNED:-0}"
 # Real institutions: file preferred over shell JSON
 export AST_INSTITUTION_SECRETS_FILE="${AST_INSTITUTION_SECRETS_FILE:-$ROOT/data/institution-secrets.json}"
 if [[ -f "$AST_INSTITUTION_SECRETS_FILE" ]]; then
@@ -129,6 +136,11 @@ nohup env PORTAL_PORT="$PORTAL_PORT" \
   AST_INSTITUTION_SECRETS_FILE="${AST_INSTITUTION_SECRETS_FILE:-}" \
   AST_EDGE_STORE_PATH="$AST_EDGE_STORE_PATH" \
   AST_PILOT_SALT="${AST_PILOT_SALT:-pilot}" \
+  AST_X509_TRUST_DIR="${AST_X509_TRUST_DIR:-}" \
+  AST_X509_TRUST_FILE="${AST_X509_TRUST_FILE:-}" \
+  AST_REQUIRE_X509="$AST_REQUIRE_X509" \
+  AST_X509_ALLOW_SELF_SIGNED="$AST_X509_ALLOW_SELF_SIGNED" \
+  AST_X509_BIND_INSTITUTION="${AST_X509_BIND_INSTITUTION:-0}" \
   npm --prefix portal/backend run start:dev >"$LOG_DIR/edge.log" 2>&1 &
 echo $! >"$LOG_DIR/edge.pid"
 
@@ -181,12 +193,21 @@ wait_http "http://127.0.0.1:3200/" "Portal UI" "$LOG_DIR/ui.log" \
   echo "  Wizard: http://127.0.0.1:3200/tokenization"
   echo "  Journal:http://127.0.0.1:3200/nodechain"
   echo ""
-  echo "LOGIN (local demo — AST_ALLOW_DEMO=$AST_ALLOW_DEMO)"
-  echo "  Quick:  login pilot  ·  salt pilot"
-  echo "  Alt:    Institution DEMO  ·  Token demo-institution-token"
+  echo "LOGIN (local — AST_ALLOW_DEMO=$AST_ALLOW_DEMO)"
   if [[ -f "${AST_INSTITUTION_SECRETS_FILE:-}" ]]; then
+    echo "  Secrets file is loaded — demo pilot/pilot may be OFF"
     echo "  File:   $AST_INSTITUTION_SECRETS_FILE"
-    echo "          (see data/institution-credentials.txt if present)"
+    if [[ -f "$ROOT/data/institution-credentials.txt" ]]; then
+      # Print login line only (salt stays in credentials file / owner memory)
+      grep -E '^Login:|^Salt:|^Display:' "$ROOT/data/institution-credentials.txt" 2>/dev/null \
+        | sed 's/^/  /' || true
+      echo "  Full:   data/institution-credentials.txt (gitignored)"
+    else
+      echo "  Salt:   see institution-secrets.json token field (or re-run setup-institution-secrets.sh)"
+    fi
+  else
+    echo "  Quick:  login pilot  ·  salt pilot"
+    echo "  Alt:    Institution DEMO  ·  Token demo-institution-token"
   fi
   echo ""
   echo "HEALTH"

@@ -19,5 +19,6 @@ Source draft from product (tokenization/start, documents/upload, assets) merged 
 
 - `POST /v1/tokenization/start` → primary tokenization edge + Core hand-off  
 - `POST /v1/documents/upload` → signature + hash attach to process  
+- `POST /v1/documents/verify-signature` → `institutional_attestation` (v1) or `x509_detached` (D4; see `QES-X509-D4.md`)  
 - `GET /v1/assets`, `GET /v1/assets/{claimId}`  
 - Legacy: `POST /v1/processes`, `POST /v1/documents/hash` still supported  

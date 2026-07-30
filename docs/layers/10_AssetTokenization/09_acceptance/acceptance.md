@@ -16,7 +16,8 @@ npm test -- --testPathPattern='token|intake'
 
 ## Residual (honest — portal/ops, not core layer holes)
 
-- [ ] Full national QES / X.509 certificate chain verify (edge attestation flag today)  
+- [x] X.509 detached certificate chain verify at portal edge (D4 pilot crypto; national QTSP residual)  
+- [ ] Full national QES / QTSP profile (eIDAS etc.) + OCSP/CRL (residual)  
 - [ ] OCR for image-only scans  
 - [ ] Production mTLS / OIDC for institutions  
 - [ ] Operator e2e checklist sign-off with real PDF package (C5 / owner)  

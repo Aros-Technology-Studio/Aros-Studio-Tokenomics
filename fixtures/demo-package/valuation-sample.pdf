@@ -1,0 +1,38 @@
+%PDF-1.4
+1 0 obj<< /Type /Catalog /Pages 2 0 R >>endobj
+2 0 obj<< /Type /Pages /Kids [3 0 R] /Count 1 >>endobj
+3 0 obj<< /Type /Page /Parent 2 0 R /MediaBox [0 0 612 792] /Contents 4 0 R /Resources << /Font << /F1 5 0 R >> >> >>endobj
+4 0 obj<< /Length 1099 >>stream
+BT /F1 11 Tf 50 780 Td (Aros Studio Tokenomics \(AST\) — DEMO PACKAGE) Tj ET
+BT /F1 11 Tf 50 764 Td (Not a legal instrument. Pilot document-first e2e only.) Tj ET
+BT /F1 11 Tf 50 748 Td () Tj ET
+BT /F1 11 Tf 50 732 Td (Institution: PILOT / DEMO) Tj ET
+BT /F1 11 Tf 50 716 Td (Document type: Institutional asset valuation annex) Tj ET
+BT /F1 11 Tf 50 700 Td () Tj ET
+BT /F1 11 Tf 50 684 Td (Asset: Sample commercial property \(demo\)) Tj ET
+BT /F1 11 Tf 50 668 Td (Address: 1 Demo Street, Tbilisi \(fictional\)) Tj ET
+BT /F1 11 Tf 50 652 Td () Tj ET
+BT /F1 11 Tf 50 636 Td (Institutional Valuation Amount: 250000.00 USD) Tj ET
+BT /F1 11 Tf 50 620 Td (Currency: USD) Tj ET
+BT /F1 11 Tf 50 604 Td (Valuation date: 2026-07-30) Tj ET
+BT /F1 11 Tf 50 588 Td () Tj ET
+BT /F1 11 Tf 50 572 Td (Qualified electronic signature: ATTESTED-DEMO-KEP-20260730) Tj ET
+BT /F1 11 Tf 50 556 Td (Signer: DEMO-INSTITUTION-KEP) Tj ET
+BT /F1 11 Tf 50 540 Td () Tj ET
+BT /F1 11 Tf 50 524 Td (Hash of package is computed by portal edge \(SHA-256\).) Tj ET
+BT /F1 11 Tf 50 508 Td (AST does not re-appraise the asset.) Tj ET
+endstream
+endobj
+5 0 obj<< /Type /Font /Subtype /Type1 /BaseFont /Helvetica >>endobj
+xref
+0 6
+0000000000 65535 f 
+0000000009 00000 n 
+0000000056 00000 n 
+0000000111 00000 n 
+0000000235 00000 n 
+0000001383 00000 n 
+trailer<< /Size 6 /Root 1 0 R >>
+startxref
+1451
+%%EOF

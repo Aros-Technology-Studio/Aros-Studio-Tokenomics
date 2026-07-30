@@ -102,6 +102,7 @@ Holding participants’ third-party funds is **forbidden**.
 
 1. The institution provides a document package containing the official asset valuation and a qualified digital signature.
 2. The system verifies authenticity of the signature and documents.
+   - Portal edge (admission only, never mints): institutional attestation and/or cryptographic **X.509 detached** verification of the document package hash against configured trust anchors (`docs/portal/QES-X509-D4.md`). National QTSP/eIDAS profiles, CMS/PAdES-in-PDF, and OCSP/CRL remain residual.
 3. PoT confirms the fact that a confirmed valuation was provided.
 4. NodeChain records creation of the token.
 5. Primary minting of tokens occurs **strictly at the fixed institutional price**.

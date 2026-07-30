@@ -10,9 +10,10 @@ import { createHash, randomBytes } from 'crypto';
 import { AuthService } from '../auth/auth.service';
 import { ProcessesService } from '../processes/processes.service';
 import { extractFromBuffer } from './document-extract';
+import { requireX509, verifyX509Detached } from './x509-verify';
 
 /**
- * Document package at the edge (SHA-256 + signature attestation).
+ * Document package at the edge (SHA-256 + signature attestation / X.509 D4).
  * Does not store PII documents as NodeChain SoT.
  */
 @Controller('v1/documents')
@@ -96,8 +97,9 @@ export class DocumentsController {
 
   /**
    * Confirm electronic signature before tokenization starts.
-   * v1: institutional attestation + package hash (full X.509/QES PKI = follow-on).
-   * Fail-closed if attestation incomplete.
+   * - institutional_attestation (v1): flag + attestation text
+   * - x509_detached (D4): PEM leaf + chain + detached sig over package hash
+   * Fail-closed. AST_REQUIRE_X509=1 forces x509_detached.
    */
   @Post('verify-signature')
   verifySignature(
@@ -110,6 +112,11 @@ export class DocumentsController {
       /** Free-form attestation (КЭП id / seal reference / base64 fragment). */
       signatureAttestation?: string;
       signerId?: string;
+      /** institutional_attestation | x509_detached */
+      mode?: string;
+      signerCertificatePem?: string;
+      signatureBase64?: string;
+      certificateChainPem?: string | string[];
     },
   ) {
     const s = this.requireSession(sessionId);
@@ -132,6 +139,65 @@ export class DocumentsController {
         422,
       );
     }
+
+    const modeRaw = (body.mode ?? 'institutional_attestation').trim().toLowerCase();
+    const mode =
+      modeRaw === 'x509' || modeRaw === 'x509_detached' || modeRaw === 'qes_x509'
+        ? 'x509_detached'
+        : 'institutional_attestation';
+
+    if (requireX509() && mode !== 'x509_detached') {
+      throw new HttpException(
+        {
+          code: 'X509_REQUIRED',
+          message:
+            'AST_REQUIRE_X509=1 — use mode x509_detached with signerCertificatePem + signatureBase64',
+        },
+        422,
+      );
+    }
+
+    if (mode === 'x509_detached') {
+      const r = verifyX509Detached({
+        documentPackageHash: hash,
+        signerCertificatePem: body.signerCertificatePem ?? '',
+        signatureBase64: body.signatureBase64 ?? '',
+        certificateChainPem: body.certificateChainPem,
+        institutionId: s.institutionId,
+      });
+      if (!r.ok) {
+        throw new HttpException({ code: r.code, message: r.message }, 422);
+      }
+      const verificationId = createHash('sha256')
+        .update(`${s.institutionId}:${r.verificationMaterial}`)
+        .digest('hex')
+        .slice(0, 24);
+      return {
+        ok: true,
+        verified: true,
+        mode: 'x509_detached',
+        verificationId,
+        documentPackageHash: hash,
+        fileName: body.fileName ?? null,
+        signerId: body.signerId?.trim() || r.subject,
+        institutionId: s.institutionId,
+        verifiedAt: new Date().toISOString(),
+        signer: {
+          subject: r.subject,
+          issuer: r.issuer,
+          serialNumber: r.serialNumber,
+          fingerprint256: r.fingerprint256,
+          notBefore: r.notBefore,
+          notAfter: r.notAfter,
+        },
+        chainDepth: r.chainDepth,
+        trustAnchorFingerprint256: r.trustAnchorFingerprint256,
+        message:
+          'X.509 detached signature verified at portal edge against configured trust anchors. Tokenization may proceed.',
+        next: 'POST /v1/tokenization/start or POST /v1/processes',
+      };
+    }
+
     const att = body.signatureAttestation?.trim() ?? '';
     if (att.length < 8) {
       throw new HttpException(
@@ -160,7 +226,7 @@ export class DocumentsController {
       institutionId: s.institutionId,
       verifiedAt: new Date().toISOString(),
       message:
-        'Electronic signature attested at portal edge. Full X.509/QES chain validation is a follow-on. Tokenization may proceed.',
+        'Electronic signature attested at portal edge (institutional attestation). For cryptographic X.509 use mode=x509_detached (D4). Tokenization may proceed.',
       next: 'POST /v1/tokenization/start or POST /v1/processes',
     };
   }

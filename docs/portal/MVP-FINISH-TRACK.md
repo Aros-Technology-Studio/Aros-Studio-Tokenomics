@@ -47,7 +47,7 @@ Do **one slice at a time**. Do not mark Done without real acceptance.
 1. [x] Document-first UX  
 2. [x] Multi-file package (title + valuation annex)  
 3. [x] PDF / text extract assist (`POST /v1/documents/extract`, human confirms)  
-4. [ ] Later: real QES/X.509 chain for national e-seal  
+4. [x] X.509 detached chain verify at edge (D4 — see `docs/portal/QES-X509-D4.md`); national QTSP residual  
 5. [ ] OCR for image-only scans
 
 ### Track C — Status & certificate
@@ -83,8 +83,8 @@ AST is the main economic link. Any outer product surface wraps AST — **after**
 - [x] Core hand-off when Core up  
 - [x] Digitization certificate  
 - [x] Owner can start stack alone (`home-up` / `npm run home:up`) — see `docs/OWNER-START-D1.md`  
-- [ ] One real PDF package demo end-to-end (owner file)  
-- [ ] Demo script / checklist owner signs off  
+- [x] One real PDF package demo end-to-end (fixture or owner file) — see `docs/DEMO-PDF-E2E-D2.md` · `npm run demo:pdf-e2e`  
+- [x] Demo script / checklist package ready for owner — see `docs/DEMO-SIGN-OFF-D3.md` (owner reply **`D3 approved`** to close)  
 
 ## Source of truth
 

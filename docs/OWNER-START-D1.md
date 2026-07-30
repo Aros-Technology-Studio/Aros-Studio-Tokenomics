@@ -22,16 +22,19 @@ Wait until you see **AST home stack — READY**.
 | Wizard | http://127.0.0.1:3200/tokenization |
 | NodeChain | http://127.0.0.1:3200/nodechain |
 
-**Login (local demo):**
+**Login (local):**
 
-| Field | Value |
-|-------|--------|
-| Login | `pilot` |
-| Salt | `pilot` |
+| Situation | Login | Salt |
+|-----------|-------|------|
+| No secrets file | `pilot` | `pilot` |
+| `data/institution-secrets.json` present | see READY / credentials file | `data/institution-credentials.txt` |
 
-Alternative: Institution `DEMO` · Token `demo-institution-token`.
+Alternative when demo accounts are enabled (no secrets file, or `--with-demo`): Institution `DEMO` · Token `demo-institution-token`.
 
 Same card is written to: `.home-run/READY.txt`
+
+**Demo PDF e2e (D2):** `npm run demo:pdf-e2e` — see `docs/DEMO-PDF-E2E-D2.md`  
+**Owner sign-off (D3):** `docs/DEMO-SIGN-OFF-D3.md`
 
 ---
 

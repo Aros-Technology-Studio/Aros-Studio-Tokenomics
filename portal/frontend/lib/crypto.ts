@@ -1,6 +1,6 @@
 /**
  * Browser hashing helpers for document packages (Web Crypto).
- * Full QES / X.509 chain is a follow-on — v1 uses SHA-256 package hash + signature flag.
+ * Package hash is SHA-256. Signature: institutional attestation (v1) or X.509 detached (D4).
  */
 
 export async function sha256Hex(text: string): Promise<string> {

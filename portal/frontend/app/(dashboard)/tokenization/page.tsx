@@ -42,6 +42,12 @@ type SigVerify = {
   verifiedAt: string;
   message?: string;
   signerId?: string;
+  mode?: string;
+  signer?: {
+    subject?: string;
+    fingerprint256?: string;
+  };
+  chainDepth?: number;
 };
 
 /**
@@ -64,6 +70,13 @@ export default function TokenizationWizardPage() {
   const [hasQualifiedSignature, setHasQualifiedSignature] = useState(false);
   const [signatureAttestation, setSignatureAttestation] = useState('');
   const [signerId, setSignerId] = useState('');
+  /** institutional_attestation (v1) | x509_detached (D4) */
+  const [sigMode, setSigMode] = useState<'institutional_attestation' | 'x509_detached'>(
+    'institutional_attestation',
+  );
+  const [signerCertificatePem, setSignerCertificatePem] = useState('');
+  const [signatureBase64, setSignatureBase64] = useState('');
+  const [certificateChainPem, setCertificateChainPem] = useState('');
   const [sigVerify, setSigVerify] = useState<SigVerify | null>(null);
   const [sigBusy, setSigBusy] = useState(false);
 
@@ -216,16 +229,30 @@ export default function TokenizationWizardPage() {
       if (!hasQualifiedSignature) {
         throw new Error('Confirm that a qualified electronic signature is on the document');
       }
+      const body =
+        sigMode === 'x509_detached'
+          ? {
+              mode: 'x509_detached',
+              documentPackageHash,
+              fileName: files.map((f) => f.name).join(', '),
+              hasQualifiedSignature: true,
+              signerCertificatePem: signerCertificatePem.trim(),
+              signatureBase64: signatureBase64.trim(),
+              certificateChainPem: certificateChainPem.trim() || undefined,
+              signerId: signerId.trim() || undefined,
+            }
+          : {
+              mode: 'institutional_attestation',
+              documentPackageHash,
+              fileName: files.map((f) => f.name).join(', '),
+              hasQualifiedSignature: true,
+              signatureAttestation: signatureAttestation.trim(),
+              signerId: signerId.trim() || undefined,
+            };
       const res = await portalFetch('/v1/documents/verify-signature', {
         method: 'POST',
         sessionId: s.sessionId,
-        body: JSON.stringify({
-          documentPackageHash,
-          fileName: files.map((f) => f.name).join(', '),
-          hasQualifiedSignature: true,
-          signatureAttestation: signatureAttestation.trim(),
-          signerId: signerId.trim() || undefined,
-        }),
+        body: JSON.stringify(body),
       });
       const data = await res.json();
       if (!res.ok) throw new Error(data.message ?? res.statusText);
@@ -402,8 +429,9 @@ export default function TokenizationWizardPage() {
           <>
             <h2 style={{ marginTop: 0 }}>2 · Confirm electronic signature</h2>
             <p className="muted">
-              Tokenization may proceed only after signature confirmation. Full national QES PKI
-              chain check is a follow-on; today the institution attests the seal on this package.
+              Tokenization may proceed only after signature confirmation. Use institutional
+              attestation (pilot) or cryptographic X.509 detached verification (D4). National QTSP
+              profiles remain residual.
             </p>
             <div className="card flat" style={{ marginBottom: '1rem' }}>
               <p style={{ margin: 0 }}>
@@ -425,6 +453,18 @@ export default function TokenizationWizardPage() {
               />
               Qualified electronic signature is present and binds this document (required)
             </label>
+            <label htmlFor="sigMode">Verification mode</label>
+            <select
+              id="sigMode"
+              value={sigMode}
+              onChange={(e) => {
+                setSigMode(e.target.value as 'institutional_attestation' | 'x509_detached');
+                setSigVerify(null);
+              }}
+            >
+              <option value="institutional_attestation">Institutional attestation (pilot v1)</option>
+              <option value="x509_detached">X.509 detached (D4 crypto)</option>
+            </select>
             <label htmlFor="signer">Signer / seal id (optional)</label>
             <input
               id="signer"
@@ -432,14 +472,48 @@ export default function TokenizationWizardPage() {
               onChange={(e) => setSignerId(e.target.value)}
               placeholder="NAPR / notary / institution seal reference"
             />
-            <label htmlFor="att">Signature attestation (required)</label>
-            <textarea
-              id="att"
-              rows={3}
-              value={signatureAttestation}
-              onChange={(e) => setSignatureAttestation(e.target.value)}
-              placeholder="QES reference, serial, or verification page note (min 8 characters)"
-            />
+            {sigMode === 'institutional_attestation' ? (
+              <>
+                <label htmlFor="att">Signature attestation (required)</label>
+                <textarea
+                  id="att"
+                  rows={3}
+                  value={signatureAttestation}
+                  onChange={(e) => setSignatureAttestation(e.target.value)}
+                  placeholder="QES reference, serial, or verification page note (min 8 characters)"
+                />
+              </>
+            ) : (
+              <>
+                <label htmlFor="leafPem">Signer certificate PEM (leaf)</label>
+                <textarea
+                  id="leafPem"
+                  rows={5}
+                  className="mono"
+                  value={signerCertificatePem}
+                  onChange={(e) => setSignerCertificatePem(e.target.value)}
+                  placeholder="-----BEGIN CERTIFICATE-----"
+                />
+                <label htmlFor="sigB64">Detached signature (Base64 over package hash bytes)</label>
+                <textarea
+                  id="sigB64"
+                  rows={3}
+                  className="mono"
+                  value={signatureBase64}
+                  onChange={(e) => setSignatureBase64(e.target.value)}
+                  placeholder="Base64 RSA-SHA256 / ECDSA signature"
+                />
+                <label htmlFor="chainPem">Intermediate chain PEM (optional)</label>
+                <textarea
+                  id="chainPem"
+                  rows={3}
+                  className="mono"
+                  value={certificateChainPem}
+                  onChange={(e) => setCertificateChainPem(e.target.value)}
+                  placeholder="Optional intermediates"
+                />
+              </>
+            )}
             <div className="actions">
               <button
                 type="button"
@@ -457,8 +531,11 @@ export default function TokenizationWizardPage() {
                 disabled={
                   sigBusy ||
                   !hasQualifiedSignature ||
-                  signatureAttestation.trim().length < 8 ||
-                  documentPackageHash.length !== 64
+                  documentPackageHash.length !== 64 ||
+                  (sigMode === 'institutional_attestation'
+                    ? signatureAttestation.trim().length < 8
+                    : signerCertificatePem.trim().length < 32 ||
+                      signatureBase64.trim().length < 16)
                 }
                 onClick={() => void confirmSignature()}
               >
@@ -474,8 +551,18 @@ export default function TokenizationWizardPage() {
             <h2 style={{ marginTop: 0 }}>3 · Data as stated in the document</h2>
             {sigVerify?.verified && (
               <div className="banner ok">
-                Signature confirmed · id{' '}
+                Signature confirmed · mode{' '}
+                <code className="mono">{sigVerify.mode ?? 'attestation'}</code> · id{' '}
                 <code className="mono">{sigVerify.verificationId}</code>
+                {sigVerify.signer?.subject && (
+                  <>
+                    <br />
+                    <span className="muted" style={{ fontSize: '0.85rem' }}>
+                      Signer: {sigVerify.signer.subject}
+                      {sigVerify.chainDepth != null ? ` · chain depth ${sigVerify.chainDepth}` : ''}
+                    </span>
+                  </>
+                )}
                 <br />
                 <span className="muted" style={{ fontSize: '0.85rem' }}>
                   Enter only facts that appear on the verified package. Assist below is optional —

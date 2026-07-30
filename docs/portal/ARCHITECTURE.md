@@ -35,7 +35,8 @@ Browser (Next.js :3200)
 - Session TTL 8h in-memory (restart invalidates)  
 - Session institution overrides spoofed `X-Institution-Id`  
 - Optional Core `AST_REQUIRE_INSTITUTION_AUTH=1` for token on core writes  
-- Production follow-on: mTLS, OIDC, full X.509 chain for КЭП  
+- X.509 detached signature verify (D4): `docs/portal/QES-X509-D4.md`  
+- Production follow-on: mTLS, OIDC, national QTSP/eIDAS profiles, OCSP/CRL  
 
 ## processId / idempotency
 

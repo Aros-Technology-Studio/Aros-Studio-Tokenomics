@@ -31,8 +31,14 @@ UI: `http://localhost:3200` (Next.js) · Edge: `:3100` · Core: `:3000`
 npm run demo:tokenize -- --dir data/journal-rocks --engine rocksdb
 ```
 
-## Signature verification (v1)
+## Signature verification
 
-Flags `hasQualifiedSignature` / allowlist are process inputs.  
-Production КЭП/X.509 validation is a follow-on (bind to nodes registration + intake policy).  
-Portal edge currently enforces the **flag + package hash**, not full X.509 crypto.
+Flags `hasQualifiedSignature` / allowlist are process inputs.
+
+| Mode | Behavior |
+|------|----------|
+| `institutional_attestation` (v1 default) | Flag + free-text attestation + package hash |
+| `x509_detached` (D4) | PEM leaf (+ chain) + detached sig over package hash bytes vs trust anchors |
+
+Spec: [`docs/portal/QES-X509-D4.md`](./portal/QES-X509-D4.md).  
+Residual: national QTSP/eIDAS profiles, CMS/PAdES-in-PDF, OCSP/CRL.

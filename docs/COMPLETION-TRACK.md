@@ -66,9 +66,9 @@
 | ID | Item | Status / notes |
 |----|------|----------------|
 | **D1** | Owner `home-up` alone | ✅ `OWNER-START-D1.md` · preflight · READY card · `npm run home:up` |
-| D2 | Real PDF e2e | Owner file |
-| D3 | Demo script sign-off | Owner |
-| D4 | Full QES / X.509 | Not v1 flag path |
+| **D2** | Real PDF e2e | ✅ `demo:pdf-e2e` · fixture PDF · hash → e-sign → start → cert (`DEMO-PDF-E2E-D2.md`) |
+| **D3** | Demo script sign-off | ✅ package `DEMO-SIGN-OFF-D3.md` · agent evidence; **owner reply `D3 approved`** |
+| **D4** | X.509 detached / QES crypto path | ✅ `x509-verify` · trust anchors · UI mode · `demo:x509-e2e` · residual national QTSP |
 | D5 | OCR image-only | Later |
 | D6 | mTLS / OIDC | Prod |
 | D7–D12 | Secrets rotation, domain, showcase, content packs | Owner content + hosting |
@@ -133,6 +133,9 @@ npm run test:rust       # needs cargo
 | 2026-07-30 | Commit `6f374de` | Pushed to `origin/main` |
 | 2026-07-30 | List refresh | Blocks A/B/C marked **Done** in this file |
 | 2026-07-30 | **D1** | Owner alone start: preflight, READY.txt, OWNER-START-D1.md, npm run home:up/down |
+| 2026-07-30 | **D2** | Real PDF e2e: fixture + `npm run demo:pdf-e2e` → `D2 PDF E2E PASS` (process `AST-PILOT-20260730-fd7f1b6e5c54`) |
+| 2026-07-30 | **D3** | Owner sign-off package `DEMO-SIGN-OFF-D3.md`; checklist + recorded evidence; awaiting owner `D3 approved` |
+| 2026-07-30 | **D4** | X.509 detached verify at edge (`QES-X509-D4.md`); unit tests + `demo:x509-e2e`; national QTSP residual |
 
 ---
 
