@@ -1,6 +1,6 @@
 # Portal + AST MVP — finish track
 
-**Status:** Working MVP core + institutional edge. Polish and harden in order.  
+**Status:** Working MVP core + institutional edge. **D1–D4 done** (home-up · PDF e2e · sign-off package · X.509 detached). D5+ residual.  
 **Positioning:** AST is an institutional **tool** (not a competing market player). Outer product shells build on AST later.
 
 ## Already in place

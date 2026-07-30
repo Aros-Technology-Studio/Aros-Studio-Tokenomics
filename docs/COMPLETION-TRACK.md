@@ -1,7 +1,7 @@
 # AST Completion Track — finish remaining repo components
 
-**Status:** Blocks **A · B · C complete** (2026-07-30)  
-**Commit:** `6f374de` on `main`  
+**Status:** Blocks **A · B · C complete**; **D1–D4 done** (2026-07-30)  
+**Commit:** `8c9bcbe` on `main` (D2–D4; D1 in `37cde2c`)  
 **Law:** `docs/AST-CORE-CANON.md` · decisions · layer acceptances  
 **Rule:** No fake Done. Docs first when a unit lacks a written contract.
 
@@ -14,7 +14,7 @@
 | **A** | Repo hygiene / CI / companions / issues / vocabulary | **Done** (A1–A8) |
 | **B** | NodeChain Core residuals | **Done** code path (B2–B6); **B1** owner sign-off still optional |
 | **C** | Acceptance depth + operator smoke | **Done** (C1–C5) |
-| **D** | Portal polish / QES / OCR / domain | **Open** (owner/ops) |
+| **D** | Portal / pilot finish | **Partial** — **D1–D4 Done**; D5–D12 open (OCR, mTLS, domain, showcase) |
 | **I** | Infra Kafka · K8s · Redis · logging · Spring decision | **Open** (owner decide) |
 
 ---
@@ -59,19 +59,21 @@
 
 ---
 
-## Next (not started as a closed block)
+## Block D — Portal / pilot finish (partial)
 
-### D — Portal / pilot finish (from MVP track)
+| ID | Item | Status |
+|----|------|--------|
+| **D1** | Owner `home-up` alone | ✅ `OWNER-START-D1.md` · READY card · `npm run home:up` |
+| **D2** | Real PDF e2e | ✅ `demo:pdf-e2e` · fixture · `DEMO-PDF-E2E-D2.md` |
+| **D3** | Demo script sign-off package | ✅ `DEMO-SIGN-OFF-D3.md` (owner may still reply `D3 approved`) |
+| **D4** | X.509 detached / QES crypto path | ✅ `QES-X509-D4.md` · `demo:x509-e2e` · national QTSP residual |
+| D5 | OCR image-only | ⬜ Later |
+| D6 | mTLS / OIDC | ⬜ Prod |
+| D7–D12 | Secrets rotation, domain, showcase, content packs | ⬜ Owner content + hosting |
 
-| ID | Item | Status / notes |
-|----|------|----------------|
-| **D1** | Owner `home-up` alone | ✅ `OWNER-START-D1.md` · preflight · READY card · `npm run home:up` |
-| **D2** | Real PDF e2e | ✅ `demo:pdf-e2e` · fixture PDF · hash → e-sign → start → cert (`DEMO-PDF-E2E-D2.md`) |
-| **D3** | Demo script sign-off | ✅ package `DEMO-SIGN-OFF-D3.md` · agent evidence; **owner reply `D3 approved`** |
-| **D4** | X.509 detached / QES crypto path | ✅ `x509-verify` · trust anchors · UI mode · `demo:x509-e2e` · residual national QTSP |
-| D5 | OCR image-only | Later |
-| D6 | mTLS / OIDC | Prod |
-| D7–D12 | Secrets rotation, domain, showcase, content packs | Owner content + hosting |
+---
+
+## Next (open)
 
 ### I — Infrastructure (owner decision)
 
@@ -103,12 +105,13 @@
 
 | Bar | Meaning |
 |-----|---------|
-| **A — Repo engineering** | Specs ↔ code ↔ tests ↔ guards — **A/B/C blocks address this** |
-| **B — Regulated production** | Hosting, full QES, mTLS, audit — **still open (D/I + owner)** |
+| **A — Repo engineering** | Specs ↔ code ↔ tests ↔ guards — **A/B/C done** |
+| **B — Pilot portal path** | home-up · PDF e2e · sign-off package · X.509 detached — **D1–D4 done** |
+| **C — Regulated production** | OCR, mTLS, domain, full QTSP, infra — **still open (D5+ / I + owner)** |
 
 ---
 
-## 3. Verification (after A/B/C)
+## 3. Verification
 
 ```bash
 npm test
@@ -118,6 +121,10 @@ npm run smoke:operator
 npm run check:release   # includes smoke + portal when deps installed
 npm run test:contracts  # needs forge
 npm run test:rust       # needs cargo
+# Portal pilot (stack up):
+npm run home:up
+npm run demo:pdf-e2e
+npm run demo:x509-e2e
 ```
 
 ---
@@ -133,9 +140,12 @@ npm run test:rust       # needs cargo
 | 2026-07-30 | Commit `6f374de` | Pushed to `origin/main` |
 | 2026-07-30 | List refresh | Blocks A/B/C marked **Done** in this file |
 | 2026-07-30 | **D1** | Owner alone start: preflight, READY.txt, OWNER-START-D1.md, npm run home:up/down |
-| 2026-07-30 | **D2** | Real PDF e2e: fixture + `npm run demo:pdf-e2e` → `D2 PDF E2E PASS` (process `AST-PILOT-20260730-fd7f1b6e5c54`) |
-| 2026-07-30 | **D3** | Owner sign-off package `DEMO-SIGN-OFF-D3.md`; checklist + recorded evidence; awaiting owner `D3 approved` |
-| 2026-07-30 | **D4** | X.509 detached verify at edge (`QES-X509-D4.md`); unit tests + `demo:x509-e2e`; national QTSP residual |
+| 2026-07-30 | Commit `37cde2c` | D1 on `origin/main` |
+| 2026-07-30 | **D2** | Real PDF e2e: fixture + `npm run demo:pdf-e2e` → `D2 PDF E2E PASS` |
+| 2026-07-30 | **D3** | Owner sign-off package `DEMO-SIGN-OFF-D3.md` |
+| 2026-07-30 | **D4** | X.509 detached verify (`QES-X509-D4.md`); `demo:x509-e2e`; national QTSP residual |
+| 2026-07-30 | Commit `8c9bcbe` | D2–D4 (+ canon note) on `origin/main` |
+| 2026-07-30 | List refresh | **D1–D4 Done**; D5+ / I remain open |
 
 ---
 
