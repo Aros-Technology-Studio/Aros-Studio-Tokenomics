@@ -31,7 +31,7 @@
 
 ## Suggested auditor checklist
 
-1. Canon § hard prohibitions still match guards (AFC firewall, no free mint).  
+1. Canon § hard prohibitions still match guards (forbidden foreign product names firewall, no free mint).  
 2. Mint paths all require PoT `verified=1` / ok-to-emit.  
 3. Portal cannot mint (search edge for mint — none).  
 4. Journal immutability / hash chain verify.  
