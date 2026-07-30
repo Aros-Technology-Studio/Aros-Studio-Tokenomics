@@ -60,11 +60,21 @@ GitHub Issues are the operational list; this file is the in-repo mirror.
 - [ ] Quarterly **production** backup/restore drill log (F5 offline drill ships)  
 - [ ] Prometheus / Alertmanager wire (F6 smoke ships)  
 
-## Later (owner-driven)
+## Later (owner-driven · still may touch AST ops)
 
-- Optional multi-node BFT  
 - Mainnet ArosCoinView if explorers need it (E2 residual)  
 - National QTSP / full IdP  
+
+## Explicitly **not** AST core track (Block H)
+
+Do not freelanc as AST layer Done. See [`docs/docs-process/BLOCK-H.md`](docs-process/BLOCK-H.md).
+
+| ID | Item | Priority |
+|----|------|----------|
+| **H1** | Outer API Contract (execution process shell on AST) | later / out of AST core |
+| **H2** | Public market listing of ARO | **out** |
+| **H3** | Multi-node BFT mainnet | later (≠ F3 catch-up mesh) |
+| **H4** | Eye veto / executive powers | **out** (Canon forbid) |
 
 ---
 

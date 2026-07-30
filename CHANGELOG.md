@@ -20,6 +20,7 @@ Repo completion blocks **A–G · E · F · I** on `main` (not a semver tag by i
 - Solidity Block E: ArosCoinView Foundry tests, testnet deploy, journal tip reporter; E4 free-mint out  
 - Hardening Block F (Bar B): audit prep, KMS residual, mesh residual, L3 key env, `drill:backup-restore`, `monitor:smoke`  
 - Docs process Block G: trackers sync, pilot brief refresh (Nodes + iMac path), B1 owner package link  
+- Block H documented as **not** AST core track (outer shell, market listing, BFT mainnet, Eye veto forbid)  
 - CI: `require-canon-update` ignores lockfile / dep-only noise
 
 ## 1.1.0 — 2026-07-20

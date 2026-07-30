@@ -15,3 +15,7 @@
 
 - **G2:** Product owner signs B1 via chat **`B1 approved`** (or amendments) — package already written:  
   `docs/layers/01_NodeChain/09_acceptance/OWNER-REVIEW.md`
+
+## Related
+
+- **Block H** — explicitly **not** AST core track: [`BLOCK-H.md`](BLOCK-H.md)

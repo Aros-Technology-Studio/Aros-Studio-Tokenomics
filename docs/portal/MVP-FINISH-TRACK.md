@@ -65,9 +65,10 @@ Do **one slice at a time**. Do not mark Done without real acceptance.
 4. [x] Docs: `docs/portal/INSTITUTION-SECRETS.md`  
 5. [x] Owner rotates token if shared (D7); domain ops card D8; mTLS/OIDC hooks D6
 
-### Track E — Outer product shell (later)
+### Track E — Outer product shell (later · Block H1)
 
-AST is the main economic link. Any outer product surface wraps AST — **after** AST pilot path is stable. Not freelanced ahead of specs.
+AST is the main economic link. Any outer product surface wraps AST — **after** AST pilot path is stable. Not freelanced ahead of specs.  
+Tracked as **H1** (not AST core Done): `docs/docs-process/BLOCK-H.md`.
 
 ## Explicit out of scope for this finish track
 

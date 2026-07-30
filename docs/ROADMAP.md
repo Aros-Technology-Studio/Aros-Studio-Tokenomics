@@ -38,7 +38,17 @@ Source: [`docs/COMPLETION-TRACK.md`](COMPLETION-TRACK.md).
 | **P2** | Real KMS/PKCS#11 · multi-region mesh when required | F2 · F3 |
 | **P3** | L3 multi-vendor keys in vault · IdP/QTSP | F4 · D6 residual |
 
-## Later
+## Later (may be AST-adjacent ops)
 
-- Optional multi-node BFT  
 - Mainnet representation deploy if product needs it  
+
+## Not AST core track (Block H)
+
+| ID | Item | Priority |
+|----|------|----------|
+| H1 | Outer execution-process API shell (product on AST) | later / separate product |
+| H2 | Public market listing of ARO | **out** |
+| H3 | Multi-node BFT mainnet | later |
+| H4 | Eye veto / executive powers | **out** (Canon) |
+
+Detail: [`docs/docs-process/BLOCK-H.md`](docs-process/BLOCK-H.md).

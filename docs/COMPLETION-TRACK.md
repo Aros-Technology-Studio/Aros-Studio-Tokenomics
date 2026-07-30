@@ -1,6 +1,6 @@
 # AST Completion Track — finish remaining repo components
 
-**Status:** Blocks **A · B · C · D · E · F · G · I engineering complete** (2026-07-30)  
+**Status:** Blocks **A · B · C · D · E · F · G · I engineering complete** (2026-07-30) · **H = not AST core track**  
 **Law:** `docs/AST-CORE-CANON.md` · decisions · layer acceptances  
 **Rule:** No fake Done. Docs first when a unit lacks a written contract.  
 **Owner residual:** `B1 approved` · host cutover · auditor · field tag · Bar B live ops.
@@ -18,6 +18,7 @@
 | **E** | Solidity / representation (ArosCoinView) | **Done** E1–E3 · **E4 out** |
 | **F** | Hardening / ops / prod (Bar B) | **Done** package F1–F6 · owner residual |
 | **G** | Documents / process | **Done** G1–G5 · **G2 owner reply open** |
+| **H** | Explicitly **not** AST core track | **Documented** · do not freelanc as AST Done |
 | **I** | Infra Postgres · Redis · Kafka · logs · K8s · Nest · alerts | **Done** engineering I1–I7 |
 | **Cutover** | Live host packages (domain/secrets/data/health) | **Done** package `docs/cutover/` · owner executes |
 
@@ -151,6 +152,25 @@ B1 package: [`layers/01_NodeChain/09_acceptance/OWNER-REVIEW.md`](layers/01_Node
 
 ---
 
+## Block H — Explicitly **not** this AST track ⛔
+
+Do **not** schedule or mark as AST core Done. Full note: [`docs/docs-process/BLOCK-H.md`](docs-process/BLOCK-H.md).
+
+| ID | Item | Note | Priority |
+|----|------|------|----------|
+| **H1** | Outer API Contract (execution process shell) | Separate product **on** AST | later / out of AST core |
+| **H2** | Public market listing of ARO | Out of product scope | **out** |
+| **H3** | Multi-node BFT mainnet | Beyond catch-up / pilot journal | **later** |
+| **H4** | Eye veto / executive powers | Canon forbid (observe only) | **out** |
+
+| Confusion | Keep separate |
+|-----------|----------------|
+| Portal OpenAPI | AST edge — not H1 outer shell |
+| F3 multi-region residual | Ops mesh/catch-up — not H3 BFT mainnet |
+| Eye HTTP stream | Observe only — not H4 veto |
+
+---
+
 ## Next (owner only)
 
 ```bash
@@ -239,6 +259,7 @@ curl -s http://127.0.0.1:3000/metrics | head
 | 2026-07-30 | **F1–F6** Hardening Bar B | Audit prep · KMS residual · mesh residual · L3 keys · drill script · monitor smoke |
 | 2026-07-30 | List refresh | Block **F** = hardening/ops/prod package |
 | 2026-07-30 | **G1–G5** | Docs process: trackers sync · B1 owner package · pilot brief · CHANGELOG Nodes · push |
+| 2026-07-30 | **H1–H4** | Explicit non-AST-core: outer shell · market listing · BFT mainnet · Eye veto forbid |
 | 2026-07-30 | Cutover ops packages | `docs/cutover/*` (domain/secrets/data/health) — not Solidity |
 | 2026-07-30 | **E1–E3** Solidity | Foundry green · testnet deploy · report-tip; **E4 out** no free mint |
 | 2026-07-30 | List refresh | Block **E** = Solidity representation complete |

@@ -119,7 +119,10 @@ npm run drill:backup-restore  # F5 offline drill
 | Multi-region replication mesh | Residual | Catch-up exists (F3 later) |
 | External security audit engagement | Residual | Prep package F1; firm not engaged |
 | Real cloud KMS / PKCS#11 | Residual | Soft-HSM ships (F2) |
-| Outer product shell | Out of scope for this pilot | AST is the economic tool |
+| Outer product shell | Out of scope for this pilot | AST is the economic tool · **H1** later/separate |
+| Public market listing ARO | Out | **H2** |
+| Multi-node BFT mainnet | Later | **H3** (not pilot) |
+| Eye veto / executive | Forbidden | **H4** Canon |
 
 ---
 
