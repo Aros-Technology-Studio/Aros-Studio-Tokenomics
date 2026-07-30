@@ -9,6 +9,14 @@ import {
   computeAroMintAmount,
   type ValuationCurrencyCode,
 } from '../../../lib/currencies';
+import {
+  FALLBACK_CATALOG,
+  flattenSlotFiles,
+  requiredSlotsOk,
+  type AssetTypeDef,
+  type AssetTypeSummary,
+  type EvidenceSlot,
+} from '../../../lib/asset-evidence';
 
 function randomIdem(): string {
   if (typeof crypto !== 'undefined' && crypto.randomUUID) return crypto.randomUUID();
@@ -52,16 +60,27 @@ type SigVerify = {
 
 /**
  * Document-first institutional path:
- * 1) Upload signed document (source of truth for facts)
+ * 0) Choose asset type → typed evidence slots
+ * 1) Upload evidence package (per slot)
  * 2) Confirm electronic signature
- * 3) Declare fields AS STATED IN the verified package (not free appraisal)
- * 4) Start tokenization → certificate
+ * 3) Declare fields AS STATED IN the verified package
+ * 4) Optional enrichment (bureau signals)
+ * 5) Start tokenization → certificate
  */
 export default function TokenizationWizardPage() {
   const router = useRouter();
-  const [step, setStep] = useState(1);
+  const [step, setStep] = useState(0);
 
-  /** Multi-file package: e.g. title extract + valuation annex */
+  const [assetTypeOptions, setAssetTypeOptions] = useState<AssetTypeSummary[]>(
+    FALLBACK_CATALOG.map(({ id, label, description }) => ({ id, label, description })),
+  );
+  const [evidenceDef, setEvidenceDef] = useState<AssetTypeDef | null>(
+    FALLBACK_CATALOG.find((t) => t.id === 'real_estate') ?? null,
+  );
+  /** slotId → files for that evidentiary document */
+  const [slotFiles, setSlotFiles] = useState<Record<string, File[]>>({});
+
+  /** Multi-file package flattened from slots */
   const [files, setFiles] = useState<File[]>([]);
   const [documentPackageHash, setDocumentPackageHash] = useState('');
   const [fileMeta, setFileMeta] = useState<string | null>(null);
@@ -90,6 +109,19 @@ export default function TokenizationWizardPage() {
   const [holderWallet, setHolderWallet] = useState('');
   const [note, setNote] = useState('');
   const [fieldsFromDocument, setFieldsFromDocument] = useState(false);
+  const [enrichment, setEnrichment] = useState<{
+    enrichmentId: string;
+    provider: string;
+    signals: {
+      identityMatch: string;
+      assetPresence: string;
+      valueContext: string;
+      notes: string[];
+    };
+    disclaimer: string;
+  } | null>(null);
+  const [enrichBusy, setEnrichBusy] = useState(false);
+  const [enrichmentConfirmed, setEnrichmentConfirmed] = useState(false);
 
   /**
    * v1: fixed institutional 1:1 mapping of the document figure into ARO units.
@@ -118,7 +150,63 @@ export default function TokenizationWizardPage() {
     if (!loadSession()) router.replace('/login');
   }, [router]);
 
-  const step1Ok = documentPackageHash.length === 64 && files.length > 0;
+  useEffect(() => {
+    const s = loadSession();
+    if (!s) return;
+    void (async () => {
+      try {
+        const res = await portalFetch('/v1/catalog/asset-types', {
+          method: 'GET',
+          sessionId: s.sessionId,
+        });
+        if (!res.ok) return;
+        const body = (await res.json()) as { assetTypes?: AssetTypeSummary[] };
+        if (body.assetTypes?.length) setAssetTypeOptions(body.assetTypes);
+      } catch {
+        /* keep fallback */
+      }
+    })();
+  }, []);
+
+  async function loadEvidenceForType(typeId: string) {
+    const s = loadSession();
+    const fallback = FALLBACK_CATALOG.find((t) => t.id === typeId) ?? null;
+    if (!s) {
+      setEvidenceDef(fallback);
+      return;
+    }
+    try {
+      const res = await portalFetch(
+        `/v1/catalog/evidence-requirements?assetType=${encodeURIComponent(typeId)}`,
+        { method: 'GET', sessionId: s.sessionId },
+      );
+      if (!res.ok) {
+        setEvidenceDef(fallback);
+        return;
+      }
+      const body = (await res.json()) as {
+        assetType: string;
+        label: string;
+        description: string;
+        slots: EvidenceSlot[];
+      };
+      setEvidenceDef({
+        id: body.assetType,
+        label: body.label,
+        description: body.description,
+        slots: body.slots,
+      });
+    } catch {
+      setEvidenceDef(fallback);
+    }
+  }
+
+  const slots: EvidenceSlot[] = evidenceDef?.slots ?? [];
+  const step0Ok = Boolean(assetType && evidenceDef);
+  const step1Ok =
+    documentPackageHash.length === 64 &&
+    files.length > 0 &&
+    requiredSlotsOk(slots, slotFiles);
   const step2Ok = !!sigVerify?.verified && hasQualifiedSignature;
   const step3Ok =
     fieldsFromDocument &&
@@ -126,10 +214,17 @@ export default function TokenizationWizardPage() {
     holderId.trim().length > 0 &&
     !!aroMintAmount &&
     /^-?\d+(\.\d{1,18})?$/.test(amountFromDocument.trim().replace(/,/g, ''));
+  const step4Ok = enrichmentConfirmed || enrichment != null;
 
   const canSubmit = useMemo(
-    () => step1Ok && step2Ok && step3Ok && idempotencyKey.trim().length >= 8,
-    [step1Ok, step2Ok, step3Ok, idempotencyKey],
+    () =>
+      step0Ok &&
+      step1Ok &&
+      step2Ok &&
+      step3Ok &&
+      step4Ok &&
+      idempotencyKey.trim().length >= 8,
+    [step0Ok, step1Ok, step2Ok, step3Ok, step4Ok, idempotencyKey],
   );
 
   async function rehashPackage(nextFiles: File[]) {
@@ -208,12 +303,53 @@ export default function TokenizationWizardPage() {
     }
   }
 
-  async function onFilesSelected(list: FileList | null) {
+  async function onSlotFilesSelected(slotId: string, list: FileList | null) {
+    const next = { ...slotFiles };
     if (!list?.length) {
-      await rehashPackage([]);
-      return;
+      delete next[slotId];
+    } else {
+      next[slotId] = [...list];
     }
-    await rehashPackage([...list]);
+    setSlotFiles(next);
+    setEnrichment(null);
+    setEnrichmentConfirmed(false);
+    await rehashPackage(flattenSlotFiles(next));
+  }
+
+  async function runEnrichment() {
+    setError(null);
+    setEnrichBusy(true);
+    try {
+      const s = loadSession();
+      if (!s) {
+        router.replace('/login');
+        return;
+      }
+      const res = await portalFetch('/v1/enrichment/check', {
+        method: 'POST',
+        sessionId: s.sessionId,
+        body: JSON.stringify({
+          assetType,
+          holderId: holderId.trim() || undefined,
+          assetId: assetId.trim() || undefined,
+          documentPackageHash,
+          amountFromDocument: amountFromDocument.trim().replace(/,/g, ''),
+          currency: valuationCurrency,
+        }),
+      });
+      const data = await res.json();
+      if (!res.ok) throw new Error(data.message ?? res.statusText);
+      setEnrichment({
+        enrichmentId: data.enrichmentId,
+        provider: data.provider,
+        signals: data.signals,
+        disclaimer: data.disclaimer,
+      });
+    } catch (e) {
+      setError(e instanceof Error ? e.message : String(e));
+    } finally {
+      setEnrichBusy(false);
+    }
   }
 
   async function confirmSignature() {
@@ -257,7 +393,7 @@ export default function TokenizationWizardPage() {
       const data = await res.json();
       if (!res.ok) throw new Error(data.message ?? res.statusText);
       setSigVerify(data as SigVerify);
-      setStep(3);
+      setStep(3); // fields from document
     } catch (e) {
       setError(e instanceof Error ? e.message : String(e));
     } finally {
@@ -305,11 +441,18 @@ export default function TokenizationWizardPage() {
             .join(' | ')
             .slice(0, 512),
           metadata: {
-            flow: 'document_first',
+            flow: 'document_first_typed_evidence',
+            assetType,
             fieldsDeclaredFromDocument: true,
             signatureVerificationId: sigVerify?.verificationId,
             fileNames: files.map((f) => f.name),
             fileCount: files.length,
+            evidenceSlots: Object.fromEntries(
+              Object.entries(slotFiles).map(([k, v]) => [k, v.map((f) => f.name)]),
+            ),
+            enrichmentId: enrichment?.enrichmentId,
+            enrichmentProvider: enrichment?.provider,
+            enrichmentSignals: enrichment?.signals,
             signerId: signerId.trim() || undefined,
             holderWallet: holderWallet.trim() || undefined,
             walletCompat: true,
@@ -349,16 +492,19 @@ export default function TokenizationWizardPage() {
         <Link href="/dashboard">← Cabinet</Link>
       </p>
       <p className="eyebrow">Institutional client · document-first</p>
-      <h1>Tokenize from a signed document</h1>
+      <h1>Tokenize from a signed document package</h1>
       <p className="lead">
-        You do <strong>not</strong> invent the price first. Upload the official package with
-        electronic signature. After the signature is confirmed, declare only what the{' '}
-        <strong>document already states</strong>. AST does not appraise. Portal never mints.
+        Choose the <strong>asset type</strong>, upload the <strong>typed evidence documents</strong>,
+        confirm e-signature, restate only what the package states. Optional bureau enrichment assists
+        confirmation — it does not invent price. AST does not appraise. Portal never mints.
       </p>
 
       <ul className="steps">
+        <li className={step === 0 ? 'active' : step > 0 ? 'done' : ''}>
+          <span className="n">0</span> Asset type
+        </li>
         <li className={step === 1 ? 'active' : step > 1 ? 'done' : ''}>
-          <span className="n">1</span> Document
+          <span className="n">1</span> Evidence
         </li>
         <li className={step === 2 ? 'active' : step > 2 ? 'done' : ''}>
           <span className="n">2</span> E-signature
@@ -367,40 +513,120 @@ export default function TokenizationWizardPage() {
           <span className="n">3</span> From document
         </li>
         <li className={step === 4 ? 'active' : step > 4 ? 'done' : ''}>
-          <span className="n">4</span> Start
+          <span className="n">4</span> Enrich
+        </li>
+        <li className={step === 5 ? 'active' : step > 5 ? 'done' : ''}>
+          <span className="n">5</span> Start
         </li>
       </ul>
 
       <form onSubmit={onSubmit}>
-        {/* ——— 1. DOCUMENT FIRST ——— */}
+        {/* ——— 0. ASSET TYPE ——— */}
+        {step === 0 && (
+          <>
+            <h2 style={{ marginTop: 0 }}>0 · Select asset type</h2>
+            <p className="muted">
+              Each asset type requires a different set of evidentiary documents. Pick the type that
+              matches the package you will upload. You can change type only by restarting this step
+              (uploads reset).
+            </p>
+            <label htmlFor="assetType0">Asset type</label>
+            <select
+              id="assetType0"
+              value={assetType}
+              onChange={(e) => {
+                const v = e.target.value;
+                setAssetType(v);
+                setSlotFiles({});
+                setFiles([]);
+                setDocumentPackageHash('');
+                setFileMeta(null);
+                setEnrichment(null);
+                setEnrichmentConfirmed(false);
+                void loadEvidenceForType(v);
+              }}
+            >
+              {assetTypeOptions.map((t) => (
+                <option key={t.id} value={t.id}>
+                  {t.label}
+                </option>
+              ))}
+            </select>
+            {evidenceDef && (
+              <div className="card flat" style={{ marginTop: '1rem' }}>
+                <p style={{ marginTop: 0 }}>
+                  <strong>{evidenceDef.label}</strong>
+                </p>
+                <p className="muted">{evidenceDef.description}</p>
+                <p style={{ marginBottom: 0 }}>
+                  <strong>Evidence you will need:</strong>
+                </p>
+                <ul>
+                  {evidenceDef.slots.map((s) => (
+                    <li key={s.id}>
+                      {s.label}{' '}
+                      <span className="muted">
+                        ({s.required ? 'required' : 'optional'}) — {s.purpose}
+                      </span>
+                    </li>
+                  ))}
+                </ul>
+              </div>
+            )}
+            <div className="actions">
+              <button
+                type="button"
+                className="primary"
+                disabled={!step0Ok}
+                onClick={() => {
+                  void loadEvidenceForType(assetType);
+                  setStep(1);
+                }}
+              >
+                Continue → evidence package
+              </button>
+            </div>
+          </>
+        )}
+
+        {/* ——— 1. TYPED EVIDENCE ——— */}
         {step === 1 && (
           <>
-            <h2 style={{ marginTop: 0 }}>1 · Upload the signed package</h2>
+            <h2 style={{ marginTop: 0 }}>1 · Upload evidence for {evidenceDef?.label ?? assetType}</h2>
             <p className="muted">
-              First: official documents with electronic signature. You may attach{' '}
-              <strong>several files</strong> (e.g. registry extract + valuation annex). This package
-              is the entry — not a form of guessed amounts.
+              Fill each slot with the matching institutional document. Required slots must not be
+              empty. All files become one package fingerprint (SHA-256).
             </p>
-            <label htmlFor="file">PDF / package files (multi-select allowed)</label>
-            <input
-              id="file"
-              type="file"
-              multiple
-              accept=".pdf,.PDF,.xml,.asice,.adoc,.edoc,.zip,application/pdf"
-              onChange={(e) => void onFilesSelected(e.target.files)}
-            />
+            {slots.map((s) => (
+              <div key={s.id} className="card flat" style={{ marginBottom: '0.75rem' }}>
+                <label htmlFor={`slot-${s.id}`}>
+                  {s.label}{' '}
+                  <span className="muted">{s.required ? '(required)' : '(optional)'}</span>
+                </label>
+                <p className="muted" style={{ margin: '0.25rem 0 0.5rem', fontSize: '0.85rem' }}>
+                  {s.purpose}
+                </p>
+                <input
+                  id={`slot-${s.id}`}
+                  type="file"
+                  multiple
+                  accept={s.acceptHint}
+                  onChange={(e) => void onSlotFilesSelected(s.id, e.target.files)}
+                />
+                {(slotFiles[s.id]?.length ?? 0) > 0 && (
+                  <ul className="plain-list" style={{ marginTop: '0.35rem' }}>
+                    {slotFiles[s.id]!.map((f) => (
+                      <li key={f.name + f.size}>
+                        {f.name}{' '}
+                        <span className="muted">({(f.size / 1024).toFixed(1)} KB)</span>
+                      </li>
+                    ))}
+                  </ul>
+                )}
+              </div>
+            ))}
             {hashBusy && <p className="muted">Fingerprinting package…</p>}
             {fileMeta && <p className="ok">{fileMeta}</p>}
-            {files.length > 0 && (
-              <ul className="plain-list" style={{ marginTop: '0.5rem' }}>
-                {files.map((f) => (
-                  <li key={f.name + f.size}>
-                    {f.name}{' '}
-                    <span className="muted">({(f.size / 1024).toFixed(1)} KB)</span>
-                  </li>
-                ))}
-              </ul>
-            )}
             {documentPackageHash && (
               <>
                 <label>Package fingerprint (SHA-256)</label>
@@ -412,6 +638,13 @@ export default function TokenizationWizardPage() {
               Core after PoT.
             </div>
             <div className="actions">
+              <button
+                type="button"
+                className="secondary"
+                onClick={() => setStep(0)}
+              >
+                Back
+              </button>
               <button
                 type="button"
                 className="primary"
@@ -539,7 +772,7 @@ export default function TokenizationWizardPage() {
                 }
                 onClick={() => void confirmSignature()}
               >
-                {sigBusy ? 'Confirming…' : 'Confirm signature → read package'}
+                {sigBusy ? 'Confirming…' : 'Confirm signature → fields'}
               </button>
             </div>
           </>
@@ -634,17 +867,9 @@ export default function TokenizationWizardPage() {
               paper.
             </p>
 
-            <label htmlFor="assetType">Asset type (as in package)</label>
-            <select
-              id="assetType"
-              value={assetType}
-              onChange={(e) => setAssetType(e.target.value)}
-            >
-              <option value="real_estate">Real estate</option>
-              <option value="bond">Bond / instrument</option>
-              <option value="investment_package">Investment package</option>
-              <option value="other">Other</option>
-            </select>
+            <p className="muted">
+              Asset type locked from step 0: <strong>{evidenceDef?.label ?? assetType}</strong>
+            </p>
 
             <div className="callout" style={{ marginBottom: '1rem' }}>
               <strong>Amount + currency only (from the paper)</strong>
@@ -757,18 +982,105 @@ export default function TokenizationWizardPage() {
                 disabled={!step3Ok}
                 onClick={() => setStep(4)}
               >
-                Continue → start process
+                Continue → enrichment
               </button>
             </div>
           </>
         )}
 
-        {/* ——— 4. START ——— */}
+        {/* ——— 4. ENRICHMENT (bureau signals) ——— */}
         {step === 4 && (
           <>
-            <h2 style={{ marginTop: 0 }}>4 · Start tokenization</h2>
+            <h2 style={{ marginTop: 0 }}>4 · Enrich confirmation (optional bureau)</h2>
+            <p className="muted">
+              Optional check against an enrichment gateway (mock by default; live bureau such as a
+              credit/asset data provider via <code>AST_ENRICHMENT_URL</code>). Signals help you
+              confirm identity / asset presence — they do <strong>not</strong> set the mint amount.
+            </p>
+            <div className="actions" style={{ marginBottom: '1rem' }}>
+              <button
+                type="button"
+                className="secondary"
+                disabled={enrichBusy}
+                onClick={() => void runEnrichment()}
+              >
+                {enrichBusy ? 'Checking…' : 'Run enrichment check'}
+              </button>
+              <button
+                type="button"
+                className="secondary"
+                onClick={() => {
+                  setEnrichment(null);
+                  setEnrichmentConfirmed(true);
+                }}
+              >
+                Skip enrichment
+              </button>
+            </div>
+            {enrichment && (
+              <div className="card flat">
+                <p style={{ marginTop: 0 }}>
+                  <strong>Provider:</strong> {enrichment.provider} ·{' '}
+                  <code className="mono">{enrichment.enrichmentId}</code>
+                </p>
+                <p>
+                  Identity match: <strong>{enrichment.signals.identityMatch}</strong>
+                </p>
+                <p>
+                  Asset presence: <strong>{enrichment.signals.assetPresence}</strong>
+                </p>
+                <p>
+                  Value context: <strong>{enrichment.signals.valueContext}</strong>
+                </p>
+                <ul>
+                  {enrichment.signals.notes.map((n) => (
+                    <li key={n} className="muted">
+                      {n}
+                    </li>
+                  ))}
+                </ul>
+                <p className="muted" style={{ fontSize: '0.85rem' }}>
+                  {enrichment.disclaimer}
+                </p>
+                <label className="inline">
+                  <input
+                    type="checkbox"
+                    checked={enrichmentConfirmed}
+                    onChange={(e) => setEnrichmentConfirmed(e.target.checked)}
+                  />
+                  I have reviewed enrichment signals; institutional documents remain the source of
+                  valuation
+                </label>
+              </div>
+            )}
+            {enrichmentConfirmed && !enrichment && (
+              <p className="ok">Enrichment skipped — package documents remain sole valuation source.</p>
+            )}
+            <div className="actions">
+              <button type="button" className="secondary" onClick={() => setStep(3)}>
+                Back
+              </button>
+              <button
+                type="button"
+                className="primary"
+                disabled={!step4Ok}
+                onClick={() => setStep(5)}
+              >
+                Continue → start
+              </button>
+            </div>
+          </>
+        )}
+
+        {/* ——— 5. START ——— */}
+        {step === 5 && (
+          <>
+            <h2 style={{ marginTop: 0 }}>5 · Start tokenization</h2>
             <div className="card flat">
               <p style={{ marginTop: 0 }}>
+                <strong>Asset type:</strong> {evidenceDef?.label ?? assetType}
+              </p>
+              <p>
                 <strong>Document package:</strong>{' '}
                 {files.map((f) => f.name).join(', ') || '—'}
               </p>
@@ -793,6 +1105,14 @@ export default function TokenizationWizardPage() {
               <p>
                 <strong>Holder (from package):</strong> {holderId}
               </p>
+              <p>
+                <strong>Enrichment:</strong>{' '}
+                {enrichment
+                  ? `${enrichment.provider} · ${enrichment.enrichmentId}`
+                  : enrichmentConfirmed
+                    ? 'skipped'
+                    : '—'}
+              </p>
               <p className="muted" style={{ marginBottom: 0 }}>
                 Submit → portal edge → Core → PoT → NodeChain. You receive a digitization
                 certificate on the next screen.
@@ -806,7 +1126,7 @@ export default function TokenizationWizardPage() {
               onChange={(e) => setIdempotencyKey(e.target.value)}
             />
             <div className="actions">
-              <button type="button" className="secondary" onClick={() => setStep(3)}>
+              <button type="button" className="secondary" onClick={() => setStep(4)}>
                 Back
               </button>
               <button className="primary" type="submit" disabled={!canSubmit || busy}>

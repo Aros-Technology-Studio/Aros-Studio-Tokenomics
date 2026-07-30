@@ -6,6 +6,8 @@ import { HealthModule } from './modules/health/health.module';
 import { AssetsModule } from './modules/assets/assets.module';
 import { TokenizationModule } from './modules/tokenization/tokenization.module';
 import { PublicModule } from './modules/public/public.module';
+import { CatalogModule } from './modules/catalog/catalog.module';
+import { EnrichmentModule } from './modules/enrichment/enrichment.module';
 
 @Module({
   imports: [
@@ -16,6 +18,8 @@ import { PublicModule } from './modules/public/public.module';
     AssetsModule,
     TokenizationModule,
     PublicModule,
+    CatalogModule,
+    EnrichmentModule,
   ],
 })
 export class AppModule {}

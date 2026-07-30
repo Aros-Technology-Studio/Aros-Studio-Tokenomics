@@ -647,7 +647,19 @@ components:
 
     AssetType:
       type: string
-      enum: [real_estate, bond, investment_package, other]
+      enum:
+        [
+          real_estate,
+          bond,
+          investment_package,
+          vehicle,
+          receivable,
+          equipment,
+          other,
+        ]
+      description: >
+        Drives evidence document slots in the cabinet wizard.
+        See docs/portal/ASSET-EVIDENCE-AND-ENRICHMENT.md
 
     StartTokenizationRequest:
       type: object
