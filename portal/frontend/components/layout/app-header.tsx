@@ -17,10 +17,12 @@ export function AppHeader() {
   const router = useRouter();
   const pathname = usePathname();
   const { t } = useI18n();
+  const isHome = pathname === '/';
 
   useEffect(() => {
+    if (isHome) return;
     setSession(loadSession());
-  }, [pathname]);
+  }, [pathname, isHome]);
 
   function logout() {
     const s = loadSession();
@@ -35,22 +37,30 @@ export function AppHeader() {
     router.push('/login');
   }
 
+  // Home owns its own nav (Canva layout) — global header off
+  if (isHome) {
+    return null;
+  }
+
   return (
     <header className="topbar">
-      <Link href="/" style={{ textDecoration: 'none' }}>
+      <Link href="/" className="brand-link" aria-label="Aros Studio Tokenomics">
         <div className="brand">
-          <span className="brand-title">Aros Studio Tokenomics (AST)</span>
-          <span className="brand-sub">{t('nav.brandSub')}</span>
+          <img
+            className="brand-logo"
+            src="/brand/ast-logo-dark.png"
+            alt="Aros Studio Tokenomics"
+            width={280}
+            height={80}
+          />
         </div>
       </Link>
       <div className="topbar-right">
-        {/* Always visible: EN · RU · KA */}
         <LanguageSwitcher />
         <nav className="nav" aria-label="Main">
-          <Link href="/about">{t('nav.about')}</Link>
-          <Link href="/system">{t('nav.system')}</Link>
-          <Link href="/explore">{t('nav.explore')}</Link>
           <Link href="/nodechain">{t('nav.nodechain')}</Link>
+          <Link href="/system">{t('nav.system')}</Link>
+          <Link href="/about">{t('nav.about')}</Link>
           {session ? (
             <>
               <Link href="/dashboard">{t('nav.cabinet')}</Link>
@@ -62,10 +72,8 @@ export function AppHeader() {
               </button>
             </>
           ) : (
-            <Link href="/login">
-              <button type="button" className="primary" style={{ padding: '0.45rem 0.9rem' }}>
-                {t('nav.login')}
-              </button>
+            <Link href="/login" className="nav-login">
+              {t('nav.login')}
             </Link>
           )}
         </nav>
