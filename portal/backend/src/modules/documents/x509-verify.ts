@@ -385,7 +385,43 @@ export function verifyX509Detached(
   }
 
   const chain = resolveTrustAnchor(leaf, intermediates, trustAnchors, allowSelfSigned(env));
-  if ('ok' in chain && chain.ok === false) return chain;
+if (!('ok' in chain)) {
+  // chain is now { anchor: X509Certificate; depth: number }
+  const sigErr = verifyDetachedSignature(leaf, hash, input.signatureBase64.trim());
+  if (sigErr) return sigErr;
+
+  if (bindInstitution(env) && input.institutionId) {
+    if (!subjectBindsInstitution(leaf.subject, input.institutionId)) {
+      return {
+        ok: false,
+        code: 'X509_INSTITUTION_MISMATCH',
+        message: `leaf subject does not bind to institution ${input.institutionId}`,
+      };
+    }
+  }
+
+  const material = createHash('sha256')
+    .update(`${leaf.fingerprint256}:${hash}:${chain.anchor.fingerprint256}`)
+    .digest('hex')
+    .slice(0, 32);
+
+  return {
+    ok: true,
+    mode: 'x509_detached',
+    subject: leaf.subject,
+    issuer: leaf.issuer,
+    serialNumber: leaf.serialNumber,
+    fingerprint256: leaf.fingerprint256,
+    notBefore: leaf.validFrom,
+    notAfter: leaf.validTo,
+    chainDepth: chain.depth,
+    trustAnchorFingerprint256: chain.anchor.fingerprint256,
+    verificationMaterial: material,
+  };
+} else {
+  return chain;
+}
+const anchor = chain as { anchor: X509Certificate; depth: number };
 
   const sigErr = verifyDetachedSignature(leaf, hash, input.signatureBase64.trim());
   if (sigErr) return sigErr;
