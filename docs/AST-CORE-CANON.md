@@ -103,6 +103,7 @@ Holding participants’ third-party funds is **forbidden**.
 1. The institution provides a document package containing the official asset valuation and a qualified digital signature.
 2. The system verifies authenticity of the signature and documents.
    - Portal edge (admission only, never mints): institutional attestation and/or cryptographic **X.509 detached** verification of the document package hash against configured trust anchors (`docs/portal/QES-X509-D4.md`). National QTSP/eIDAS profiles, CMS/PAdES-in-PDF, and OCSP/CRL remain residual.
+   - Portal edge client-generated `Idempotency-Key` values use a CSPRNG (`crypto.randomUUID` or `crypto.getRandomValues`); `Math.random()` is not used for those keys.
    - Document assist may use optional OCR for image-only scans (`docs/portal/OCR-D5.md`); human confirmation remains mandatory; AST does not appraise.
    - Institution auth at the edge: shared secret (pilot), and/or proxy-terminated **mTLS** map, and/or **OIDC** bearer pilot hooks (`docs/portal/MTLS-OIDC-D6.md`). Full national IdP/JWKS remains residual.
    - Optional infra (Postgres index mirror, Redis session assist, Kafka/event out, JSON logs, K8s skeleton) must not become source of truth — journal remains SoT (`docs/infra/BLOCK-I.md`). Runtime stack remains NestJS (I6 S1).
