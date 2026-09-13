@@ -20,7 +20,13 @@ import {
 
 function randomIdem(): string {
   if (typeof crypto !== 'undefined' && crypto.randomUUID) return crypto.randomUUID();
-  return `idem-${Date.now()}-${Math.random().toString(36).slice(2, 10)}`;
+  if (typeof crypto !== 'undefined' && crypto.getRandomValues) {
+    const bytes = new Uint8Array(16);
+    crypto.getRandomValues(bytes);
+    const rand = Array.from(bytes, (b) => b.toString(16).padStart(2, '0')).join('');
+    return `idem-${Date.now()}-${rand}`;
+  }
+  return `idem-${Date.now()}-fallback`;
 }
 
 async function sha256File(file: File): Promise<string> {
