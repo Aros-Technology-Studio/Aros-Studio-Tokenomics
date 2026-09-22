@@ -13,8 +13,13 @@ export default function HomePage() {
       {/* HERO */}
       <section className="home-hero">
         <div className="pad">
-          <Reveal as="div" className="page__eyebrow">
-            Sovereign process token-economy
+          <Reveal as="div" className="home-hero__mark">
+            <img
+              src="/brand/aros-infinity-white.png"
+              alt="Aros Studio"
+              width={208}
+              height={130}
+            />
           </Reveal>
           <Reveal as="div" delay={1}>
             <h1 className="home-hero__title">

@@ -141,15 +141,17 @@ a {
   letter-spacing: 0.01em;
 }
 .site-nav__links a {
-  color: var(--ink);
-  opacity: 0.9;
-  transition: opacity 0.2s, color 0.2s;
+  color: var(--ink-2);
+  opacity: 0.72;
+  font-weight: 500;
+  transition: opacity 0.2s, color 0.2s, font-weight 0.2s;
   white-space: nowrap;
 }
 .site-nav__links a:hover,
 .site-nav__links a[data-active='true'] {
   opacity: 1;
   color: #fff;
+  font-weight: 700;
 }
 .site-nav__cta {
   padding: 8px 18px;
@@ -193,10 +195,11 @@ a {
     justify-content: center;
     gap: 4px;
     padding: 90px 28px 28px;
-    background: rgba(6, 7, 17, 0.94);
-    backdrop-filter: blur(20px) saturate(160%);
-    border-left: 1px solid rgba(255, 255, 255, 0.08);
-    box-shadow: -20px 0 60px rgba(0, 0, 0, 0.45);
+    /* glass, not a flat black panel — the nebula shows through, blurred */
+    background: rgba(10, 12, 24, 0.42);
+    backdrop-filter: blur(26px) saturate(160%);
+    border-left: 1px solid rgba(255, 255, 255, 0.1);
+    box-shadow: -20px 0 60px rgba(0, 0, 0, 0.35);
     transform: translateX(100%);
     transition: transform 0.35s var(--ease, ease);
   }
@@ -204,6 +207,15 @@ a {
     padding: 12px 4px;
     width: 100%;
     font-size: 16px;
+    /* drawer is glass now (nebula visible through the blur) — keep items bright
+       and legible with a soft shadow, reserve the dim/bold split for the desktop bar */
+    color: var(--ink);
+    opacity: 0.95;
+    text-shadow: 0 2px 12px rgba(0, 0, 0, 0.6);
+  }
+  .site-nav__links a:hover,
+  .site-nav__links a[data-active='true'] {
+    opacity: 1;
   }
   .site-nav[data-open='true'] .site-nav__links {
     transform: none;
@@ -285,6 +297,15 @@ a {
   flex-direction: column;
   justify-content: center;
   padding: 120px 0 90px;
+}
+.home-hero__mark {
+  margin-bottom: 28px;
+}
+.home-hero__mark img {
+  width: clamp(140px, 16vw, 208px);
+  height: auto;
+  display: block;
+  filter: drop-shadow(0 8px 30px rgba(150, 180, 255, 0.25));
 }
 .home-hero__title {
   font-size: clamp(46px, 8.5vw, 112px);
