@@ -349,4 +349,19 @@ Any deviation is a canon violation.
 
 ---
 
+## XIV. Amendment log
+
+Presentation-only portal changes are recorded here for traceability; entries
+below do not alter any invariant, formula, or hard prohibition above.
+
+- **2026-09-22** — `portal/frontend` visual redesign: shared dark theme,
+  one transparent top navigation across all public pages, and the AST
+  Portal cabinet's own navigation (NodeChain · Cabinet · Wallet ·
+  Tokenization · Assets · Setting · Log out). AST-only branding
+  throughout (no non-AST product name on the portal, per §X). No change
+  to admission, PoT, attestation, idempotency, OCR, or auth behavior
+  described in §5.2.
+
+---
+
 **End of canon.**
