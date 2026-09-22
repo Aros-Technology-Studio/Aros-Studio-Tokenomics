@@ -65,6 +65,13 @@ export function AppHeader() {
           );
         })}
       </nav>
+
+      {/* tap-outside-to-close scrim behind the right-side mobile drawer */}
+      <div
+        className="site-nav__scrim"
+        aria-hidden="true"
+        onClick={() => setOpen(false)}
+      />
     </header>
   );
 }
