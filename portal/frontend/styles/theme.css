@@ -117,7 +117,8 @@ a {
   border-bottom: 1px solid transparent;
 }
 .site-nav.solid {
-  background: rgba(6, 7, 17, 0.5);
+  /* no dark tint of its own — the page/veil does the darkening, nav is clear glass on top */
+  background: transparent;
   backdrop-filter: blur(18px) saturate(160%);
   border-bottom: 1px solid rgba(255, 255, 255, 0.06);
 }
@@ -195,11 +196,12 @@ a {
     justify-content: center;
     gap: 4px;
     padding: 90px 28px 28px;
-    /* glass, not a flat black panel — the nebula shows through, blurred */
-    background: rgba(10, 12, 24, 0.42);
+    /* no dark tint of its own — only blur. The page/veil behind it does the
+       darkening; the nav just sits on top as clear glass. */
+    background: transparent;
     backdrop-filter: blur(26px) saturate(160%);
     border-left: 1px solid rgba(255, 255, 255, 0.1);
-    box-shadow: -20px 0 60px rgba(0, 0, 0, 0.35);
+    box-shadow: -20px 0 60px rgba(0, 0, 0, 0.25);
     transform: translateX(100%);
     transition: transform 0.35s var(--ease, ease);
   }
