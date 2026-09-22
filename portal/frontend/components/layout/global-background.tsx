@@ -50,7 +50,7 @@ export function GlobalBackground() {
       ' vec3 c2=pal(length(q)+0.15*u_time*0.04+u_scroll, vec3(0.30,0.55,0.75));',
       ' vec3 col=mix(c1,c2,smoothstep(0.2,0.9,r.x));',
       ' col=mix(col, vec3(0.55,0.75,1.0), 0.18*pow(f,2.0));',
-      ' col*=0.18+0.30*f;',
+      ' col*=0.40+0.68*f;',
       ' col=pow(col, vec3(1.25));',
       ' float vig=smoothstep(1.35,0.25,length(uv-0.5));',
       ' col*=0.35+0.65*vig;',
