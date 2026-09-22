@@ -19,6 +19,43 @@
 
   --t-font: 'Sora', var(--font-sora), -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
   --t-mono: 'IBM Plex Mono', var(--font-mono-ibm), ui-monospace, Menlo, monospace;
+
+  /* ---- retarget the legacy light-theme variable names ----
+     globals.css's whole functional UI (cards, forms, buttons, badges,
+     tables, banners) is built on these custom properties. Overriding
+     them here re-skins every dashboard/login page dark without touching
+     any of that component code. */
+  --bg: #05060f;
+  --bg2: #12141f;
+  --bg3: #171a2a;
+  --fg: var(--ink);
+  --muted: var(--ink-2);
+
+  --accent2: var(--accent-2);
+  --accent-hot: #a9c7ff;
+  --accent-soft: rgba(143, 182, 255, 0.14);
+  --accent-glow: rgba(143, 182, 255, 0.32);
+  --cyan: #8affc8;
+  --blue: #8fb6ff;
+
+  --card: var(--glass);
+  --card-solid: #12141f;
+  --card-hover: #171a2a;
+
+  --border: var(--glass-line);
+  --border-soft: rgba(255, 255, 255, 0.07);
+  --border-strong: rgba(255, 255, 255, 0.24);
+
+  --ok: #6ee7b7;
+  --warn: #fbbf24;
+  --danger: #fb7185;
+
+  --shadow: 0 12px 40px rgba(0, 0, 0, 0.45);
+  --shadow-soft: 0 10px 28px rgba(0, 0, 0, 0.35), 0 2px 8px rgba(0, 0, 0, 0.25);
+  --shadow-accent: 0 12px 32px rgba(143, 182, 255, 0.22);
+
+  --font: var(--t-font);
+  --mono: var(--t-mono);
 }
 
 /* ---- base ---- */
@@ -874,4 +911,113 @@ section.close {
   outline: 2px solid var(--accent);
   outline-offset: 3px;
   border-radius: 10px;
+}
+
+/* ================= dashboard/login functional UI ================= */
+/* The variable overrides above re-skin most of the .card/.badge/.table/
+   .banner/.callout vocabulary automatically. A few rules in globals.css
+   hardcode #ffffff instead of using a variable — patched here. */
+.auth-shell {
+  position: relative;
+  z-index: 2;
+  padding: 128px 26px 96px;
+  max-width: 1180px;
+  margin: 0 auto;
+}
+
+/* ---- cabinet (authenticated) layout: left sidebar + content ---- */
+.cabinet-layout {
+  position: relative;
+  z-index: 2;
+  display: flex;
+  align-items: flex-start;
+  padding-top: 88px; /* clear the fixed top nav */
+}
+.cabinet-sidebar {
+  position: sticky;
+  top: 88px;
+  flex: 0 0 220px;
+  width: 220px;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  padding: 32px 18px;
+  min-height: calc(100vh - 88px);
+  border-right: 1px solid rgba(255, 255, 255, 0.08);
+}
+.cabinet-sidebar a {
+  padding: 10px 12px;
+  border-radius: 10px;
+  color: var(--ink-2);
+  font-size: 14px;
+  font-weight: 500;
+  opacity: 0.85;
+  transition: background 0.2s, color 0.2s, opacity 0.2s;
+}
+.cabinet-sidebar a:hover {
+  background: rgba(255, 255, 255, 0.06);
+  color: #fff;
+  opacity: 1;
+}
+.cabinet-sidebar a[data-active='true'] {
+  background: rgba(143, 182, 255, 0.14);
+  color: #fff;
+  opacity: 1;
+  font-weight: 600;
+}
+.cabinet-sidebar__logout {
+  margin-top: auto;
+  text-align: left;
+  padding: 10px 12px;
+  border-radius: 10px;
+  border: none;
+  background: none;
+  color: var(--ink-3);
+  font: inherit;
+  font-size: 14px;
+  cursor: pointer;
+  transition: background 0.2s, color 0.2s;
+}
+.cabinet-sidebar__logout:hover {
+  background: rgba(251, 113, 133, 0.1);
+  color: #fb7185;
+}
+.dashboard-shell {
+  flex: 1;
+  min-width: 0;
+  padding: 32px 32px 96px;
+}
+@media (max-width: 900px) {
+  .cabinet-layout {
+    flex-direction: column;
+  }
+  .cabinet-sidebar {
+    position: static;
+    flex-direction: row;
+    flex-wrap: wrap;
+    width: 100%;
+    min-height: 0;
+    border-right: none;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+    padding: 16px;
+  }
+  .dashboard-shell {
+    padding: 24px 18px 72px;
+  }
+}
+input:focus,
+select:focus,
+textarea:focus {
+  background: var(--bg2);
+}
+/* cards/panels sit as real glass over the nebula */
+.card {
+  backdrop-filter: blur(20px) saturate(150%);
+}
+/* .btn/button.primary hardcode a saturated blue gradient instead of using
+   variables — align it with the site's own btn-primary look */
+.btn,
+button.primary {
+  background: linear-gradient(120deg, #c8dcff, #e8dcff);
+  color: #0a0c1a;
 }
