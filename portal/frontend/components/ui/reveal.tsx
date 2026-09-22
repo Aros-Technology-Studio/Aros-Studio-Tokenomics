@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect, useRef, type ReactNode } from 'react';
+import { useEffect, useRef, type CSSProperties, type ReactNode } from 'react';
 
 /**
  * Scroll-reveal wrapper — ported from the design artifact.
@@ -12,11 +12,13 @@ export function Reveal({
   delay,
   className = '',
   as: Tag = 'div',
+  style,
 }: {
   children: ReactNode;
   delay?: 1 | 2 | 3 | 4;
   className?: string;
   as?: 'div' | 'section';
+  style?: CSSProperties;
 }) {
   const ref = useRef<HTMLDivElement | HTMLElement | null>(null);
 
@@ -40,7 +42,7 @@ export function Reveal({
 
   const delayClass = delay ? ` d${delay}` : '';
   return (
-    <Tag ref={ref as never} className={`reveal${delayClass}${className ? ' ' + className : ''}`}>
+    <Tag ref={ref as never} className={`reveal${delayClass}${className ? ' ' + className : ''}`} style={style}>
       {children}
     </Tag>
   );

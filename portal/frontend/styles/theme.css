@@ -345,6 +345,17 @@ a {
   gap: 18px;
   max-width: 860px;
 }
+/* wider 3-up variant (Resources) — placed before the mobile query below so
+   that query still wins and collapses to 1 column on small screens */
+.tl-grid--3col {
+  grid-template-columns: 1fr 1fr 1fr;
+  max-width: none;
+}
+@media (max-width: 900px) {
+  .tl-grid--3col {
+    grid-template-columns: 1fr 1fr;
+  }
+}
 .tl-card {
   display: block;
   padding: 30px;
