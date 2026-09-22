@@ -42,7 +42,7 @@ export function AppHeader() {
       data-open={open ? 'true' : 'false'}
     >
       <Link href="/" className="site-nav__brand" aria-label="Aros Studio Tokenomics — home">
-        <img src="/brand/ast-logo-light.png" alt="Aros Studio Tokenomics" width={140} height={40} />
+        <img src="/brand/ast-mark-white.png" alt="Aros Studio Tokenomics" width={128} height={68} />
       </Link>
 
       <button

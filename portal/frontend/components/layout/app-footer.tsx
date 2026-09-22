@@ -12,10 +12,10 @@ export function AppFooter() {
       <span className="footer-brand" style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
         <img
           className="footer-logo"
-          src="/brand/ast-logo-light.png"
+          src="/brand/ast-mark-white.png"
           alt="Aros Studio Tokenomics"
-          width={120}
-          height={34}
+          width={102}
+          height={54}
         />
         <span>&copy; {year} Aros Studio Tokenomics</span>
       </span>
