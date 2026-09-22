@@ -10,6 +10,7 @@ export default function ResourcesPage() {
       title="Resources"
       lead="Placeholder — real copy to come."
       links={[
+        { label: 'AFC Docs', href: '/resources/afc-docs' },
         { label: 'AST Docs', href: '/resources/ast-docs' },
         { label: 'Blog', href: '/resources/blog' },
         { label: 'Whitepaper', href: '/whitepaper' },

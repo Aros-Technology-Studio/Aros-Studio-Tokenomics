@@ -4,9 +4,7 @@ import type { Metadata } from 'next';
 export const metadata: Metadata = { title: 'TECHNOlogic' };
 
 /**
- * TECHNOlogic — brand hub for AST (Aros Studio Tokenomics).
- * AST-only branding per canon (docs/AST-CORE-CANON.md §X hard prohibitions,
- * "the reserve is AST's own" — no third-party/affiliate brand on the portal).
+ * TECHNOlogic — brand hub. Splits into AST and AFC, each with About + Resources.
  */
 export default function TechnologicPage() {
   return (
@@ -17,7 +15,7 @@ export default function TechnologicPage() {
           TECHNO<span style={{ fontStyle: 'italic', fontWeight: 400 }}>logic</span>
         </h1>
         <p className="home-hero__lead">
-          The lifecycle logic behind institutional assets.
+          The lifecycle logic behind institutional assets — two engines under one method.
         </p>
 
         <div className="tl-grid">
@@ -25,6 +23,12 @@ export default function TechnologicPage() {
             <span className="tl-card__id">AST</span>
             <h3>Aros Studio Tokenomics</h3>
             <p>Process token-economy: valuation recorded after confirmed work. NodeChain is the source of truth.</p>
+            <span className="tl-card__go">About · Resources →</span>
+          </Link>
+          <Link href="/technologic/afc" className="tl-card glass">
+            <span className="tl-card__id">AFC</span>
+            <h3>Aros Financial Core</h3>
+            <p>The financial core layer. Settlement and institutional rails around the confirmed process.</p>
             <span className="tl-card__go">About · Resources →</span>
           </Link>
         </div>
