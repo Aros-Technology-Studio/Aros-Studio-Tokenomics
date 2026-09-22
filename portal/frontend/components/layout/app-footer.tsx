@@ -1,38 +1,31 @@
 'use client';
 
 import Link from 'next/link';
-import { usePathname } from 'next/navigation';
-import { useI18n } from '../../lib/i18n/context';
 
+/**
+ * Shared dark footer — visible on every page, sits above the global backdrop.
+ */
 export function AppFooter() {
-  const { t } = useI18n();
-  const pathname = usePathname();
-  const isHome = pathname === '/';
-
-  if (isHome) {
-    return null;
-  }
-
+  const year = new Date().getFullYear();
   return (
     <footer className="footer">
-      <span className="footer-brand">
+      <span className="footer-brand" style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
         <img
           className="footer-logo"
-          src="/brand/ast-logo-dark.png"
+          src="/brand/ast-logo-light.png"
           alt="Aros Studio Tokenomics"
-          width={140}
-          height={40}
+          width={120}
+          height={34}
         />
-        <span>{t('footer.tagline')}</span>
+        <span>&copy; {year} Aros Studio Tokenomics</span>
       </span>
-      <span>
-        <Link href="/explore">{t('nav.explore')}</Link>
-        {' · '}
-        <Link href="/nodechain">{t('nav.nodechain')}</Link>
-        {' · '}
-        <Link href="/system">{t('nav.system')}</Link>
-        {' · '}
-        {t('footer.sot')}
+      <span style={{ display: 'flex', gap: '14px', flexWrap: 'wrap' }}>
+        <Link href="/technologic">TECHNOlogic</Link>
+        <Link href="/institutions">Institutions</Link>
+        <Link href="/investment">Investment</Link>
+        <Link href="/resources">Resources</Link>
+        <Link href="/about">About</Link>
+        <Link href="/contact">Contact</Link>
       </span>
     </footer>
   );

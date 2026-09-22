@@ -2,82 +2,69 @@
 
 import Link from 'next/link';
 import { useEffect, useState } from 'react';
-import { usePathname, useRouter } from 'next/navigation';
-import {
-  clearSession,
-  loadSession,
-  portalFetch,
-  type PortalSession,
-} from '../../lib/auth';
-import { useI18n } from '../../lib/i18n/context';
-import { LanguageSwitcher } from './language-switcher';
+import { usePathname } from 'next/navigation';
+
+/**
+ * Single shared navigation — transparent, fixed to the top of every page.
+ * Matches the AST site map: TECHNOlogic · Institutions · Investment · Resources · About · Contact.
+ * Turns solid-glass on scroll for legibility over the iridescent backdrop.
+ */
+
+const NAV_ITEMS: { label: string; href: string }[] = [
+  { label: 'TECHNOlogic', href: '/technologic' },
+  { label: 'Institutions', href: '/institutions' },
+  { label: 'Investment', href: '/investment' },
+  { label: 'Resources', href: '/resources' },
+  { label: 'About', href: '/about' },
+  { label: 'Contact', href: '/contact' },
+];
 
 export function AppHeader() {
-  const [session, setSession] = useState<PortalSession | null>(null);
-  const router = useRouter();
   const pathname = usePathname();
-  const { t } = useI18n();
-  const isHome = pathname === '/';
+  const [solid, setSolid] = useState(false);
+  const [open, setOpen] = useState(false);
 
   useEffect(() => {
-    if (isHome) return;
-    setSession(loadSession());
-  }, [pathname, isHome]);
+    const onScroll = () => setSolid(window.scrollY > 40);
+    onScroll();
+    window.addEventListener('scroll', onScroll, { passive: true });
+    return () => window.removeEventListener('scroll', onScroll);
+  }, []);
 
-  function logout() {
-    const s = loadSession();
-    if (s) {
-      void portalFetch('/v1/auth/logout', {
-        method: 'POST',
-        sessionId: s.sessionId,
-      });
-    }
-    clearSession();
-    setSession(null);
-    router.push('/login');
-  }
-
-  // Home owns its own nav (Canva layout) — global header off
-  if (isHome) {
-    return null;
-  }
+  // close the mobile menu on route change
+  useEffect(() => {
+    setOpen(false);
+  }, [pathname]);
 
   return (
-    <header className="topbar">
-      <Link href="/" className="brand-link" aria-label="Aros Studio Tokenomics">
-        <div className="brand">
-          <img
-            className="brand-logo"
-            src="/brand/ast-logo-dark.png"
-            alt="Aros Studio Tokenomics"
-            width={280}
-            height={80}
-          />
-        </div>
+    <header
+      className={`site-nav${solid ? ' solid' : ''}`}
+      data-open={open ? 'true' : 'false'}
+    >
+      <Link href="/" className="site-nav__brand" aria-label="Aros Studio Tokenomics — home">
+        <img src="/brand/ast-logo-light.png" alt="Aros Studio Tokenomics" width={140} height={40} />
       </Link>
-      <div className="topbar-right">
-        <LanguageSwitcher />
-        <nav className="nav" aria-label="Main">
-          <Link href="/nodechain">{t('nav.nodechain')}</Link>
-          <Link href="/system">{t('nav.system')}</Link>
-          <Link href="/about">{t('nav.about')}</Link>
-          {session ? (
-            <>
-              <Link href="/dashboard">{t('nav.cabinet')}</Link>
-              <Link href="/tokenization">{t('nav.tokenization')}</Link>
-              <Link href="/assets">{t('nav.assets')}</Link>
-              <span className="pill">{session.institutionId}</span>
-              <button type="button" className="linkish" onClick={logout}>
-                {t('nav.logout')}
-              </button>
-            </>
-          ) : (
-            <Link href="/login" className="nav-login">
-              {t('nav.login')}
+
+      <button
+        type="button"
+        className="site-nav__burger"
+        aria-label="Toggle menu"
+        aria-expanded={open}
+        onClick={() => setOpen((v) => !v)}
+      >
+        {open ? '✕' : '☰'}
+      </button>
+
+      <nav className="site-nav__links" aria-label="Main">
+        {NAV_ITEMS.map((item) => {
+          const active = pathname === item.href || pathname.startsWith(item.href + '/');
+          return (
+            <Link key={item.href} href={item.href} data-active={active ? 'true' : 'false'}>
+              {item.label}
             </Link>
-          )}
-        </nav>
-      </div>
+          );
+        })}
+      </nav>
     </header>
   );
 }

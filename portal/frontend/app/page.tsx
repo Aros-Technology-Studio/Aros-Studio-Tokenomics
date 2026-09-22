@@ -1,56 +1,36 @@
-'use client';
-
 import Link from 'next/link';
 
 /**
- * Home = Canva mock 1:1 (EN copy from design).
- * No language switcher, no doors, no residual portal chrome.
+ * Home (Welcome). Full-bleed dark hero on the shared iridescent backdrop.
+ * Navigation + footer come from the shared shell, not from this page.
  */
 export default function HomePage() {
   return (
-    <div className="canva-home">
-      <header className="canva-nav">
-        <Link href="/nodechain">NodeChain</Link>
-        <Link href="/system">Solutions</Link>
-        <Link href="/about">About us</Link>
-        <Link href="/login" className="canva-nav-login">
-          Login
-        </Link>
-      </header>
-
-      <div className="canva-body">
-        <img
-          className="canva-logo"
-          src="/brand/ast-logo-dark.png"
-          alt="a. Aros Studio Tokenomics"
-          width={520}
-          height={280}
-        />
-
-        <h1 className="canva-h1">
-          Institutional valuation,
+    <section className="home-hero">
+      <div className="pad">
+        <p className="page__eyebrow">Aros Studio · TECHNOlogic</p>
+        <h1 className="home-hero__title">
+          Lifecycle logic
           <br />
-          recorded after confirmed work
+          for institutional assets.
         </h1>
-
-        <p className="canva-lead">
-          AST records valuations already confirmed by institutions. Digital units appear only after
-          Proof of Transaction. <strong>NodeChain</strong> is the source of truth. This site is
-          public lookup and the institution edge - it never mints.
+        <p className="home-hero__lead">
+          AST records valuations already confirmed by institutions. Digital units appear only after{' '}
+          <strong>Proof of Transaction</strong>. <strong>NodeChain</strong> is the source of truth —
+          this site is public lookup and the institution edge. It never mints.
         </p>
-
-        <div className="canva-ctas">
-          <Link href="/system" className="canva-cta">
-            What AST can do?
+        <div className="home-hero__cta">
+          <Link href="/technologic" className="btn-primary">
+            Explore TECHNOlogic
           </Link>
-          <Link href="/nodechain" className="canva-cta">
-            NodeChain journal
+          <Link href="/nodechain" className="btn-ghost">
+            NodeChain journal <span aria-hidden="true">→</span>
           </Link>
-          <Link href="/login" className="canva-cta">
-            Institution sign-in
+          <Link href="/login" className="btn-ghost">
+            Institution sign-in <span aria-hidden="true">→</span>
           </Link>
         </div>
       </div>
-    </div>
+    </section>
   );
 }
