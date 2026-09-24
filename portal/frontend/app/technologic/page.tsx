@@ -20,7 +20,13 @@ export default function TechnologicPage() {
 
         <div className="tl-grid">
           <Link href="/technologic/ast" className="tl-card glass">
-            <span className="tl-card__id">AST</span>
+            <img
+              src="/brand/ast-mark-white.png"
+              alt="AST"
+              className="tl-card__mark"
+              width={28}
+              height={15}
+            />
             <h3>Aros Studio Tokenomics</h3>
             <p>Process token-economy: valuation recorded after confirmed work. NodeChain is the source of truth.</p>
             <span className="tl-card__go">About · Resources →</span>

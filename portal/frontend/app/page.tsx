@@ -28,12 +28,7 @@ export default function HomePage() {
               to any asset, any jurisdiction.
             </h1>
           </Reveal>
-          <Reveal as="div" delay={2}>
-            <p className="home-hero__lead">
-              From any asset, in any jurisdiction, to any asset, in any jurisdiction.
-            </p>
-          </Reveal>
-          <Reveal as="div" delay={3} className="home-hero__cta">
+          <Reveal as="div" delay={2} className="home-hero__cta">
             <Link href="/nodechain" className="btn-primary">
               Explore the journal
             </Link>
