@@ -54,18 +54,12 @@ export default function HomePage() {
         <div className="pad">
           <Reveal as="div">
             <h2>
-              Recorded once.
+              From any asset, in any jurisdiction —
               <br />
-              Trusted forever.
+              to any asset, in any jurisdiction.
             </h2>
           </Reveal>
           <Reveal as="div" delay={1}>
-            <p>
-              AST holds only its own value. It never appraises, never custodies, never rewrites.
-              It remembers.
-            </p>
-          </Reveal>
-          <Reveal as="div" delay={2}>
             <Link href="/login" className="btn-primary">
               Enter the portal
             </Link>
