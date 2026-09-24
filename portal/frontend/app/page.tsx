@@ -54,12 +54,15 @@ export default function HomePage() {
         <div className="pad">
           <Reveal as="div">
             <h2>
-              From any asset, in any jurisdiction —
+              Any asset, any jurisdiction —
               <br />
-              to any asset, in any jurisdiction.
+              to any asset, any jurisdiction.
             </h2>
           </Reveal>
           <Reveal as="div" delay={1}>
+            <p>From any asset, in any jurisdiction, to any asset, in any jurisdiction.</p>
+          </Reveal>
+          <Reveal as="div" delay={2}>
             <Link href="/login" className="btn-primary">
               Enter the portal
             </Link>
