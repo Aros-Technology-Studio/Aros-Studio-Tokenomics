@@ -23,15 +23,14 @@ export default function HomePage() {
           </Reveal>
           <Reveal as="div" delay={1}>
             <h1 className="home-hero__title">
-              Lifecycle logic
+              Any asset, any jurisdiction —
               <br />
-              for institutional assets.
+              to any asset, any jurisdiction.
             </h1>
           </Reveal>
           <Reveal as="div" delay={2}>
             <p className="home-hero__lead">
-              AST records <strong>already-confirmed institutional value</strong> as a living
-              token — and <strong>NodeChain</strong> remembers every move of it.
+              From any asset, in any jurisdiction, to any asset, in any jurisdiction.
             </p>
           </Reveal>
           <Reveal as="div" delay={3} className="home-hero__cta">
@@ -54,13 +53,16 @@ export default function HomePage() {
         <div className="pad">
           <Reveal as="div">
             <h2>
-              Any asset, any jurisdiction —
+              Lifecycle logic
               <br />
-              to any asset, any jurisdiction.
+              for institutional assets.
             </h2>
           </Reveal>
           <Reveal as="div" delay={1}>
-            <p>From any asset, in any jurisdiction, to any asset, in any jurisdiction.</p>
+            <p>
+              AST records <strong>already-confirmed institutional value</strong> as a living
+              token — and <strong>NodeChain</strong> remembers every move of it.
+            </p>
           </Reveal>
           <Reveal as="div" delay={2}>
             <Link href="/login" className="btn-primary">
