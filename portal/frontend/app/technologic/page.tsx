@@ -32,7 +32,13 @@ export default function TechnologicPage() {
             <span className="tl-card__go">About · Resources →</span>
           </Link>
           <Link href="/technologic/afc" className="tl-card glass">
-            <span className="tl-card__id">AFC</span>
+            <img
+              src="/brand/afc-mark-white.png"
+              alt="AFC"
+              className="tl-card__mark"
+              width={28}
+              height={16}
+            />
             <h3>Aros Financial Core</h3>
             <p>The financial core layer. Settlement and institutional rails around the confirmed process.</p>
             <span className="tl-card__go">About · Resources →</span>
