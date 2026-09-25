@@ -417,6 +417,7 @@ a {
 .nc-page {
   /* clear the fixed 72px top nav with room to spare */
   padding-top: 128px;
+  max-width: 1040px;
 }
 .nc-mega-mark {
   position: relative;
@@ -427,7 +428,7 @@ a {
   pointer-events: none;
 }
 .nc-mega-mark img {
-  width: min(640px, 100%);
+  width: min(760px, 100%);
   height: auto;
 }
 .nc-hero {
