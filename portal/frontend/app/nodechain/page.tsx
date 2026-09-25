@@ -205,7 +205,7 @@ function NodechainPageInner() {
   const chainOk = status?.chain?.ok === true;
 
   return (
-    <>
+    <div className="pad nc-page">
       <div className="nc-mega-mark" aria-hidden="true">
         <img src="/brand/nodechain-wordmark-white.png" alt="" />
       </div>
@@ -569,7 +569,7 @@ function NodechainPageInner() {
           <li>{t('nc.rules.3')}</li>
         </ul>
       </section>
-    </>
+    </div>
   );
 }
 
