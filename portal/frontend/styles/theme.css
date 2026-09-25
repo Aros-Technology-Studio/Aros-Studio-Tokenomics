@@ -413,28 +413,37 @@ a {
   opacity: 0.9;
 }
 /* Giant NodeChain wordmark, full content width, overlapping down onto the
-   journal card below it — the card scrolls up from underneath it. */
-.nc-page {
-  /* clear the fixed 72px top nav with room to spare */
-  padding-top: 128px;
-  max-width: 1040px;
-}
+   journal card below it — the card scrolls up from underneath it. Nav
+   clearance + width containment now come from the shared cabinet layout
+   (.cabinet-layout / .dashboard-shell), since this page lives inside the
+   authenticated cabinet alongside the sidebar. */
 .nc-mega-mark {
   position: relative;
   z-index: 2;
   display: flex;
   justify-content: center;
-  margin-bottom: -60px;
+  margin-bottom: -110px;
   pointer-events: none;
 }
 .nc-mega-mark img {
-  width: min(760px, 100%);
+  width: min(920px, 100%);
   height: auto;
 }
 .nc-hero {
   position: relative;
   z-index: 1;
-  padding-top: 80px;
+  padding-top: 60px;
+}
+@media (max-width: 720px) {
+  .nc-mega-mark {
+    margin-bottom: -40px;
+  }
+  .nc-mega-mark img {
+    width: min(420px, 100%);
+  }
+  .nc-hero {
+    padding-top: 34px;
+  }
 }
 .sr-only {
   position: absolute;
@@ -1024,11 +1033,13 @@ section.close {
 .dashboard-shell {
   flex: 1;
   min-width: 0;
+  max-width: 1040px;
   padding: 32px 32px 96px;
 }
 @media (max-width: 900px) {
   .cabinet-layout {
     flex-direction: column;
+    padding-top: 72px;
   }
   .cabinet-sidebar {
     position: static;
@@ -1038,10 +1049,17 @@ section.close {
     min-height: 0;
     border-right: none;
     border-bottom: 1px solid rgba(255, 255, 255, 0.08);
-    padding: 16px;
+    padding: 12px 16px;
+    gap: 2px;
+  }
+  .cabinet-sidebar a,
+  .cabinet-sidebar__logout {
+    padding: 8px 10px;
+    font-size: 13px;
   }
   .dashboard-shell {
-    padding: 24px 18px 72px;
+    max-width: 100%;
+    padding: 20px 16px 56px;
   }
 }
 input:focus,
