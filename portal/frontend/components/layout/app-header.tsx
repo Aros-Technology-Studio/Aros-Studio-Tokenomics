@@ -58,10 +58,6 @@ export function AppHeader() {
       data-open={open ? 'true' : 'false'}
       data-cabinet={inCabinet ? 'true' : 'false'}
     >
-      <Link href="/" className="site-nav__brand" aria-label="Aros Studio Tokenomics — home">
-        <img src="/brand/aros-infinity-white.png" alt="Aros Studio" width={128} height={80} />
-      </Link>
-
       <button
         type="button"
         className="site-nav__burger"
@@ -82,6 +78,18 @@ export function AppHeader() {
           );
         })}
       </nav>
+
+      {/* reserved, empty on purpose — room for a future action (e.g. Sign up)
+          between the nav links and the brand mark */}
+      <span className="site-nav__slot" aria-hidden="true" />
+
+      <Link href="/" className="site-nav__brand" aria-label="Aros Studio Tokenomics — home">
+        <img src="/brand/aros-infinity-white.png" alt="Aros Studio" width={128} height={80} />
+      </Link>
+
+      {/* mirrors the reserved slot before the mark, so it sits centered
+          between two equal gaps */}
+      <span className="site-nav__slot" aria-hidden="true" />
 
       {/* tap-outside-to-close scrim behind the right-side mobile drawer */}
       <div

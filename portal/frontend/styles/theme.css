@@ -142,7 +142,8 @@ a {
   height: 72px;
   display: flex;
   align-items: center;
-  justify-content: space-between;
+  justify-content: flex-end;
+  gap: 24px;
   padding: 0 32px;
   background: transparent;
   transition: background 0.4s, backdrop-filter 0.4s, border-color 0.4s;
@@ -204,6 +205,15 @@ a {
   width: auto;
   opacity: 0.9;
 }
+/* reserved, empty placeholder flanking the brand mark on the right —
+   room for a future action (e.g. Sign up), sized like one nav item */
+.site-nav__slot {
+  display: inline-block;
+  flex: 0 0 auto;
+  width: 96px;
+  height: 1px;
+  pointer-events: none;
+}
 .site-nav__burger {
   display: none;
   background: none;
@@ -256,8 +266,14 @@ a {
   }
   .site-nav__burger {
     display: inline-flex;
-    position: relative;
+    position: absolute;
+    left: 32px;
+    top: 50%;
+    transform: translateY(-50%);
     z-index: 41;
+  }
+  .site-nav__slot {
+    display: none;
   }
   /* dim + close-on-tap scrim behind the drawer */
   .site-nav__scrim {
