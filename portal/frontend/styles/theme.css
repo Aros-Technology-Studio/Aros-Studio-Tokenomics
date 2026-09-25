@@ -141,10 +141,10 @@ a {
   z-index: 40;
   height: 72px;
   display: flex;
-  align-items: center;
+  align-items: flex-end;
   justify-content: flex-end;
   gap: 24px;
-  padding: 0 32px;
+  padding: 0 32px 14px;
   background: transparent;
   transition: background 0.4s, backdrop-filter 0.4s, border-color 0.4s;
   border-bottom: 1px solid transparent;
