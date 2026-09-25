@@ -294,9 +294,10 @@ a {
   }
   /* Inside the cabinet the sidebar is the real navigation — the marketing
      burger/drawer from this header would just be a confusing second menu. */
-  .site-nav[data-cabinet='true'] .site-nav__burger,
-  .site-nav[data-cabinet='true'] .site-nav__links,
-  .site-nav[data-cabinet='true'] .site-nav__scrim {
+  /* Inside the cabinet the sidebar is the only navigation on mobile — the
+     shared marketing header (burger, links, logo, everything) is redundant
+     there and gets hidden entirely. */
+  .site-nav[data-cabinet='true'] {
     display: none;
   }
 }
@@ -448,29 +449,29 @@ a {
   z-index: 2;
   display: flex;
   justify-content: center;
-  /* bleed past the dashboard-shell's own max-width so the mark can be
-     bigger than the text column without widening the column itself */
-  margin: 0 -140px -150px;
+  /* matches the card's own width exactly (no bleed) — just pokes a little
+     above the card's top edge */
+  margin: -28px 0;
   pointer-events: none;
 }
 .nc-mega-mark img {
-  width: min(1250px, 100%);
+  width: 100%;
   height: auto;
 }
 .nc-hero {
   position: relative;
   z-index: 1;
-  padding-top: 160px;
+  padding-top: 40px;
 }
 @media (max-width: 900px) {
   .nc-mega-mark {
-    margin: 0 0 -40px;
+    margin: -14px 0;
   }
   .nc-mega-mark img {
-    width: min(420px, 100%);
+    width: 100%;
   }
   .nc-hero {
-    padding-top: 46px;
+    padding-top: 22px;
   }
 }
 .sr-only {
@@ -1017,7 +1018,9 @@ section.close {
   display: flex;
   flex-direction: column;
   gap: 4px;
-  padding: 32px 18px;
+  /* a bit more than the content column's own top padding, so the sidebar
+     starts slightly lower than the card instead of lining up flush with it */
+  padding: 64px 18px 32px;
   min-height: calc(100vh - 88px);
   border-right: 1px solid rgba(255, 255, 255, 0.08);
 }
@@ -1064,42 +1067,91 @@ section.close {
   max-width: 1040px;
   padding: 32px 32px 96px;
 }
+/* mobile-only trigger for the cabinet drawer — hidden on desktop, where
+   the sidebar is always visible as a column */
+.cabinet-sidebar__toggle {
+  display: none;
+}
+.cabinet-sidebar__scrim {
+  display: none;
+}
 @media (max-width: 900px) {
   .cabinet-layout {
     flex-direction: column;
-    padding-top: 72px;
+    padding-top: 24px;
+  }
+  .cabinet-sidebar__toggle {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    position: fixed;
+    top: 16px;
+    left: 16px;
+    z-index: 41;
+    width: 44px;
+    height: 44px;
+    border-radius: 50%;
+    border: 1px solid rgba(255, 255, 255, 0.14);
+    background: rgba(16, 18, 34, 0.6);
+    backdrop-filter: blur(14px) saturate(160%);
+    color: var(--ink);
+    font-size: 20px;
+    line-height: 1;
+    cursor: pointer;
+  }
+  .cabinet-sidebar__scrim {
+    position: fixed;
+    inset: 0;
+    z-index: 39;
+    background: rgba(0, 0, 0, 0.45);
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity 0.3s var(--ease, ease);
+  }
+  .cabinet-sidebar__scrim[data-open='true'] {
+    display: block;
+    opacity: 1;
+    pointer-events: auto;
   }
   .cabinet-sidebar {
-    position: static;
-    flex-direction: row;
-    flex-wrap: nowrap;
-    width: 100%;
+    position: fixed;
+    top: 0;
+    right: 0;
+    bottom: 0;
+    left: auto;
+    z-index: 40;
+    width: 68%;
+    max-width: 300px;
+    flex-direction: column;
+    align-items: flex-start;
+    justify-content: center;
     min-height: 0;
-    overflow-x: auto;
-    -webkit-overflow-scrolling: touch;
-    scrollbar-width: none;
-    background: rgba(255, 255, 255, 0.03);
-    border-right: none;
-    border-bottom: 1px solid rgba(255, 255, 255, 0.08);
-    padding: 10px 14px;
     gap: 4px;
+    padding: 90px 24px 28px;
+    background: transparent;
+    backdrop-filter: blur(26px) saturate(160%);
+    border-right: none;
+    border-left: 1px solid rgba(255, 255, 255, 0.1);
+    box-shadow: -20px 0 60px rgba(0, 0, 0, 0.3);
+    transform: translateX(100%);
+    transition: transform 0.35s var(--ease, ease);
   }
-  .cabinet-sidebar::-webkit-scrollbar {
-    display: none;
+  .cabinet-sidebar[data-open='true'] {
+    transform: none;
   }
   .cabinet-sidebar a,
   .cabinet-sidebar__logout {
-    flex: 0 0 auto;
-    white-space: nowrap;
-    padding: 8px 12px;
-    font-size: 13px;
+    width: 100%;
+    padding: 12px 4px;
+    font-size: 16px;
   }
   .cabinet-sidebar__logout {
-    margin-top: 0;
-    margin-left: 8px;
-    border-left: 1px solid rgba(255, 255, 255, 0.08);
-    border-radius: 0;
-    padding-left: 16px;
+    margin-top: auto;
+    margin-left: 0;
+    border-left: none;
+    border-top: 1px solid rgba(255, 255, 255, 0.08);
+    padding-top: 14px;
+    padding-left: 4px;
   }
   .dashboard-shell {
     max-width: 100%;
