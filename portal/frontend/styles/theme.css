@@ -448,21 +448,23 @@ a {
   z-index: 2;
   display: flex;
   justify-content: center;
-  margin-bottom: -110px;
+  /* bleed past the dashboard-shell's own max-width so the mark can be
+     bigger than the text column without widening the column itself */
+  margin: 0 -140px -150px;
   pointer-events: none;
 }
 .nc-mega-mark img {
-  width: min(920px, 100%);
+  width: min(1250px, 100%);
   height: auto;
 }
 .nc-hero {
   position: relative;
   z-index: 1;
-  padding-top: 60px;
+  padding-top: 84px;
 }
-@media (max-width: 720px) {
+@media (max-width: 900px) {
   .nc-mega-mark {
-    margin-bottom: -40px;
+    margin: 0 0 -40px;
   }
   .nc-mega-mark img {
     width: min(420px, 100%);
