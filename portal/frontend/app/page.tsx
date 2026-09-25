@@ -1,56 +1,71 @@
-'use client';
-
 import Link from 'next/link';
+import { Reveal } from '../components/ui/reveal';
 
 /**
- * Home = Canva mock 1:1 (EN copy from design).
- * No language switcher, no doors, no residual portal chrome.
+ * Home (Welcome). Hero + closing CTA, ported from the design artifact.
+ * Navigation + footer come from the shared shell, not from this page.
+ * (Chain / PoT-gate / principles narrative sections were cut per direction —
+ * this page will likely be revisited; keep it lean for now.)
  */
 export default function HomePage() {
   return (
-    <div className="canva-home">
-      <header className="canva-nav">
-        <Link href="/nodechain">NodeChain</Link>
-        <Link href="/system">Solutions</Link>
-        <Link href="/about">About us</Link>
-        <Link href="/login" className="canva-nav-login">
-          Login
-        </Link>
-      </header>
-
-      <div className="canva-body">
-        <img
-          className="canva-logo"
-          src="/brand/ast-logo-dark.png"
-          alt="a. Aros Studio Tokenomics"
-          width={520}
-          height={280}
-        />
-
-        <h1 className="canva-h1">
-          Institutional valuation,
-          <br />
-          recorded after confirmed work
-        </h1>
-
-        <p className="canva-lead">
-          AST records valuations already confirmed by institutions. Digital units appear only after
-          Proof of Transaction. <strong>NodeChain</strong> is the source of truth. This site is
-          public lookup and the institution edge - it never mints.
-        </p>
-
-        <div className="canva-ctas">
-          <Link href="/system" className="canva-cta">
-            What AST can do?
-          </Link>
-          <Link href="/nodechain" className="canva-cta">
-            NodeChain journal
-          </Link>
-          <Link href="/login" className="canva-cta">
-            Institution sign-in
-          </Link>
+    <>
+      {/* HERO */}
+      <section className="home-hero">
+        <div className="pad">
+          <Reveal as="div" className="home-hero__mark">
+            <img
+              src="/brand/aros-infinity-white.png"
+              alt="Aros Studio"
+              width={208}
+              height={130}
+            />
+          </Reveal>
+          <Reveal as="div" delay={1}>
+            <h1 className="home-hero__title">
+              Any asset, any jurisdiction —
+              <br />
+              to any asset, any jurisdiction.
+            </h1>
+          </Reveal>
+          <Reveal as="div" delay={2} className="home-hero__cta">
+            <Link href="/nodechain" className="btn-primary">
+              Explore the journal
+            </Link>
+            <Link href="/login" className="btn-ghost">
+              Institution sign-in <span aria-hidden="true">→</span>
+            </Link>
+          </Reveal>
         </div>
-      </div>
-    </div>
+        <div className="scroll-hint" aria-hidden="true">
+          <span>Scroll</span>
+          <span className="line" />
+        </div>
+      </section>
+
+      {/* CLOSING */}
+      <section className="close">
+        <div className="pad">
+          <Reveal as="div">
+            <h2>
+              Lifecycle logic
+              <br />
+              for institutional assets.
+            </h2>
+          </Reveal>
+          <Reveal as="div" delay={1}>
+            <p>
+              AST records <strong>already-confirmed institutional value</strong> as a living
+              token — and <strong>NodeChain</strong> remembers every move of it.
+            </p>
+          </Reveal>
+          <Reveal as="div" delay={2}>
+            <Link href="/login" className="btn-primary">
+              Enter the portal
+            </Link>
+          </Reveal>
+        </div>
+      </section>
+    </>
   );
 }

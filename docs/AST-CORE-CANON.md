@@ -349,4 +349,32 @@ Any deviation is a canon violation.
 
 ---
 
+## XIV. Amendment log
+
+Presentation-only portal changes are recorded here for traceability; entries
+below do not alter any invariant, formula, or hard prohibition above.
+
+- **2026-09-22** — `portal/frontend` visual redesign: shared dark theme,
+  one transparent top navigation across all public pages, and the AST
+  Portal cabinet's own navigation (NodeChain · Cabinet · Wallet ·
+  Tokenization · Assets · Setting · Log out). No change to admission,
+  PoT, attestation, idempotency, OCR, or auth behavior described in §5.2.
+
+- **2026-09-22** (product-owner ruling) — **AFC clarified and cleared.**
+  "AFC" (Aros Financial Core) names the process of executing the Aros
+  API Contract between AST and Anchors — a contract-execution process,
+  not a platform, not a custodian, and not a claim on AST's reserve
+  ("the reserve is AST's own" continues to hold: AFC holds nothing of
+  AST's). It is distinct from the historical `AFC_RESERVE` /
+  custodial-entity confusion the original firewall was written to catch.
+  AFC may appear in the portal UI (TECHNOlogic hub, Resources) as a
+  named, separate process alongside AST. The firewall
+  (`.github/scripts/canon-gate.sh`) was updated accordingly: "AFC" /
+  "Aros Financial Core" removed from `FIREWALL`; ALB, LacMusa, Fiat/Crypto
+  Anchor, Aros Logic Bridge, and Illumination Banking remain forbidden
+  — those still name the rejected custodial/bridge concepts and are
+  unaffected by this ruling.
+
+---
+
 **End of canon.**

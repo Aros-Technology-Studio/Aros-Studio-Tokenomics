@@ -1,4 +1,4 @@
-import { Injectable } from '@nestjs/common';
+import { Injectable, Optional } from '@nestjs/common';
 import { CoreApiClient } from '../../common/core-client';
 
 /**
@@ -9,7 +9,7 @@ import { CoreApiClient } from '../../common/core-client';
 export class NodechainPublicService {
   private readonly core: CoreApiClient;
 
-  constructor(core?: CoreApiClient) {
+  constructor(@Optional() core?: CoreApiClient) {
     this.core = core ?? new CoreApiClient();
   }
 
