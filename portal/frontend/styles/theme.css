@@ -141,10 +141,10 @@ a {
   z-index: 40;
   height: 72px;
   display: flex;
-  align-items: flex-end;
+  align-items: center;
   justify-content: flex-end;
   gap: 24px;
-  padding: 0 32px 14px;
+  padding: 16px 32px 0;
   background: transparent;
   transition: background 0.4s, backdrop-filter 0.4s, border-color 0.4s;
   border-bottom: 1px solid transparent;
@@ -161,7 +161,7 @@ a {
   gap: 10px;
 }
 .site-nav__brand img {
-  height: 40px;
+  height: 48px;
   width: auto;
   display: block;
 }
