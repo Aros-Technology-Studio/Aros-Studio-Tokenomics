@@ -412,9 +412,24 @@ a {
   display: block;
   opacity: 0.9;
 }
-.nc-hero__mark {
-  display: block;
-  margin: 0.4rem 0 0.6rem;
+/* Giant NodeChain wordmark, full content width, overlapping down onto the
+   journal card below it — the card scrolls up from underneath it. */
+.nc-mega-mark {
+  position: relative;
+  z-index: 2;
+  display: flex;
+  justify-content: center;
+  margin-bottom: -70px;
+  pointer-events: none;
+}
+.nc-mega-mark img {
+  width: min(900px, 100%);
+  height: auto;
+}
+.nc-hero {
+  position: relative;
+  z-index: 1;
+  padding-top: 100px;
 }
 .sr-only {
   position: absolute;
