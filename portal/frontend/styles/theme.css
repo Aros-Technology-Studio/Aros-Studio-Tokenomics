@@ -213,7 +213,7 @@ a {
 .site-nav__slot {
   display: inline-block;
   flex: 0 0 auto;
-  width: 96px;
+  width: 40px;
   height: 1px;
   pointer-events: none;
 }
