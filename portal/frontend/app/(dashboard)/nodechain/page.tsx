@@ -210,7 +210,6 @@ function NodechainPageInner() {
         <img src="/brand/nodechain-wordmark-white.png" alt="" />
       </div>
       <section className="card hero nc-hero">
-        <p className="eyebrow">{t('nc.eyebrow')}</p>
         <h1 className="sr-only">{t('nc.h1')}</h1>
         <p className="lead lead-wide">{t('nc.lead')}</p>
         <div className="actions">

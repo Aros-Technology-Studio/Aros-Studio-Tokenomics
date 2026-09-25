@@ -10,7 +10,7 @@
   --ink: #f4f6ff;
   --ink-2: rgba(233, 238, 255, 0.66);
   --ink-3: rgba(233, 238, 255, 0.4);
-  --glass: rgba(16, 18, 34, 0.34);
+  --glass: rgba(16, 18, 34, 0.82);
   --glass-line: rgba(180, 200, 255, 0.16);
   --accent: #8fb6ff;
   --accent-2: #c69bff;
@@ -460,7 +460,7 @@ a {
 .nc-hero {
   position: relative;
   z-index: 1;
-  padding-top: 84px;
+  padding-top: 160px;
 }
 @media (max-width: 900px) {
   .nc-mega-mark {
@@ -470,7 +470,7 @@ a {
     width: min(420px, 100%);
   }
   .nc-hero {
-    padding-top: 34px;
+    padding-top: 46px;
   }
 }
 .sr-only {
