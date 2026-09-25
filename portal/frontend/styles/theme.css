@@ -273,6 +273,13 @@ a {
     display: block;
     opacity: 1;
   }
+  /* Inside the cabinet the sidebar is the real navigation — the marketing
+     burger/drawer from this header would just be a confusing second menu. */
+  .site-nav[data-cabinet='true'] .site-nav__burger,
+  .site-nav[data-cabinet='true'] .site-nav__links,
+  .site-nav[data-cabinet='true'] .site-nav__scrim {
+    display: none;
+  }
 }
 @media (min-width: 901px) {
   .site-nav__scrim {
@@ -1044,18 +1051,34 @@ section.close {
   .cabinet-sidebar {
     position: static;
     flex-direction: row;
-    flex-wrap: wrap;
+    flex-wrap: nowrap;
     width: 100%;
     min-height: 0;
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+    scrollbar-width: none;
+    background: rgba(255, 255, 255, 0.03);
     border-right: none;
     border-bottom: 1px solid rgba(255, 255, 255, 0.08);
-    padding: 12px 16px;
-    gap: 2px;
+    padding: 10px 14px;
+    gap: 4px;
+  }
+  .cabinet-sidebar::-webkit-scrollbar {
+    display: none;
   }
   .cabinet-sidebar a,
   .cabinet-sidebar__logout {
-    padding: 8px 10px;
+    flex: 0 0 auto;
+    white-space: nowrap;
+    padding: 8px 12px;
     font-size: 13px;
+  }
+  .cabinet-sidebar__logout {
+    margin-top: 0;
+    margin-left: 8px;
+    border-left: 1px solid rgba(255, 255, 255, 0.08);
+    border-radius: 0;
+    padding-left: 16px;
   }
   .dashboard-shell {
     max-width: 100%;

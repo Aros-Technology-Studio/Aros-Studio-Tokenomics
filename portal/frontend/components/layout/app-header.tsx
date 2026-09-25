@@ -19,10 +19,26 @@ const NAV_ITEMS: { label: string; href: string }[] = [
   { label: 'Contact', href: '/contact' },
 ];
 
+// Routes that live inside the authenticated cabinet — the cabinet's own
+// left sidebar is the in-app navigation there, so on mobile this header's
+// burger/drawer (marketing nav) is redundant and gets hidden by CSS.
+const CABINET_PREFIXES = [
+  '/dashboard',
+  '/wallet',
+  '/history',
+  '/setting',
+  '/tokenization',
+  '/assets',
+  '/nodechain',
+];
+
 export function AppHeader() {
   const pathname = usePathname();
   const [solid, setSolid] = useState(false);
   const [open, setOpen] = useState(false);
+  const inCabinet = CABINET_PREFIXES.some(
+    (p) => pathname === p || pathname.startsWith(p + '/'),
+  );
 
   useEffect(() => {
     const onScroll = () => setSolid(window.scrollY > 40);
@@ -40,6 +56,7 @@ export function AppHeader() {
     <header
       className={`site-nav${solid ? ' solid' : ''}`}
       data-open={open ? 'true' : 'false'}
+      data-cabinet={inCabinet ? 'true' : 'false'}
     >
       <Link href="/" className="site-nav__brand" aria-label="Aros Studio Tokenomics — home">
         <img src="/brand/aros-infinity-white.png" alt="Aros Studio" width={128} height={80} />
