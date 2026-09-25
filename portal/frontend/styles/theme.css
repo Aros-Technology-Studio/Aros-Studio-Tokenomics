@@ -1033,6 +1033,16 @@ textarea:focus {
 .card {
   backdrop-filter: blur(20px) saturate(150%);
 }
+/* .hero hardcodes a light-theme white gradient instead of using variables —
+   NodeChain/Explore/About/System still use this legacy class and were
+   rendering as a washed-out white card against the dark nebula */
+.hero {
+  background: var(--card);
+  border-color: var(--border);
+}
+.hero::after {
+  display: none;
+}
 /* .btn/button.primary hardcode a saturated blue gradient instead of using
    variables — align it with the site's own btn-primary look */
 .btn,
