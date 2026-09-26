@@ -1,21 +1,14 @@
 import type { Metadata } from 'next';
-import { StubPage } from '../../components/ui/stub-page';
+import { PackPage } from '../../components/ui/pack-page';
+import { loadContentPack } from '../../lib/content-pack';
 
-export const metadata: Metadata = { title: 'Resources' };
+export const metadata: Metadata = {
+  title: 'Resources',
+  description:
+    'Documentation, white paper, technical deep dive, blog and key terms for Aros Studio Tokenomics (AST) and Aros Financial Core (AFC).',
+};
 
+/** Copy lives in content-packs/resources.en.md — edit the pack, not this file. */
 export default function ResourcesPage() {
-  return (
-    <StubPage
-      eyebrow="Docs & writing"
-      title="Resources"
-      lead="Placeholder — real copy to come."
-      links={[
-        { label: 'AFC Docs', href: '/resources/afc-docs' },
-        { label: 'AST Docs', href: '/resources/ast-docs' },
-        { label: 'Blog', href: '/resources/blog' },
-        { label: 'Whitepaper', href: '/whitepaper' },
-        { label: 'Deep dive', href: '/deep-dive' },
-      ]}
-    />
-  );
+  return <PackPage pack={loadContentPack('resources', 'en')} />;
 }

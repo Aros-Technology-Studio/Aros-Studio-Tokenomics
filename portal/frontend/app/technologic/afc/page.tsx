@@ -1,18 +1,14 @@
 import type { Metadata } from 'next';
-import { StubPage } from '../../../components/ui/stub-page';
+import { PackPage } from '../../../components/ui/pack-page';
+import { loadContentPack } from '../../../lib/content-pack';
 
-export const metadata: Metadata = { title: 'AFC' };
+export const metadata: Metadata = {
+  title: 'Aros Financial Core (AFC)',
+  description:
+    'Aros Financial Core (AFC) is the process of executing the Aros API Contract between independent, licensed parties. Non-custodial by design, auditable at every step.',
+};
 
-export default function AfcPage() {
-  return (
-    <StubPage
-      eyebrow="TECHNOlogic · AFC"
-      title="Aros Financial Core"
-      lead="The financial core layer — settlement and institutional rails around the confirmed process."
-      links={[
-        { label: 'About', href: '/about' },
-        { label: 'Resources', href: '/resources/afc-docs' },
-      ]}
-    />
-  );
+/** Copy lives in content-packs/technologic-afc.en.md — edit the pack, not this file. */
+export default function TechnologicAfcPage() {
+  return <PackPage pack={loadContentPack('technologic-afc', 'en')} />;
 }
