@@ -1,20 +1,14 @@
 import type { Metadata } from 'next';
-import { StubPage } from '../../../components/ui/stub-page';
+import { PackPage } from '../../../components/ui/pack-page';
+import { loadContentPack } from '../../../lib/content-pack';
 
-export const metadata: Metadata = { title: 'AST' };
+export const metadata: Metadata = {
+  title: 'Aros Studio Tokenomics (AST)',
+  description:
+    'AST records already-confirmed institutional valuation as a token of rights. Value arises only through Proof of Transaction; NodeChain is the source of truth.',
+};
 
-export default function AstPage() {
-  return (
-    <StubPage
-      eyebrow="TECHNOlogic · AST"
-      title="Aros Studio Tokenomics"
-      lead="Process token-economy: value arises only through a confirmed process, recorded append-only in NodeChain."
-      links={[
-        { label: 'About', href: '/about' },
-        { label: 'Resources', href: '/resources/ast-docs' },
-        { label: 'NodeChain', href: '/nodechain' },
-        { label: 'AST Portal', href: '/login' },
-      ]}
-    />
-  );
+/** Copy lives in content-packs/technologic-ast.en.md — edit the pack, not this file. */
+export default function TechnologicAstPage() {
+  return <PackPage pack={loadContentPack('technologic-ast', 'en')} />;
 }

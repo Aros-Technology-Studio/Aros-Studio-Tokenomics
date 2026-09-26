@@ -375,6 +375,17 @@ below do not alter any invariant, formula, or hard prohibition above.
   — those still name the rejected custodial/bridge concepts and are
   unaffected by this ruling.
 
+- **2026-09-26** — `portal/frontend` public copy: placeholder pages
+  (TECHNOlogic · AFC / AST, Institutions, Investment, Resources, AFC Docs,
+  AST Docs, Blog, White paper, Deep dive, Contact) now render owner content
+  packs from `portal/frontend/content-packs/` (moved from
+  `fixtures/content-packs/` so the production image can read them); blog
+  posts added. Presentation only: no change to admission, PoT, attestation,
+  idempotency, OCR, auth, invariants, formulas or prohibitions. Public copy
+  states the All-Seeing Eye as observe/record/notify with no veto or
+  rollback (§4.3), ArosCoin as an internal process and payment unit that is
+  not sold (§VII, I8), and AFC per the 2026-09-22 ruling above.
+
 ---
 
 **End of canon.**
