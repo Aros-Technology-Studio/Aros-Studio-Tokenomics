@@ -1,14 +1,14 @@
 import type { Metadata } from 'next';
-import { StubPage } from '../../components/ui/stub-page';
+import { PackPage } from '../../components/ui/pack-page';
+import { loadContentPack } from '../../lib/content-pack';
 
-export const metadata: Metadata = { title: 'Contact' };
+export const metadata: Metadata = {
+  title: 'Contact',
+  description:
+    'Contact Aros Studio for institutional briefings, pilots, investment and press.',
+};
 
+/** Copy lives in content-packs/contact.en.md — edit the pack, not this file. */
 export default function ContactPage() {
-  return (
-    <StubPage
-      eyebrow="Get in touch"
-      title="Contact"
-      lead="Placeholder — real copy to come."
-    />
-  );
+  return <PackPage pack={loadContentPack('contact', 'en')} />;
 }

@@ -40,7 +40,7 @@ export default function TechnologicPage() {
               height={16}
             />
             <h3>Aros Financial Core</h3>
-            <p>The financial core layer. Settlement and institutional rails around the confirmed process.</p>
+            <p>The process of executing the Aros API Contract between independent, licensed parties. It coordinates — it never holds funds.</p>
             <span className="tl-card__go">About · Resources →</span>
           </Link>
         </div>
