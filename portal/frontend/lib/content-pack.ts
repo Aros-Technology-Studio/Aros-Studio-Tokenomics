@@ -3,8 +3,7 @@
  *
  * Packs live in `portal/frontend/content-packs/<page>.<lang>.md` so they are
  * inside the frontend Docker build context (the prod image is built from
- * `portal/frontend`). The legacy `fixtures/content-packs` roots are still
- * searched for local runs from the repository root.
+ * `portal/frontend`).
  *
  * Pack format (one file per page and language):
  *
@@ -71,9 +70,6 @@ export function packRoots(): string[] {
   return [
     path.join(process.cwd(), 'content-packs'),
     path.join(process.cwd(), 'portal/frontend/content-packs'),
-    path.join(process.cwd(), 'fixtures/content-packs'),
-    path.join(process.cwd(), '../../fixtures/content-packs'),
-    path.join(process.cwd(), '../fixtures/content-packs'),
   ];
 }
 
