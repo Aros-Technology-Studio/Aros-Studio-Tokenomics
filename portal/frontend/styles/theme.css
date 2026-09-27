@@ -92,6 +92,17 @@ a {
 #veil {
   display: none;
 }
+/* Standalone decorative canvas — fills whatever positioned ancestor wraps
+   it (see .home-canvas-wrap below), not the viewport. Whoever mounts
+   <CodeWaterfall/> decides how big a stage it gets. */
+#code-waterfall {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  z-index: 0;
+  pointer-events: none;
+}
 #veil::after {
   content: '';
   position: absolute;
@@ -350,7 +361,10 @@ a {
   font-weight: 500;
 }
 
-/* ---- HOME hero ---- */
+/* ---- HOME ---- */
+.home-canvas-wrap {
+  position: relative;
+}
 .home-hero {
   position: relative;
   z-index: 2;
