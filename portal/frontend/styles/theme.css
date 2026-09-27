@@ -370,11 +370,12 @@ a {
   filter: drop-shadow(0 8px 30px rgba(150, 180, 255, 0.25));
 }
 .home-hero__title {
-  font-size: clamp(46px, 8.5vw, 112px);
-  font-weight: 700;
-  line-height: 0.98;
-  letter-spacing: -0.045em;
+  font-size: clamp(28px, 3.6vw, 48px);
+  font-weight: 600;
+  line-height: 1.3;
+  letter-spacing: -0.015em;
   margin: 0;
+  max-width: 44ch;
   text-wrap: balance;
   background: linear-gradient(180deg, #ffffff 30%, #b9c6ff 130%);
   -webkit-background-clip: text;

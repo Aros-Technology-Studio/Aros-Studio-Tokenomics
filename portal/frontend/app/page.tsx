@@ -23,9 +23,11 @@ export default function HomePage() {
           </Reveal>
           <Reveal as="div" delay={1}>
             <h1 className="home-hero__title">
-              Any asset, any jurisdiction —
+              A financial-process layer might reduce time and resources
+              while bridging gaps between systems—a need the world shares.
               <br />
-              to any asset, any jurisdiction.
+              This new phase of financial development can connect assets
+              that remain separate across various financial frameworks.
             </h1>
           </Reveal>
           <Reveal as="div" delay={2} className="home-hero__cta">
