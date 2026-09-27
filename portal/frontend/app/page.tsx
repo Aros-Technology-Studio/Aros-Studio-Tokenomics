@@ -1,5 +1,6 @@
 import Link from 'next/link';
 import { Reveal } from '../components/ui/reveal';
+import { ChainDiagram } from '../components/ui/chain-diagram';
 
 /**
  * Home (Welcome). Hero + closing CTA, ported from the design artifact.
@@ -42,6 +43,29 @@ export default function HomePage() {
         <div className="scroll-hint" aria-hidden="true">
           <span>Scroll</span>
           <span className="line" />
+        </div>
+      </section>
+
+      {/* POT CHAIN */}
+      <section className="chain-section">
+        <div className="pad">
+          <Reveal as="div">
+            <h2>
+              One gate. Every token,
+              <br />
+              the same five steps.
+            </h2>
+          </Reveal>
+          <Reveal as="div" delay={1}>
+            <p>
+              No positive <strong>Proof of Transaction</strong> verdict, no value. There is no
+              pre-mine and no free issuance — every AST token earns its place on NodeChain
+              through the same confirmed path.
+            </p>
+          </Reveal>
+          <Reveal as="div" delay={2}>
+            <ChainDiagram />
+          </Reveal>
         </div>
       </section>
 

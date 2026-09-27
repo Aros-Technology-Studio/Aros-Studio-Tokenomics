@@ -928,6 +928,40 @@ section.chapter {
   }
 }
 
+/* ---- PoT chain ---- */
+section.chain-section {
+  position: relative;
+  z-index: 2;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+  padding: 100px 0;
+}
+.chain-section h2 {
+  font-size: clamp(30px, 5vw, 54px);
+  font-weight: 700;
+  letter-spacing: -0.03em;
+  line-height: 1.05;
+  margin: 0;
+  background: linear-gradient(180deg, #fff 30%, #b9c6ff 120%);
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+  text-wrap: balance;
+}
+.chain-section p {
+  font-size: 17px;
+  font-weight: 300;
+  color: var(--ink-2);
+  margin: 22px auto 0;
+  max-width: 52ch;
+}
+.chain-section p strong {
+  color: var(--ink);
+  font-weight: 500;
+}
+
 /* ---- closing ---- */
 section.close {
   position: relative;
