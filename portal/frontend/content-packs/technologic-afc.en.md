@@ -47,7 +47,7 @@ body: Regulated entry and exit points: banks, payment or e-money institutions on
 id: pillar-4
 tag: Pillar 4 · Governance
 title: Governance and oversight
-body: Tiered AI supervision with escalation to human control, plus an independent validation layer that checks every process against the contract's constitutional rules.
+body: Tiered AI supervision with escalation to human control, plus an independent validation layer that checks every process against the contract's rules. Like the All-Seeing Eye, it has no veto or rollback rights of its own.
 
 id: pillar-5
 tag: Pillar 5 · Record
@@ -59,7 +59,7 @@ id: how
 title: How a process runs
 * **1 · Initiation** — the institution completes KYC, AML, sanctions screening and internal authorisation, then submits the request to the API gateway.
 * **2 · Admission** — the gateway checks identity, certificate, contract version and message structure. Unauthorised or malformed requests never enter.
-* **3 · Validation** — AI supervision and the constitutional validation layer check the route, the roles and the process state before anything executes.
+* **3 · Validation** — AI supervision and the structural validation layer check the route, the roles and the process state before anything executes.
 * **4 · Execution** — AST executes and records each step on NodeChain; the relevant licensed anchor performs the regulated money or asset movement under its own licence.
 * **5 · Settlement** — the recipient receives value in the form it is meant to receive it; each party sees only what its role requires.
 * **6 · Finalisation** — the process closes in one terminal state. If anything deviates, it is returned to its last consistent state and the reason is recorded.

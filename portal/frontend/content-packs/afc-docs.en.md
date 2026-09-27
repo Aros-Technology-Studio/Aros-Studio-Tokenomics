@@ -62,9 +62,9 @@ lead: Each participant sees only the data its contractual role requires.
 id: governance
 title: 5 · Governance and validation
 * **Three tiers of AI supervision** — continuous monitoring (1-minute sync), tactical operations and risk (hourly), strategic policy (daily). AI actions are logged, replayable and bounded.
-* **Escalation path** — monitoring → tactical → strategic → constitutional validation → human control.
-* **Constitutional validation layer** — checks architectural conformity, role assignment, route admissibility, state coherence and readiness to finalise for every process. It can approve a route, request a correction, pause a process or order a rollback. It cannot initiate transactions, change contract terms, reassign roles or read participants' internal data.
-* **Correction protocol** — at most three correction iterations; unresolved conflicts go to manual control.
+* **Escalation path** — monitoring → tactical → strategic → structural validation → human control.
+* **Structural validation layer** — checks architectural conformity, role assignment, route admissibility, state coherence and readiness to finalise for every process, and records the result. Like the All-Seeing Eye, it has no veto or rollback rights and cannot act on a process itself: a failed check is one of the recorded conditions that route a process into the correction protocol below or, if unresolved, into the automatic rollback described in §6. It cannot initiate transactions, change contract terms, reassign roles or read participants' internal data.
+* **Correction protocol** — at most three automatic correction iterations after a failed check; unresolved conflicts go to manual control.
 * **Amendments** — changing the contract requires consensus of the parties, a conformity check and a new version with backward compatibility or a migration plan.
 
 ## Block: section
