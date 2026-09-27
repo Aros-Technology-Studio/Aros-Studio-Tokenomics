@@ -361,10 +361,7 @@ a {
   font-weight: 500;
 }
 
-/* ---- HOME ---- */
-.home-canvas-wrap {
-  position: relative;
-}
+/* ---- HOME hero ---- */
 .home-hero {
   position: relative;
   z-index: 2;
