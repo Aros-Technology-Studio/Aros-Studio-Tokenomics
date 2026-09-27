@@ -6,7 +6,7 @@ import { usePathname } from 'next/navigation';
 
 /**
  * Single shared navigation — transparent, fixed to the top of every page.
- * Matches the AST site map: TECHNOlogic · Institutions · Investment · Resources · About · Contact.
+ * Matches the AST site map: TECHNOlogic · Institutions · Investment · Resources · Contact.
  * Turns solid-glass on scroll for legibility over the iridescent backdrop.
  */
 
@@ -15,7 +15,6 @@ const NAV_ITEMS: { label: string; href: string }[] = [
   { label: 'Institutions', href: '/institutions' },
   { label: 'Investment', href: '/investment' },
   { label: 'Resources', href: '/resources' },
-  { label: 'About', href: '/about' },
   { label: 'Contact', href: '/contact' },
 ];
 

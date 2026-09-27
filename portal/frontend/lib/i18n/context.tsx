@@ -12,7 +12,6 @@ import {
 import { translate } from './messages';
 import {
   DEFAULT_LOCALE,
-  LOCALES,
   LOCALE_STORAGE_KEY,
   type Locale,
 } from './types';
@@ -25,21 +24,14 @@ type I18nContextValue = {
 
 const I18nContext = createContext<I18nContextValue | null>(null);
 
-function isLocale(v: string | null | undefined): v is Locale {
-  return !!v && (LOCALES as string[]).includes(v);
-}
-
+/**
+ * English only for now: the public content packs are English-only markdown
+ * (content-pack.ts has no ru/ka files to fall back to), so letting the
+ * cabinet UI auto-switch to the browser's language produced a mixed-language
+ * site. Locale detection/switching is disabled until real ru/ka copy exists;
+ * the LOCALES/translate machinery stays in place to re-enable later.
+ */
 function readStoredLocale(): Locale {
-  if (typeof window === 'undefined') return DEFAULT_LOCALE;
-  try {
-    const raw = localStorage.getItem(LOCALE_STORAGE_KEY);
-    if (isLocale(raw)) return raw;
-  } catch {
-    /* ignore */
-  }
-  const nav = typeof navigator !== 'undefined' ? navigator.language.toLowerCase() : '';
-  if (nav.startsWith('ru')) return 'ru';
-  if (nav.startsWith('ka')) return 'ka';
   return DEFAULT_LOCALE;
 }
 

@@ -24,7 +24,6 @@ export function AppFooter() {
         <Link href="/institutions">Institutions</Link>
         <Link href="/investment">Investment</Link>
         <Link href="/resources">Resources</Link>
-        <Link href="/about">About</Link>
         <Link href="/contact">Contact</Link>
       </span>
     </footer>
