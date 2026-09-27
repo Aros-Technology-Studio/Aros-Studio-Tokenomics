@@ -234,6 +234,7 @@ a {
     right: 0;
     bottom: 0;
     left: auto;
+    z-index: 40;
     width: 62%;
     max-width: 340px;
     flex-direction: column;
