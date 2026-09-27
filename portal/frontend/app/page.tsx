@@ -1,6 +1,7 @@
 import Link from 'next/link';
 import { Reveal } from '../components/ui/reveal';
 import { ChainDiagram } from '../components/ui/chain-diagram';
+import { CodeWaterfall } from '../components/ui/code-waterfall';
 
 /**
  * Home (Welcome). Hero + closing CTA, ported from the design artifact.
@@ -13,6 +14,7 @@ export default function HomePage() {
     <>
       {/* HERO */}
       <section className="home-hero">
+        <CodeWaterfall />
         <div className="pad">
           <Reveal as="div" className="home-hero__mark">
             <img
