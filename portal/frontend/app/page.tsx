@@ -28,17 +28,20 @@ export default function HomePage() {
             <h1 className="home-hero__title">
               A financial-process layer might reduce time and resources
               while bridging gaps between systems—a need the world shares.
-              <br />
+            </h1>
+            <p className="home-hero__lead">
               This new phase of financial development can connect assets
               that remain separate across various financial frameworks.
-            </h1>
+            </p>
           </Reveal>
           <Reveal as="div" delay={2} className="home-hero__cta">
-            <Link href="/nodechain" className="btn-primary">
-              Explore the journal
+            <Link href="/nodechain" className="card home-hero__cta-card">
+              <span className="home-hero__cta-card-title">Explore the journal</span>
+              <span className="home-hero__cta-card-arrow" aria-hidden="true">→</span>
             </Link>
-            <Link href="/login" className="btn-ghost">
-              Institution sign-in <span aria-hidden="true">→</span>
+            <Link href="/login" className="card home-hero__cta-card">
+              <span className="home-hero__cta-card-title">Institution sign-in</span>
+              <span className="home-hero__cta-card-arrow" aria-hidden="true">→</span>
             </Link>
           </Reveal>
         </div>

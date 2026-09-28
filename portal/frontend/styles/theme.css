@@ -381,6 +381,7 @@ a {
   padding: 120px 0 90px;
 }
 .home-hero__mark {
+  margin-top: -150px;
   margin-bottom: 28px;
 }
 .home-hero__mark img {
@@ -417,10 +418,32 @@ a {
 }
 .home-hero__cta {
   display: flex;
-  gap: 16px;
-  align-items: center;
+  gap: 20px;
+  align-items: stretch;
   margin-top: 44px;
   flex-wrap: wrap;
+}
+.home-hero__cta-card {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  width: min(100%, 260px);
+  padding: 20px 22px;
+  text-decoration: none;
+  transition: border-color 0.25s, transform 0.25s;
+}
+.home-hero__cta-card:hover {
+  transform: translateY(-2px);
+}
+.home-hero__cta-card-title {
+  font-size: 16px;
+  font-weight: 500;
+  color: var(--ink);
+}
+.home-hero__cta-card-arrow {
+  color: var(--ink-2);
+  font-size: 18px;
 }
 
 /* ---- TECHNOlogic cards ---- */
