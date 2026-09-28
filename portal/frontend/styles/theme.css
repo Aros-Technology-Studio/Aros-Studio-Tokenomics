@@ -92,11 +92,9 @@ a {
 #veil {
   display: none;
 }
-/* Standalone decorative overlay — fills whatever positioned ancestor wraps
-   it, not the viewport. Whoever mounts <CodeWaterfall/> decides how big a
-   stage it gets. Base layer is the artwork itself (real alpha, no white
-   halo); the two flow layers are the same artwork used as a mask so the
-   travelling light is clipped to the actual drawn strands. */
+/* Standalone static overlay — fills whatever positioned ancestor wraps it,
+   not the viewport. Whoever mounts <CodeWaterfall/> decides how big a stage
+   it gets. No animation, per owner direction — just the artwork itself. */
 .code-waterfall {
   position: absolute;
   inset: 0;
@@ -106,67 +104,13 @@ a {
   pointer-events: none;
   z-index: 0;
 }
-.code-waterfall__base,
-.code-waterfall__flow {
+.code-waterfall__base {
   position: absolute;
   inset: 0;
-}
-.code-waterfall__base {
   background-image: url('/effects/code-waterfall.png');
   background-repeat: no-repeat;
   background-position: center;
   background-size: contain;
-  opacity: 0.6;
-}
-.code-waterfall__flow {
-  -webkit-mask-image: url('/effects/code-waterfall.png');
-  mask-image: url('/effects/code-waterfall.png');
-  -webkit-mask-repeat: no-repeat;
-  mask-repeat: no-repeat;
-  -webkit-mask-position: center;
-  mask-position: center;
-  -webkit-mask-size: contain;
-  mask-size: contain;
-  -webkit-mask-mode: alpha;
-  mask-mode: alpha;
-  mix-blend-mode: screen;
-  background-image: linear-gradient(
-    180deg,
-    transparent 0%,
-    rgba(255, 255, 255, 0.95) 8%,
-    transparent 16%
-  );
-  background-repeat: no-repeat;
-  background-size: 100% 600%;
-}
-.code-waterfall__flow--down {
-  animation: code-waterfall-down 6s linear infinite;
-}
-.code-waterfall__flow--up {
-  opacity: 0.8;
-  animation: code-waterfall-up 8s linear infinite;
-}
-@keyframes code-waterfall-down {
-  from {
-    background-position: 0 -100%;
-  }
-  to {
-    background-position: 0 500%;
-  }
-}
-@keyframes code-waterfall-up {
-  from {
-    background-position: 0 500%;
-  }
-  to {
-    background-position: 0 -100%;
-  }
-}
-@media (prefers-reduced-motion: reduce) {
-  .code-waterfall__flow {
-    animation: none;
-    display: none;
-  }
 }
 #veil::after {
   content: '';
