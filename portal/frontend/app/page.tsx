@@ -34,16 +34,6 @@ export default function HomePage() {
               that remain separate across various financial frameworks.
             </p>
           </Reveal>
-          <Reveal as="div" delay={2} className="home-hero__cta">
-            <Link href="/nodechain" className="card home-hero__cta-card">
-              <span className="home-hero__cta-card-title">Explore the journal</span>
-              <span className="home-hero__cta-card-arrow" aria-hidden="true">→</span>
-            </Link>
-            <Link href="/login" className="card home-hero__cta-card">
-              <span className="home-hero__cta-card-title">Institution sign-in</span>
-              <span className="home-hero__cta-card-arrow" aria-hidden="true">→</span>
-            </Link>
-          </Reveal>
         </div>
         <div className="scroll-hint" aria-hidden="true">
           <span>Scroll</span>
