@@ -15,26 +15,15 @@ export default function HomePage() {
       {/* HERO */}
       <section className="home-hero">
         <CodeWaterfall />
-        <div className="pad">
-          <Reveal as="div" className="home-hero__mark">
-            <img
-              src="/brand/aros-infinity-white.png"
-              alt="Aros Studio"
-              width={208}
-              height={130}
-            />
-          </Reveal>
-          <Reveal as="div" delay={1}>
-            <h1 className="home-hero__title">
-              A financial-process layer might reduce time and resources
-              while bridging gaps between systems—a need the world shares.
-            </h1>
-            <p className="home-hero__lead">
-              This new phase of financial development can connect assets
-              that remain separate across various financial frameworks.
-            </p>
-          </Reveal>
-        </div>
+        {/* The hero image (public/effects/code-waterfall.png) already bakes in
+            the Aros Studio mark and both sentences of copy — owner-composed.
+            Real text stays in the DOM for screen readers/SEO, hidden visually. */}
+        <h1 className="sr-only">Aros Studio</h1>
+        <p className="sr-only">
+          A financial-process layer might reduce time and resources while bridging gaps
+          between systems—a need the world shares. This new phase of financial development
+          can connect assets that remain separate across various financial frameworks.
+        </p>
         <div className="scroll-hint" aria-hidden="true">
           <span>Scroll</span>
           <span className="line" />
