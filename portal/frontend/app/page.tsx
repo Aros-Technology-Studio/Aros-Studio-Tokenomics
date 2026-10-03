@@ -1,6 +1,7 @@
 import Link from 'next/link';
 import { Reveal } from '../components/ui/reveal';
 import { ChainDiagram } from '../components/ui/chain-diagram';
+import { HeroMark } from '../components/ui/hero-mark';
 
 /**
  * Home (Welcome). Hero + closing CTA, ported from the design artifact.
@@ -8,8 +9,8 @@ import { ChainDiagram } from '../components/ui/chain-diagram';
  * (Chain / PoT-gate / principles narrative sections were cut per direction —
  * this page will likely be revisited; keep it lean for now.)
  *
- * Hero: nebula backdrop + the Aros Studio mark/wordmark lockup, per owner
- * direction — tagline/art still cut, structure to be revisited.
+ * Hero: big centered mark that flies up into the nav brand slot on scroll
+ * (see HeroMark), revealing the tagline underneath — per owner direction.
  */
 export default function HomePage() {
   return (
@@ -17,14 +18,12 @@ export default function HomePage() {
       {/* HERO */}
       <section className="home-hero">
         <div className="pad">
-          <Reveal as="div" className="home-hero__mark">
-            <img
-              src="/brand/aros-lockup-hero.png"
-              alt="Aros Studio"
-              width={341}
-              height={220}
-            />
-          </Reveal>
+          <HeroMark />
+          <h1 className="home-hero__title home-hero__title--reveal">
+            Any asset
+            <br />
+            any jurisdiction
+          </h1>
         </div>
         <div className="scroll-hint" aria-hidden="true">
           <span>Scroll</span>
