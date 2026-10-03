@@ -8,14 +8,24 @@ import { ChainDiagram } from '../components/ui/chain-diagram';
  * (Chain / PoT-gate / principles narrative sections were cut per direction —
  * this page will likely be revisited; keep it lean for now.)
  *
- * Hero content (mark, tagline, CodeWaterfall art) pulled per owner direction —
- * just the nebula backdrop for now, structure to be revisited.
+ * Hero: nebula backdrop + the Aros Studio mark/wordmark lockup, per owner
+ * direction — tagline/art still cut, structure to be revisited.
  */
 export default function HomePage() {
   return (
     <>
       {/* HERO */}
       <section className="home-hero">
+        <div className="pad">
+          <Reveal as="div" className="home-hero__mark">
+            <img
+              src="/brand/aros-lockup-hero.png"
+              alt="Aros Studio"
+              width={341}
+              height={220}
+            />
+          </Reveal>
+        </div>
         <div className="scroll-hint" aria-hidden="true">
           <span>Scroll</span>
           <span className="line" />
