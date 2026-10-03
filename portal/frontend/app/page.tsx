@@ -1,7 +1,6 @@
 import Link from 'next/link';
 import { Reveal } from '../components/ui/reveal';
 import { ChainDiagram } from '../components/ui/chain-diagram';
-import { HeroMark } from '../components/ui/hero-mark';
 
 /**
  * Home (Welcome). Hero + closing CTA, ported from the design artifact.
@@ -9,22 +8,15 @@ import { HeroMark } from '../components/ui/hero-mark';
  * (Chain / PoT-gate / principles narrative sections were cut per direction —
  * this page will likely be revisited; keep it lean for now.)
  *
- * Hero: big centered mark that flies up into the nav brand slot on scroll
- * (see HeroMark), revealing the tagline underneath — per owner direction.
+ * Hero: just the nebula backdrop for now — the mark/scroll animation and
+ * tagline are cut per owner direction, locking in the backdrop colors
+ * first; content comes back in a follow-up pass.
  */
 export default function HomePage() {
   return (
     <>
       {/* HERO */}
       <section className="home-hero">
-        <div className="pad">
-          <HeroMark />
-          <h1 className="home-hero__title home-hero__title--reveal">
-            Any asset
-            <br />
-            any jurisdiction
-          </h1>
-        </div>
         <div className="scroll-hint" aria-hidden="true">
           <span>Scroll</span>
           <span className="line" />
