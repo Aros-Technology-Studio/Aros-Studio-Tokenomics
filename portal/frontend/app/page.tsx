@@ -8,15 +8,26 @@ import { ChainDiagram } from '../components/ui/chain-diagram';
  * (Chain / PoT-gate / principles narrative sections were cut per direction —
  * this page will likely be revisited; keep it lean for now.)
  *
- * Hero: just the nebula backdrop for now — the mark/scroll animation and
- * tagline are cut per owner direction, locking in the backdrop colors
- * first; content comes back in a follow-up pass.
+ * Hero: big mark left-aligned, ~20-25px under the nav, with the tagline
+ * underneath — per owner direction (no scroll animation this time).
  */
 export default function HomePage() {
   return (
     <>
       {/* HERO */}
       <section className="home-hero">
+        <div className="pad">
+          <Reveal as="div" className="home-hero__mark">
+            <img src="/brand/aros-infinity-white.png" alt="Aros Studio" width={414} height={258} />
+          </Reveal>
+          <Reveal as="div" delay={1}>
+            <h1 className="home-hero__title">
+              Any institutional asset
+              <br />
+              in any jurisdiction
+            </h1>
+          </Reveal>
+        </div>
         <div className="scroll-hint" aria-hidden="true">
           <span>Scroll</span>
           <span className="line" />

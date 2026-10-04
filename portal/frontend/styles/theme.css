@@ -377,14 +377,16 @@ a {
   min-height: 100vh;
   display: flex;
   flex-direction: column;
-  justify-content: center;
-  padding: 120px 0 90px;
+  justify-content: flex-start;
+  padding: 94px 0 90px;
 }
-.hero-mark__slot {
-  width: clamp(420px, 42vw, 620px);
-  height: clamp(260px, 26vw, 380px);
-  margin: 0 auto;
-  visibility: hidden;
+.home-hero__mark {
+  margin-bottom: 28px;
+}
+.home-hero__mark img {
+  width: clamp(360px, 34vw, 560px);
+  height: auto;
+  display: block;
 }
 .home-hero__title {
   font-size: clamp(32px, 5vw, 64px);
@@ -392,16 +394,12 @@ a {
   line-height: 1.2;
   letter-spacing: -0.015em;
   margin: 0;
-  text-align: center;
+  text-align: left;
   text-wrap: balance;
   background: linear-gradient(180deg, #ffffff 30%, #b9c6ff 130%);
   -webkit-background-clip: text;
   background-clip: text;
   color: transparent;
-}
-.home-hero__title--reveal {
-  opacity: var(--hero-progress, 0);
-  transform: translateY(calc((1 - var(--hero-progress, 0)) * 16px));
 }
 .home-hero__lead {
   font-size: clamp(18px, 2.4vw, 27px);
