@@ -45,7 +45,7 @@ export function GlobalBackground() {
       ' vec2 q=vec2(fbm(p*1.6+t+m),fbm(p*1.6+vec2(5.2,1.3)-t*0.8));',
       ' vec2 r=vec2(fbm(p*1.6+q*2.4+vec2(1.7,9.2)+0.12*t),fbm(p*1.6+q*2.4+vec2(8.3,2.8)-0.10*t));',
       ' float f=fbm(p*1.6+r*2.4);',
-      ' vec3 c1=vec3(0.12,0.17,0.46);',
+      ' vec3 c1=vec3(0.04,0.42,0.44);',
       ' vec3 c2=vec3(0.46,0.30,0.74);',
       ' vec3 c3=vec3(0.88,0.32,0.62);',
       ' vec3 col=mix(c1,c2,smoothstep(0.2,0.9,r.x));',
