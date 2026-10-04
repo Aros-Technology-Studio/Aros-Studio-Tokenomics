@@ -392,8 +392,8 @@ a {
   display: block;
 }
 .home-hero__title {
-  font-size: clamp(32px, 5vw, 64px);
-  font-weight: 400;
+  font-size: clamp(38px, 6vw, 76px);
+  font-weight: 700;
   line-height: 1.2;
   letter-spacing: -0.015em;
   margin: 0;

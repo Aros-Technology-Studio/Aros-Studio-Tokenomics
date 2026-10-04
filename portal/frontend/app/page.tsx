@@ -22,9 +22,7 @@ export default function HomePage() {
           </Reveal>
           <Reveal as="div" delay={1}>
             <h1 className="home-hero__title">
-              Any
-              <br />
-              institutional asset
+              Any institutional asset
               <br />
               in any jurisdiction
             </h1>
