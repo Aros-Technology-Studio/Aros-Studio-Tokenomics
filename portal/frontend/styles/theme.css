@@ -380,6 +380,9 @@ a {
   justify-content: flex-start;
   padding: 94px 0 90px;
 }
+.home-hero .pad {
+  transform: translateX(-50px);
+}
 .home-hero__mark {
   margin-bottom: 28px;
 }
