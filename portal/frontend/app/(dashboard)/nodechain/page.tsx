@@ -3,7 +3,7 @@
 import { FormEvent, Suspense, useCallback, useEffect, useState } from 'react';
 import Link from 'next/link';
 import { useSearchParams } from 'next/navigation';
-import { apiBase } from '../../lib/auth';
+import { apiBase } from '../../../lib/auth';
 import {
   formatWhen,
   labelForType,
@@ -11,8 +11,8 @@ import {
   shortHash,
   summarizePayload,
   type EventKind,
-} from '../../lib/journal-labels';
-import { useI18n } from '../../lib/i18n/context';
+} from '../../../lib/journal-labels';
+import { useI18n } from '../../../lib/i18n/context';
 
 type StatusBody = {
   tip?: { height: number; tipHash: string } | null;
@@ -205,10 +205,12 @@ function NodechainPageInner() {
   const chainOk = status?.chain?.ok === true;
 
   return (
-    <>
+    <div className="nc-page">
+      <div className="nc-mega-mark" aria-hidden="true">
+        <img src="/brand/nodechain-wordmark-white.png" alt="" />
+      </div>
       <section className="card hero nc-hero">
-        <p className="eyebrow">{t('nc.eyebrow')}</p>
-        <h1>{t('nc.h1')}</h1>
+        <h1 className="sr-only">{t('nc.h1')}</h1>
         <p className="lead lead-wide">{t('nc.lead')}</p>
         <div className="actions">
           <button type="button" className="primary" onClick={() => void refresh()} disabled={loading}>
@@ -566,7 +568,7 @@ function NodechainPageInner() {
           <li>{t('nc.rules.3')}</li>
         </ul>
       </section>
-    </>
+    </div>
   );
 }
 

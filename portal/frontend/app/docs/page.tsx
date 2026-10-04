@@ -1,8 +1,10 @@
-import { ShowcasePackView } from '../../components/ShowcasePackView';
+import type { Metadata } from 'next';
+import { PackPage } from '../../components/ui/pack-page';
 import { loadContentPack } from '../../lib/content-pack';
 
-export const metadata = { title: 'Docs · AST' };
+export const metadata: Metadata = { title: 'Docs' };
 
+/** Copy lives in content-packs/docs.en.md — edit the pack, not this file. */
 export default function DocsPage() {
-  return <ShowcasePackView pack={loadContentPack('docs', 'en')} />;
+  return <PackPage pack={loadContentPack('docs', 'en')} />;
 }

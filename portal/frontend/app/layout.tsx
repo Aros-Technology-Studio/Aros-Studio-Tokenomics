@@ -1,16 +1,25 @@
 import type { Metadata } from 'next';
 import type { ReactNode } from 'react';
-import { Inter } from 'next/font/google';
+import { Sora, IBM_Plex_Mono } from 'next/font/google';
 import '../styles/globals.css';
+import '../styles/theme.css';
 import { AppHeader } from '../components/layout/app-header';
 import { AppFooter } from '../components/layout/app-footer';
+import { GlobalBackground } from '../components/layout/global-background';
 import { Providers } from '../components/providers';
 
-const inter = Inter({
-  subsets: ['latin', 'cyrillic'],
-  weight: ['400', '500', '600', '700', '800'],
+const sora = Sora({
+  subsets: ['latin'],
+  weight: ['300', '400', '500', '600', '700', '800'],
   display: 'swap',
-  variable: '--font-inter',
+  variable: '--font-sora',
+});
+
+const ibmMono = IBM_Plex_Mono({
+  subsets: ['latin'],
+  weight: ['400', '500'],
+  display: 'swap',
+  variable: '--font-mono-ibm',
 });
 
 export const metadata: Metadata = {
@@ -31,8 +40,9 @@ export const metadata: Metadata = {
 
 export default function RootLayout({ children }: { children: ReactNode }) {
   return (
-    <html lang="en" className={inter.variable} suppressHydrationWarning>
-      <body className={inter.className}>
+    <html lang="en" className={`${sora.variable} ${ibmMono.variable}`} suppressHydrationWarning>
+      <body>
+        <GlobalBackground />
         <Providers>
           <div className="shell">
             <AppHeader />

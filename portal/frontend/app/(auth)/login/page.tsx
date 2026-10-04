@@ -232,14 +232,6 @@ export default function LoginPage() {
         </button>
         {error && <p className="err">{error}</p>}
       </form>
-
-      <div className="callout" style={{ marginBottom: 0, marginTop: '1.1rem' }}>
-        <strong>{t('login.hint')}</strong>
-        <br />
-        {t('login.login')}: <code>pilot</code>
-        <br />
-        {t('login.salt')}: <code>pilot</code>
-      </div>
     </div>
   );
 }

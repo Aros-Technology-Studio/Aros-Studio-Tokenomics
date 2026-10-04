@@ -80,7 +80,7 @@ Release notes: [`RELEASE-1.2.0.md`](RELEASE-1.2.0.md)
 | **D7** | Secrets rotation | ✅ `secrets:rotate` · `SECRETS-ROTATION-D7.md` |
 | **D8** | Domain ops card | ✅ `DOMAIN-D8.md` + tunnel/proxy scripts · **owner DNS** |
 | **D9** | Showcase routes | ✅ `/showcase` `/whitepaper` `/deep-dive` `/docs` |
-| **D10** | Content packs (demo EN) | ✅ `fixtures/content-packs/` · `SHOWCASE-D9-D10.md` |
+| **D10** | Content packs (demo EN) | ✅ `portal/frontend/content-packs/` · `SHOWCASE-D9-D10.md` |
 | **D11** | Production readiness checklist | ✅ `PRODUCTION-READINESS-D11.md` · owner rows |
 | **D12** | Portal finish rollup | ✅ `PORTAL-FINISH-D5-D12.md` |
 
