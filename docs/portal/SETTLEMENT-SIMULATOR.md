@@ -81,11 +81,11 @@ Shown live: simulated clock, active holds (count and amount), liquidity locked (
 
 ### 4.2 With AFC
 
-Participants: **Fiat Anchor A**, **Correspondent (FX executor)**, **Fiat Anchor B**. Above them runs the **AFC protocol layer** (a thin bus). Above the bus sits a separate **NodeChain node (AST)**.
+Participants: **Anchor A**, **Correspondent (FX executor)**, **Anchor B**. Above them runs the **AFC protocol layer** (a thin bus). Above the bus sits a separate **NodeChain node (AST)**.
 
 | # | Step |
 |---|------|
-| 1 | Request arrives at Fiat Anchor A |
+| 1 | Request arrives at Anchor A |
 | 2 | API call rises from Anchor A to the AFC layer |
 | 3 | One pass: every participant runs its own KYC/AML and account checks at the same time (rings flash together) |
 | 4 | One combined stamp on the AFC layer: contract terms, parties, accounts, FX quote |
