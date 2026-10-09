@@ -1,6 +1,6 @@
 # Settlement Simulator — specification
 
-**Status:** Spec v0.1 + prototype (scenario 01 only). Not a product surface; presentation only.
+**Status:** Spec v0.2 + prototype (scenarios 01–04). Not a product surface; presentation only.
 **Date:** 2026-10-09
 **Owner decisions captured:** 2026-10-09 (chat with product owner).
 **Surface:** Public showcase (`docs/portal/PUBLIC-SHOWCASE-SITE.md`). UI language: English (other packs later).
@@ -35,7 +35,11 @@ The simulator is presentation only. It reads nothing from the AST core, mints no
 | KYC/AML check | Violet rotating ring inside the organization circle |
 | Account check (Nostro/Loro, liquidity) | Blue rotating ring inside the organization circle |
 | Hold | Padlock above the circle, labelled `HOLD` + amount |
-| Completed check | Stamp card above the circle (`✓ …`) |
+| Completed check | Stamp card (double rule, issuer caption, `✓ …` lines) |
+| Paper document | White sheet with folded corner and a caption (DEED, B/L, BATCH FILE…) |
+| Asset token (RWA) | White hexagonal tile, black outline, `RWA` — proposed, pending owner approval |
+| Goods | 2.5D kraft box |
+| Check result | Green ✓ or red ✗ badge on the circle |
 
 All world currencies are selectable (`Intl.supportedValuesOf('currency')`). Conversion is shown as coins re-minted in the converting institution (e.g. green → blue).
 
@@ -109,13 +113,52 @@ Mode (`Today` / `With AFC` / `Side by side`) · From currency · To currency · 
 - Owner note: at the sandbox rate the PoT fee on large tickets exceeds flat correspondent fees (1,500 vs ~65 USD on 1M). The simulator shows this as is; the AFC case rests on time and locked liquidity until a tariff is ratified.
 - Illustrative FX rates are embedded for major currencies; for others the destination amount is shown as "at anchor rate".
 
-## 7. Backlog (next scenarios)
+## 7. Scenarios 02–04
 
-1. Tokenization of an institutional asset in AST (Today vs AST: valuation → PoT → NodeChain record → mint at institutional price).
-2. Further AFC applications — to be listed by the owner (trade finance, FX, payouts, domestic interbank clearing are candidates).
+Every scenario keeps the same rules: identical participants in both tracks where they exist in reality, illustrative clocks, and AFC/AST drawn without custody.
 
-## 8. Acceptance (scenario 01)
+### 7.1 Scenario 02 — Asset tokenization (Today vs With AST)
 
-- [ ] Owner approves visuals of the prototype.
+| Today: notary, escrow, registry | With AST |
+|---|---|
+| Owner holds a signed institutional valuation | Same valuation; AST does not appraise (Canon §5.1) |
+| Paper title pack → notary; identity and document checks; deed drafted | One digital package with QES → AST |
+| Investor pays into notary escrow (HOLD) | Signature/document check (violet) ∥ PoT P1–P4 (blue) |
+| Deed → title registry; title history and encumbrances; new owner registered | Stamp: QES verified · PoT `verified = 1` · recorded in NodeChain |
+| Extract → notary; escrow released; owner paid; paper certificate to investor | Asset tokens minted at the institutional price (Canon §5.2); registry receives a "tokenized" mark (§5.3); AST fee in ArosCoin |
+| | DvP: one token to the investor, investor pays the owner directly — AST holds no third-party funds (§4.4) |
+
+### 7.2 Scenario 03 — Letter of credit (Today vs With AFC)
+
+Participants in both tracks: issuing bank, advising bank, exporter, carrier. Voyage time excluded from both clocks.
+
+| Today | With AFC |
+|---|---|
+| Importer's funds/credit line blocked (HOLD) | Same HOLD — the guarantee is real; only its duration changes |
+| MT700 to advising bank; authentication | LC terms posted to AFC as a machine-readable contract |
+| Paper LC notice to exporter | One pass: issuing bank, advising bank and exporter confirm terms |
+| Paper bill of lading; courier to advising bank; examination (UCP 600 art. 14: up to 5 banking days) | Carrier posts the e-B/L event |
+| Courier to issuing bank; second examination | Both banks check the data against the terms in one place; PoT + NodeChain record; fee in ArosCoin |
+| Payment over correspondent network | Hold released; anchors settle on their own books |
+
+### 7.3 Scenario 04 — Bulk payouts (Today vs With AFC)
+
+Payroll batch of three payments to Banks X, Y, Z; Bank Z's account is closed in both tracks.
+
+| Today | With AFC |
+|---|---|
+| Batch reserved (HOLD), validated, waits for the clearing window (overnight) | Batch submitted as one API call, any hour |
+| Clearing house sorts and nets; employer debited; files and funds to X, Y, Z | One pass: each bank confirms its own account status |
+| X and Y credit; Z rejects; return comes back days later | Z flagged before money moves; only X and Y are paid; PoT record |
+
+## 8. Backlog
+
+Further AFC applications to be confirmed by the owner (candidates: domestic interbank clearing, FX swap, securities DvP, supply-chain finance).
+
+## 9. Acceptance
+
+- [x] Owner approved scenario 01 direction (2026-10-09: "not bad, polish it").
+- [ ] Owner approves scenarios 02–04 and the asset-token glyph.
+- [ ] AFC/AST fee tariff ratified (replaces the sandbox fee rate in the simulator).
 - [ ] Legal review of on-screen copy (`afc-legal-review`).
 - [ ] Linked from showcase.
