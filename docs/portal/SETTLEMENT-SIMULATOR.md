@@ -24,7 +24,7 @@ The simulator is presentation only. It reads nothing from the AST core, mints no
 | Object | Rendering |
 |--------|-----------|
 | Background | Pure white |
-| Typeface | League Spartan (Google Fonts), system sans fallback |
+| Typeface | Open Sauce Sans (SIL OFL 1.1), embedded as WOFF/WOFF2 — not on Google Fonts; Helvetica/Arial fallback |
 | Organization (bank, correspondent, anchor, AFC participant) | Transparent circle, thin black outline |
 | Projection | 2.5D: flat shapes with soft ground shadows, slight float, stacked coins drawn with thickness |
 | SWIFT message | White envelope with light-blue flap and outline |
