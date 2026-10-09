@@ -96,7 +96,7 @@ Participants: **Anchor A**, **Correspondent (FX executor)**, **Anchor B**. Above
 
 - AFC is a **logical process layer**. It holds no assets, no balances, no nodes and no custody core. It is never drawn holding coins.
 - NodeChain and ArosCoin belong to **AST** and are drawn as a separate node above the AFC layer, never inside it.
-- Fiat anchors are the institutions that hold and move money. Conversion is executed by an anchor/executor, orchestrated by AFC.
+- Anchors are the institutions that hold and move money. Conversion is executed by an anchor/executor, orchestrated by AFC.
 - ArosCoin appears only as the PoT fee spark. It never carries the payment amount.
 - The gold spark does not illustrate or claim token price growth (Canon §9.3: the internal value estimate is not a market price).
 
