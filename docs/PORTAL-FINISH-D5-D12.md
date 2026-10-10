@@ -10,7 +10,7 @@
 | **D7** | Secrets rotation | ✅ `rotate-institution-secrets.sh` · `SECRETS-ROTATION-D7.md` | Vault / schedule |
 | **D8** | Domain ops card | ✅ `DOMAIN-D8.md` + existing tunnel/proxy scripts | Live DNS cutover |
 | **D9** | Showcase routes | ✅ `/showcase` `/whitepaper` `/deep-dive` `/docs` | Hosting split optional |
-| **D10** | Content packs | ✅ `fixtures/content-packs/*.en.md` | RU/KA + final copy |
+| **D10** | Content packs | ✅ `portal/frontend/content-packs/*.en.md` | RU/KA + final copy |
 | **D11** | Production readiness | ✅ checklist `PRODUCTION-READINESS-D11.md` | Owner row sign-off |
 | **D12** | This rollup | ✅ package complete | Close when D11 owner OK |
 

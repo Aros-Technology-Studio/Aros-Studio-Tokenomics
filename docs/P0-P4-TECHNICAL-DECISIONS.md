@@ -171,6 +171,13 @@ All four always; fail any → verified=0 + reason codes; formal text in Core Can
 | settlement | alias of commission |
 | portal | **institutional edge v1** under `portal/` (Next.js UI + Nest BFF + OpenAPI); session auth, hash, Core hand-off; not SoT |
 
+### Portal auth — interim single institutional key (2026-09-27)
+
+- Owner decision: for now, one institutional key (`PILOT`, via `AST_INSTITUTION_SECRETS_JSON`) covers both the admin's own use and pilot institutional testing.  
+- No separate admin credential yet — do not build one speculatively.  
+- Deferred, tracked for later: **Admin console** and **Institutional client console** are different management surfaces (different capabilities/permissions) and will need their own dashboards and their own auth story. Not in scope until the owner asks for it.  
+- Portal login stays password/shared-secret (`institutionId` + `token`) per existing `auth.service.ts`; mTLS/OIDC paths already exist in code but are not required for pilot.
+
 ### Cross-cutting defaults (also Core Canon §XII)
 
 PoT timeout 15m; step timeout 5m; grace 24h; dust 1e-9 ARO; commission 70/30; RocksDB preferred; UTC; envs local/test/sandbox/prod; kill switch yes; mint ok settle fail → retry settle (no burn-compensate); multi-node = 1 vote/cert.

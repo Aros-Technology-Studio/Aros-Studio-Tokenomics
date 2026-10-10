@@ -1,6 +1,6 @@
 # Public showcase site (“business card”) + AST portal
 
-**Status:** Scaffold live (D9/D10) — demo EN packs under `fixtures/content-packs/`  
+**Status:** Scaffold live (D9/D10) — demo EN packs under `portal/frontend/content-packs/`  
 **Date:** 2026-07-26 · updated 2026-07-30  
 **Languages:** Demo EN packs shipped; owner may add RU / KA packs. Code and this doc: English.  
 **Routes:** `/showcase` · `/whitepaper` · `/deep-dive` · `/docs` — see `SHOWCASE-D9-D10.md`.
