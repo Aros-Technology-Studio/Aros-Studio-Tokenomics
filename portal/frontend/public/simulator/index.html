@@ -157,6 +157,7 @@ const C = {
   ink:'#14161A', muted:'#646B77', shadow:'#1B2230', rail:'#B9BFC8',
   violet:'#7A4FD8', blue:'#2F6FE4', env:'#8EC5F0', envFill:'#E6F3FC',
   afc:'#0F9F78', hold:'#C2391E', ok:'#178A4C', gold:'#E1B23A', goldLine:'#C9971C',
+  neon:'#10D167', neonGlow:'#3DFF96', failGlow:'#FF5A47',
   coin:{
     USD:{face:'#2F9E5E', edge:'#1E7041', text:'#FFFFFF'},
     EUR:{face:'#2E5ED6', edge:'#1D3F98', text:'#FFFFFF'},
@@ -282,18 +283,43 @@ function floatText(parent, x, y, text, color){
   t.textContent = text;
   return {set(p){ t.setAttribute('y', y - 26*p); t.setAttribute('opacity', p <= 0 ? 0 : (p < .15 ? p/.15 : 1 - seg(p,.6,1))); }};
 }
-function stampCard(parent, lines, title, color=C.ink, w=214){
+let glowSeq = 0;
+function glowFilter(node){
+  // One blur filter per <svg>, created on first use; used for the neon glow behind passed checks.
+  const svg = node.ownerSVGElement || node;
+  if (!svg.dataset.glow) {
+    const id = 'glow' + (++glowSeq);
+    let defs = svg.querySelector('defs'); if (!defs) defs = svgEl('defs', null, svg);
+    const f = svgEl('filter',{id, x:'-40%', y:'-80%', width:'180%', height:'260%'}, defs);
+    svgEl('feGaussianBlur',{stdDeviation:5}, f);
+    svg.dataset.glow = id;
+  }
+  return `url(#${svg.dataset.glow})`;
+}
+function stampCard(parent, lines, title, color=C.neon, w=214, pointer='none'){
+  // Diagram callout: level card, hairline under the issuer, check badges, optional pointer toward its node.
   const g = svgEl('g',{opacity:0}, parent);
-  const h = 30 + lines.length*20;
-  svgEl('rect',{x:-w/2, y:-h/2, width:w, height:h, rx:7, fill:'#FFFFFF', stroke:color, 'stroke-width':1.4}, g);
-  svgEl('rect',{x:-w/2+4, y:-h/2+4, width:w-8, height:h-8, rx:4, fill:'none', stroke:color, 'stroke-width':.6, opacity:.5}, g);
-  const tt = svgEl('text',{x:-w/2+14, y:-h/2+19, 'font-size':10.5, 'letter-spacing':1.6, 'font-weight':600, fill:C.muted}, g); tt.textContent = title.toUpperCase();
+  const h = 38 + lines.length*20, hw = w/2, hh = h/2;
+  const glow = svgEl('rect',{x:-hw, y:-hh, width:w, height:h, rx:8, fill:'none', stroke:C.neonGlow, 'stroke-width':6, opacity:0, filter:glowFilter(parent)}, g);
+  svgEl('rect',{x:-hw, y:-hh, width:w, height:h, rx:8, fill:'#FFFFFF', stroke:color, 'stroke-width':1.4}, g);
+  const tip = {down:[`M-7,${hh} L0,${hh+7} L7,${hh}`, -6, hh, 6, hh], right:[`M${hw},-7 L${hw+7},0 L${hw},7`, hw, -6, hw, 6], left:[`M${-hw},-7 L${-hw-7},0 L${-hw},7`, -hw, -6, -hw, 6]}[pointer];
+  if (tip) {
+    svgEl('path',{d:tip[0], fill:'#FFFFFF', stroke:color, 'stroke-width':1.2, 'stroke-linejoin':'round'}, g);
+    svgEl('line',{x1:tip[1], y1:tip[2], x2:tip[3], y2:tip[4], stroke:'#FFFFFF', 'stroke-width':2.4}, g);
+  }
+  const tt = svgEl('text',{x:-hw+14, y:-hh+20, 'font-size':10.5, 'letter-spacing':1.6, 'font-weight':600, fill:C.muted}, g); tt.textContent = title.toUpperCase();
+  svgEl('line',{x1:-hw+14, y1:-hh+28, x2:hw-14, y2:-hh+28, stroke:'#E4E7EC', 'stroke-width':1}, g);
   lines.forEach((ln, i) => {
-    const t = svgEl('text',{x:-w/2+14, y:-h/2+38+i*20, 'font-size':15, fill:C.ink}, g);
-    const ck = svgEl('tspan',{fill:C.ok, 'font-weight':700}, t); ck.textContent = '✓ ';
-    const tx = svgEl('tspan', null, t); tx.textContent = ln;
+    const y = -hh + 46 + i*20;
+    svgEl('circle',{cx:-hw+20, cy:y-5, r:6, fill:C.neon}, g);
+    svgEl('path',{d:`M${-hw+17},${y-5} l2.2,2.2 l4,-4.4`, fill:'none', stroke:'#FFFFFF', 'stroke-width':1.6, 'stroke-linecap':'round', 'stroke-linejoin':'round'}, g);
+    const t = svgEl('text',{x:-hw+32, y, 'font-size':15, fill:C.ink}, g); t.textContent = ln;
   });
-  return {g, h, set(x, y, p){ const e = ease(p); g.setAttribute('opacity', clamp(p*2)); g.setAttribute('transform', `translate(${x},${y}) rotate(${-1.5 - 3*(1-e)}) scale(${1.22 - .22*e})`); }};
+  return {g, h, set(x, y, p){
+    const e = ease(p);
+    g.setAttribute('opacity', e); g.setAttribute('transform', `translate(${x},${y + 6*(1-e)})`);
+    glow.setAttribute('opacity', .55*e + .4*Math.sin(Math.PI*p));   // flares on arrival, then a steady neon glow
+  }};
 }
 function burnPath(parent, pts, color=C.ink, o=.5){
   const [x1,y1,cx,cy,x2,y2] = pts;
@@ -340,14 +366,15 @@ function makeNode(T, o){
     },
     releaseLock(p){ shackle.setAttribute('transform', `translate(0,${-6*seg(p,0,.4)})`); lockG.setAttribute('opacity', 1 - seg(p,.45,1)); },
     setStamp(lines, p, title){
-      if (!stamp) stamp = stampCard(g, lines, title || o.label);
+      if (!stamp) stamp = stampCard(g, lines, title || o.label, C.neon, 214, !o.stampAt ? 'down' : (o.stampAt[0] < 0 ? 'right' : 'left'));
       const [sx, sy] = o.stampAt || [0, -(r + 54 + stamp.h/2)];
       stamp.set(sx, sy, p);
     },
     setBadge(p, kind='ok'){
       if (!badge.childElementCount || badge.dataset.kind !== kind) {
         badge.replaceChildren(); badge.dataset.kind = kind;
-        svgEl('circle',{r:11, fill:kind === 'ok' ? C.ok : C.hold, stroke:'#FFFFFF', 'stroke-width':2}, badge);
+        svgEl('circle',{r:13, fill:kind === 'ok' ? C.neonGlow : C.failGlow, opacity:.75, filter:glowFilter(g)}, badge);
+        svgEl('circle',{r:11, fill:kind === 'ok' ? C.neon : C.hold, stroke:'#FFFFFF', 'stroke-width':2}, badge);
         svgEl('path',{d:kind === 'ok' ? 'M-5,0 l3.5,3.5 l6.5,-7' : 'M-4,-4 l8,8 M4,-4 l-8,8', fill:'none', stroke:'#FFFFFF', 'stroke-width':2.4, 'stroke-linecap':'round', 'stroke-linejoin':'round'}, badge);
       }
       badge.setAttribute('opacity', p); badge.setAttribute('transform', `translate(${r*.72},${-r*.72}) scale(${.6 + .4*ease(p)})`);
@@ -391,7 +418,7 @@ function afcLayer(T, o={}){
   const a = svgEl('text',{x:38, y:-2, 'font-size':17, 'font-weight':600, fill:C.ink}, nc); a.textContent = 'NodeChain';
   const b = svgEl('text',{x:38, y:15, 'font-size':12, 'letter-spacing':1.2, fill:C.muted}, nc); b.textContent = 'AST · POT RECORD';
   const v = svgEl('text',{x:0, y:5, 'text-anchor':'middle', 'font-size':12, 'font-weight':700, fill:C.ink, opacity:0}, nc); v.textContent = 'v=1';
-  const pot = makeCoins(L.tokens, 'ARO', 1, 500, busY, 0);
+  const pot = makeSpark(L.tokens, C.gold, 5);   // PoT record signal; no coin ever leaves the AFC layer (spec §4.3)
   return {
     busY, ncX, ncY,
     connect(nodes){ nodes.forEach(n => svgEl('line',{x1:n.x, y1:n.y-n.r-2, x2:n.x, y2:busY+14, stroke:C.ink, 'stroke-width':1.2, 'stroke-dasharray':'4 5', opacity:.45}, L.paths)); },
@@ -451,7 +478,7 @@ function kit(T){
         end:() => { nodes.forEach(n => n.setRings(0)); layer.scan(0, 0); }});
     },
     combined(lines, cap, at=[210,58], sim=.5, title='AFC · one pass', marks){
-      const card = stampCard(T.layers.fx, lines, title, C.afc, 240);
+      const card = stampCard(T.layers.fx, lines, title, C.neon, 240);
       add({dur:950, sim, cap, run:p => { card.set(at[0], at[1], p); (marks || []).forEach(([n, kind]) => { n.setBadge(p, kind); n.setFlash(.6*Math.sin(Math.PI*p)); }); }});
     },
     pot(layer, cap, sim=1){ add({dur:1500, sim, cap, run:p => layer.potFly(p), end:() => { T.m.pot++; T.m.protoFee = true; }}); }
@@ -474,7 +501,7 @@ class Track {
   buildDom(host){
     const sec = document.createElement('section'); sec.className = 'panel ' + this.side;
     sec.innerHTML = `<div class="panel-head"><span class="tag ${this.side}">${this.def.tag}</span><h2>${this.def.title}</h2>
-      <div class="clock"><span class="cv">T+0</span><small>illustrative</small></div></div>
+      <div class="clock"><span class="cv">T+0</span><small>${this.def.band ? 'target · PoT ≤ 15 min' : 'illustrative'}</small></div></div>
       <div class="stage-scroll"><svg class="stage" viewBox="0 0 1000 ${this.def.vbH}" role="img" aria-label="${this.def.tag}: ${this.def.title}"></svg></div>
       <div class="rail"><span class="sc"></span><div class="bar"><i></i></div></div>
       <p class="caption" aria-live="polite"></p><dl class="metrics"></dl>`;
@@ -522,7 +549,8 @@ class Track {
     const st = this.steps[Math.min(this.idx, this.steps.length-1)];
     const cap = this.done ? this.doneText : (typeof st.cap === 'function' ? st.cap() : st.cap);
     if (this.capEl.textContent !== cap) this.capEl.textContent = cap;
-    this.clockEl.textContent = fmtClock(this.m.sim, this.unit);
+    const clk = this.def.band || fmtClock(this.m.sim, this.unit);
+    if (this.clockEl.textContent !== clk) this.clockEl.textContent = clk;
     this.railEl.style.width = (this.progress()*100).toFixed(2) + '%';
     const sc = this.done ? `Done · ${this.steps.length} steps` : `Step ${this.idx + 1} / ${this.steps.length}`;
     if (this.stepEl.textContent !== sc) this.stepEl.textContent = sc;
@@ -538,7 +566,7 @@ class Track {
   }
   summary(){
     const rows = [
-      ['Elapsed (illustrative)', fmtDur(this.m.sim, this.unit)],
+      ['Elapsed (illustrative)', this.def.band ? this.def.band.toLowerCase() + ' (PoT ≤ 15 min)' : fmtDur(this.m.sim, this.unit)],
       ['Peak amount on hold', money(this.holdAmount*this.m.peakHolds, this.cfg.from)],
       ['Time with funds on hold', this.m.holdTime > 0 ? fmtDur(this.m.holdTime, this.unit) : 'none'],
       ['Messages & paper documents', String(this.m.msgs + this.m.docs)],
@@ -605,11 +633,12 @@ function paymentAfc(T, K){
   const coins = makeCoins(T.layers.tokens, from, 4, A.x, Y + 16);
 
   K.pulse(A, `Anchor A receives the same payment order: ${amt} to a client of Anchor B, paid out in ${to}.`);
-  K.api(A, layer, 'Anchor A submits it to the AFC layer as one API call. No message chain, no holds at intermediaries.');
-  K.onePass([A, M, B], layer, 'AFC orchestrates one pass: every participant runs its own KYC/AML and account checks at the same time.');
-  K.combined(['Contract terms', 'KYC/AML · all parties', fx ? `Accounts · FX ${from}→${to}` : 'Accounts & liquidity'],
-    'One combined stamp: contract terms, parties, accounts and FX quote confirmed by their owners.', [210,58], .5, 'AFC · one pass', [[A,'ok'],[M,'ok'],[B,'ok']]);
-  K.pot(layer, 'Proof of Transaction: the fee (ArosCoin) goes to the NodeChain node of AST, which records the verified execution.');
+  K.check(A, 'Anchor A completes its own KYC/AML and sanctions screening before it calls AFC. Compliance stays with the initiating institution.', .5, 2000);
+  K.api(A, layer, 'Anchor A submits the cleared order to AFC as one API call. No message chain, no holds at intermediaries.');
+  K.onePass([A, M, B], layer, fx ? 'AFC coordinates one pass: each counterparty confirms its own account, liquidity and FX quote at the same time.' : 'AFC coordinates one pass: each counterparty confirms its own account and liquidity at the same time.');
+  K.combined(['Contract terms', 'Accounts & liquidity', fx ? `FX ${from}→${to} quoted` : 'Settlement route'],
+    'One combined confirmation: contract terms, accounts, liquidity and FX quote, each attested by its owner.', [210,58], .5, 'Confirmed by participants', [[A,'ok'],[M,'ok'],[B,'ok']]);
+  K.pot(layer, 'Proof of Transaction: NodeChain (AST) records the verified execution. The AST fee is settled post-factum under the Canon.');
   K.coins(coins, A, M, fx ? `Anchors settle on their own books. The executor converts ${from} into ${to} at its quoted rate.` : 'Anchors settle on their own books through the executor.', 1.5,
     {fee:fx ? 'spread' : null, arrive:() => { if (fx) { coins.recur(to); M.setFlash(.6); setTimeout(() => M.setFlash(0), 260); } }, end:() => { if (fx) T.addFee(T.amountUSD == null ? null : T.amountUSD*FEE.spread); }});
   K.coins(coins, M, B, 'Anchor B credits the beneficiary. AFC never held the funds.', 1.5);
@@ -668,7 +697,7 @@ function tokenAst(T, K){
   K.add({dur:1300, sim:2, cap:`Asset tokens are minted strictly at the institutional price of ${amt} and belong to the owner.`, start:() => T.m.pot++, run:p => { toks.set(O.x, Y + 14 - 4*Math.sin(Math.PI*p), seg(p,0,.5)); O.setFlash(.5*Math.sin(Math.PI*p)); }});
   K.add({dur:1100, sim:1, cap:'The title registry receives a mark that the asset is tokenized. From now on, changes pass through AST.', run:p => { const s = seg(p,0,.7); Reg.setBadge(seg(p,.7,1)); gold.set(lerp(AST.x, Reg.x, ease(s)), lerp(AST.y, Reg.y, ease(s)), 0); }});
   K.add({dur:1200, sim:1, cap:'The AST fee is charged in ArosCoin under the Canon formula (amount × fee rate).', run:p => { gold.set(lerp(O.x, AST.x, ease(p)), lerp(Y - 40, AST.y + 30, ease(p)), fade(p,.1,.85)); }, end:() => { T.m.protoFee = true; }});
-  K.add({dur:1700, sim:3, cap:'Delivery against payment: one token moves to the investor while the investor pays the owner directly. AST holds no third-party funds.', run:p => {
+  K.add({dur:1700, sim:3, cap:'The owner transfers one token to the investor, who pays the owner directly, outside AST. NodeChain records the transfer of rights; AST holds no third-party funds.', run:p => {
     const q = ease(seg(p,0,.85));
     share.set(lerp(O.x, I.x, q), Y - 34 - 30*Math.sin(Math.PI*q), seg(p,0,.1));
     coins.set(lerp(I.x, O.x, q), Y + 36 + 30*Math.sin(Math.PI*q), 1);
@@ -811,12 +840,12 @@ const SCENARIOS = [
    lede:'One payment, two routes. First the correspondent chain banks use today, then the same institutions connected through the AFC protocol layer.',
    note:'Illustrative model. Timings, fees and FX rates are examples, not quotes, service levels or performance claims. The "Today" track shows a slow multi-hop corridor: SWIFT reports that most payments reach the beneficiary bank within an hour, while the BIS found that slow routes can take more than two days (<a href="https://www.swift.com/news-events/press-releases/swifts-cross-border-payments-processing-speed-surpasses-g20-target" target="_blank" rel="noopener">SWIFT, 2023</a>; <a href="https://www.bis.org/cpmi/publ/swift_gpi.pdf" target="_blank" rel="noopener">BIS CPMI, 2022</a>). AFC is a logical process layer: it holds no funds, issues no money and is not a party to settlement. Anchors settle on their own books. The protocol (PoT) fee is shown without an amount until its tariff is set; it follows the AST Canon formula (amount × fee rate). NodeChain belongs to AST.',
    today:{tag:'Today', title:'Correspondent chain (SWIFT)', vbH:380, unit:'h', build:paymentToday},
-   next:{tag:'With AFC', title:'Same institutions, one AFC layer', vbH:380, unit:'s', build:paymentAfc}},
+   next:{tag:'With AFC', title:'Same institutions, one AFC layer', vbH:380, unit:'s', band:'Seconds to minutes', build:paymentAfc}},
   {key:'tokenize', no:'02', name:'Asset tokenization', sub:'Paper title transfer vs AST', to:false, amountLabel:'Valuation',
    lede:'An institution sells a share of a real asset. Today the rights move on paper through a notary and a registry. With AST, a signed valuation passes Proof of Transaction and the rights live in NodeChain.',
-   note:'Illustrative model; notarial and registry steps vary by jurisdiction and asset class. AST does not appraise assets: it accepts an already confirmed institutional valuation and mints strictly at that price (AST Canon §5.1–5.2). AST may hold only its own funds, so the investor pays the owner directly (Canon §4.4). The title registry keeps its role and receives a "tokenized" mark (Canon §5.3).',
+   note:'Illustrative model; notarial and registry steps vary by jurisdiction and asset class. AST does not appraise assets: it accepts an already confirmed institutional valuation and mints strictly at that price (AST Canon §5.1–5.2). AST may hold only its own funds, so the investor pays the owner directly (Canon §4.4). The title registry keeps its role and receives a "tokenized" mark (Canon §5.3). Timings are examples, not quotes, service levels or performance claims; registry marking depends on the registry.',
    today:{tag:'Today', title:'Notary, escrow and registry', vbH:430, unit:'h', build:tokenToday},
-   next:{tag:'With AST', title:'Signed package, PoT, NodeChain', vbH:430, unit:'s', build:tokenAst}},
+   next:{tag:'With AST', title:'Signed package, PoT, NodeChain', vbH:430, unit:'s', band:'Seconds to minutes', build:tokenAst}},
   {key:'lc', no:'03', hidden:true, name:'Letter of credit', sub:'Paper documents vs AFC contract', to:true, amountLabel:'LC amount',
    lede:'Trade finance. An importer’s bank guarantees payment to an exporter once shipment is proven. Today proof travels as paper, checked twice. With AFC, the terms and the evidence meet in one place.',
    note:'Illustrative model. UCP 600 (art. 14) allows each bank up to five banking days to examine documents; courier and review times vary. Voyage time is excluded from both clocks. Electronic bills of lading require carrier and legal support in the corridor. Banks keep their roles and their checks; AFC holds no funds and does not take credit risk.',
@@ -826,7 +855,7 @@ const SCENARIOS = [
    lede:'A payroll batch to three banks. Today it waits for a clearing window, and a bad account shows up days later as a return. With AFC, every bank confirms its account before money moves.',
    note:'Illustrative model. Clearing windows, cut-offs and return periods vary by scheme and country. Account checks are performed by each beneficiary bank on its own data; AFC orchestrates the requests and holds no funds.',
    today:{tag:'Today', title:'Batch file through a clearing house', vbH:460, unit:'h', build:payrollToday},
-   next:{tag:'With AFC', title:'One pass across all banks', vbH:420, unit:'s', build:payrollAfc}}
+   next:{tag:'With AFC', title:'One pass across all banks', vbH:420, unit:'s', band:'Seconds to minutes', build:payrollAfc}}
 ];
 
 /* ---------- app state, loop and controls ---------- */

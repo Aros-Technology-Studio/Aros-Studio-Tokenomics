@@ -15,7 +15,7 @@ export default function HomePage() {
   return (
     <>
       {/* HERO */}
-      <section className="home-hero">
+      <section className="home-hero home-hero--landing">
         <div className="pad">
           <Reveal as="div" className="home-hero__mark">
             <img src="/brand/aros-infinity-white.png" alt="Aros Studio" width={414} height={258} />

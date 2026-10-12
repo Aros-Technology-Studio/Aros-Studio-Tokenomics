@@ -86,18 +86,19 @@ Participants: **Anchor A**, **Correspondent (FX executor)**, **Anchor B**. Above
 | # | Step |
 |---|------|
 | 1 | Request arrives at Anchor A |
-| 2 | API call rises from Anchor A to the AFC layer |
-| 3 | One pass: every participant runs its own KYC/AML and account checks at the same time (rings flash together) |
-| 4 | One combined stamp on the AFC layer: contract terms, parties, accounts, FX quote |
-| 5 | PoT: a gold spark (fee, ArosCoin) leaves for NodeChain; NodeChain records `verified = 1` |
-| 6 | Anchors settle on their own books: coins A → executor (convert) → B. No hold chain, no ACK wave |
+| 2 | Anchor A completes its own KYC/AML and sanctions screening **before** calling AFC (compliance stays with the initiating institution) |
+| 3 | API call with the cleared order rises from Anchor A to the AFC layer |
+| 4 | One pass: each counterparty confirms its own account, liquidity and FX quote at the same time (rings flash together) |
+| 5 | One combined confirmation, issuer caption "Confirmed by participants": contract terms, accounts & liquidity, FX quote |
+| 6 | PoT: a gold **record signal** (not a coin) runs from the AFC layer to NodeChain; NodeChain records `verified = 1`; the AST fee is settled post-factum (Canon §III.2, §9.5) |
+| 7 | Anchors settle on their own books: coins A → executor (convert) → B. No hold chain, no ACK wave |
 
 ### 4.3 Ontology rules (hard)
 
 - AFC is a **logical process layer**. It holds no assets, no balances, no nodes and no custody core. It is never drawn holding coins.
 - NodeChain and ArosCoin belong to **AST** and are drawn as a separate node above the AFC layer, never inside it.
 - Anchors are the institutions that hold and move money. Conversion is executed by an anchor/executor, orchestrated by AFC.
-- ArosCoin appears only as the PoT fee spark. It never carries the payment amount.
+- ArosCoin never carries the payment amount and no coin ever leaves the AFC layer; PoT is drawn as a record signal to NodeChain. (In scenario 02 the AST fee coin moves from the institution to AST, which may hold its own commissions, Canon §4.4.)
 - The gold spark does not illustrate or claim token price growth (Canon §9.3: the internal value estimate is not a market price).
 
 ## 5. Controls
@@ -108,7 +109,7 @@ Mode (`Today` / `With AFC` / `Side by side`) · From currency · To currency · 
 
 - Every timing, fee and FX rate is labelled **Illustrative**. They are examples, not quotes, SLAs or performance claims.
 - The Today track depicts a **slow multi-hop corridor**. Public data: SWIFT reports most gpi payments reach the beneficiary bank fast (89% within an hour in 2023), while BIS/CPMI (2022) found slow routes can exceed two days. The footnote states this.
-- With AFC, timing is shown as seconds-to-minutes, not a fixed figure. Canon §XII sets the PoT confirmation timeout at 15 minutes; the simulator must not promise faster finality than that.
+- With AFC / AST, timing is shown as the band "Seconds to minutes" (clock caption "target · PoT ≤ 15 min"), never a fixed figure. Canon §XII sets the PoT confirmation timeout at 15 minutes; the simulator must not promise faster finality than that.
 - Fee placeholders (until a tariff is ratified): correspondent fee 25 USD each, beneficiary lifting fee 15 USD, FX spread 0.20% (same in both tracks, set by the converting institution). All shown as USD-equivalent.
 - **Protocol (PoT) fee: no public amount** until a tariff is ratified. It follows Canon §9.4 (`fee = amount × feeRate`), but the Canon §XII sandbox rate is not a commercial tariff, and the market study (Notion, section 08) says not to fix a percentage before willingness-to-pay testing. The page shows "+ protocol fee" / "tariff TBD" instead of a number (since 2026-10-12).
 - Owner note: at the sandbox rate the PoT fee on large tickets would exceed flat correspondent fees (1,500 vs ~65 USD on 1M); this is why no amount is shown publicly until the tariff is set.
@@ -129,7 +130,7 @@ Every scenario keeps the same rules: identical participants in both tracks where
 | Investor pays into notary escrow (HOLD) | Signature/document check (violet) ∥ PoT P1–P4 (blue) |
 | Deed → title registry; title history and encumbrances; new owner registered | Stamp: QES verified · PoT `verified = 1` · recorded in NodeChain |
 | Extract → notary; escrow released; owner paid; paper certificate to investor | Asset tokens minted at the institutional price (Canon §5.2); registry receives a "tokenized" mark (§5.3); AST fee in ArosCoin |
-| | DvP: one token to the investor, investor pays the owner directly — AST holds no third-party funds (§4.4) |
+| | The owner transfers one token to the investor, who pays the owner directly, outside AST; NodeChain records the transfer of rights; AST holds no third-party funds (§4.4). Not labelled DvP: no linking mechanism is ratified |
 
 ### 7.2 Scenario 03 — Letter of credit (Today vs With AFC)
 
@@ -176,8 +177,14 @@ Production runs `docker-compose.prod.yml` behind Caddy (`deploy/Caddyfile.portal
 ```bash
 cd <repo checkout on the droplet>
 git fetch origin && git checkout <release branch> && git pull --ff-only
-docker compose -f docker-compose.prod.yml --env-file .env.production up -d --build portal-ui
-curl -sI http://127.0.0.1:3200/simulator | head -1   # expect 200
+docker compose -f docker-compose.prod.yml --env-file .env.production up -d --build --no-deps portal-ui
+curl -sI https://portal.arosfinancialcore.com/simulator | head -1   # expect 200
 ```
 
-Rollback: check out the previous commit and run the same `up -d --build portal-ui`.
+`--no-deps` is required: without it Compose also rebuilds and recreates `portal-edge` and `core` (journal SoT) through `depends_on`. Run from the checkout that holds `.env.production`; its `:?` variables must be set even for a single-service release.
+
+Rollback: check out the previous commit and run the same `up -d --build --no-deps portal-ui` (the rebuild replaces the local image tag, so rollback is a rebuild too).
+
+## 11. Visual polish (2026-10-12, owner request)
+
+Check cards are level diagram callouts (no tilt), with a hairline under the issuer, check badges, a pointer toward their node, and a neon-green glow once the check has passed; failed checks glow red. The landing-page hero shift was scoped to the home page and capped so content never leaves the screen (it had pushed `/technologic` and narrow screens off the left edge).

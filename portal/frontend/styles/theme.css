@@ -380,8 +380,13 @@ a {
   justify-content: flex-start;
   padding: 94px 0 90px;
 }
-.home-hero .pad {
-  transform: translateX(-230px);
+/* Landing page only: owner-tuned 230px shift to the left (unchanged from
+   ~1362px wide up). Below that the shift is capped by the free margin beside
+   the hero column (~906px wide when centred), so the mark and tagline never
+   leave the screen on laptops or phones. Other pages using .home-hero
+   (e.g. /technologic) are not shifted. */
+.home-hero--landing .pad {
+  transform: translateX(calc(-1 * min(230px, max(0px, (100vw - 906px) / 2 + 2px))));
 }
 .home-hero__mark {
   margin-bottom: 28px;
