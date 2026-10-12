@@ -1,10 +1,10 @@
 # Settlement Simulator — specification
 
-**Status:** Spec v0.2 + prototype (scenarios 01–04). Not a product surface; presentation only.
-**Date:** 2026-10-09
+**Status:** Spec v0.3 — on the portal at `/simulator` (scenarios 01–02 visible; 03–04 hidden pending owner decision). Presentation only.
+**Date:** 2026-10-09 · updated 2026-10-12
 **Owner decisions captured:** 2026-10-09 (chat with product owner).
 **Surface:** Public showcase (`docs/portal/PUBLIC-SHOWCASE-SITE.md`). UI language: English (other packs later).
-**Prototype:** review build published for owner approval; after approval it moves to `portal/frontend/public/simulator/index.html` (static, self-contained, no backend calls).
+**Page:** `portal/frontend/public/simulator/index.html` (static, self-contained, no backend calls), served at `/simulator` via a rewrite in `portal/frontend/next.config.ts`; linked from the TECHNOlogic hub (`/technologic`).
 
 ## 1. Purpose
 
@@ -109,11 +109,14 @@ Mode (`Today` / `With AFC` / `Side by side`) · From currency · To currency · 
 - Every timing, fee and FX rate is labelled **Illustrative**. They are examples, not quotes, SLAs or performance claims.
 - The Today track depicts a **slow multi-hop corridor**. Public data: SWIFT reports most gpi payments reach the beneficiary bank fast (89% within an hour in 2023), while BIS/CPMI (2022) found slow routes can exceed two days. The footnote states this.
 - With AFC, timing is shown as seconds-to-minutes, not a fixed figure. Canon §XII sets the PoT confirmation timeout at 15 minutes; the simulator must not promise faster finality than that.
-- Fee placeholders (until a tariff is ratified): correspondent fee 25 USD each, beneficiary lifting fee 15 USD, FX spread 0.20% (same in both tracks, set by the converting institution). PoT fee follows Canon §9.4 (`fee = amount × feeRate`) with the Canon §XII sandbox example `feeRate = 0.15%`. All shown as USD-equivalent.
-- Owner note: at the sandbox rate the PoT fee on large tickets exceeds flat correspondent fees (1,500 vs ~65 USD on 1M). The simulator shows this as is; the AFC case rests on time and locked liquidity until a tariff is ratified.
+- Fee placeholders (until a tariff is ratified): correspondent fee 25 USD each, beneficiary lifting fee 15 USD, FX spread 0.20% (same in both tracks, set by the converting institution). All shown as USD-equivalent.
+- **Protocol (PoT) fee: no public amount** until a tariff is ratified. It follows Canon §9.4 (`fee = amount × feeRate`), but the Canon §XII sandbox rate is not a commercial tariff, and the market study (Notion, section 08) says not to fix a percentage before willingness-to-pay testing. The page shows "+ protocol fee" / "tariff TBD" instead of a number (since 2026-10-12).
+- Owner note: at the sandbox rate the PoT fee on large tickets would exceed flat correspondent fees (1,500 vs ~65 USD on 1M); this is why no amount is shown publicly until the tariff is set.
 - Illustrative FX rates are embedded for major currencies; for others the destination amount is shown as "at anchor rate".
 
 ## 7. Scenarios 02–04
+
+> **Visibility (2026-10-12):** scenarios 03 (letter of credit) and 04 (bulk payouts) are **hidden** (`hidden: true` in the scenario registry). They were proposed by the assistant, not taken from the owner's portal text, and the owner questioned them. The owner's portal text (Notion, "Текст для контента на портал Aros Studio") lists other scenarios: last mile, digital-assets bridge, Nostro capital unlocking, new roads, and platform integrations — see §8.
 
 Every scenario keeps the same rules: identical participants in both tracks where they exist in reality, illustrative clocks, and AFC/AST drawn without custody.
 
@@ -153,7 +156,9 @@ Payroll batch of three payments to Banks X, Y, Z; Bank Z's account is closed in 
 
 ## 8. Backlog
 
-Further AFC applications to be confirmed by the owner (candidates: domestic interbank clearing, FX swap, securities DvP, supply-chain finance).
+1. **Align the AFC tracks with the owner's portal text:** fiat → process-bound ArosCoin (AST mint) → fiat at a second anchor → external bank payout → AST burn; KYC/AML at the initiating institution before AFC; API Gateway + protocol validation inside AFC; 5–15 min shown as a target, not an SLA. Blocked on owner decisions: (a) naming — the canon gate forbids the terms used in the Notion text; (b) ArosCoin in the conversion route vs. the legal-review position.
+2. **Scenarios from the owner's portal text:** last mile, digital-assets bridge, Nostro capital unlocking (liquidity on demand), new roads (tokenized bond via a neutral corridor), sovereign bond purchase; platform integrations shown only as proposed models, never as live partnerships.
+3. Decide on scenarios 03–04 (keep hidden, rework, or delete).
 
 ## 9. Acceptance
 
@@ -161,4 +166,18 @@ Further AFC applications to be confirmed by the owner (candidates: domestic inte
 - [ ] Owner approves scenarios 02–04 and the asset-token glyph.
 - [ ] AFC/AST fee tariff ratified (replaces the sandbox fee rate in the simulator).
 - [ ] Legal review of on-screen copy (`afc-legal-review`).
-- [ ] Linked from showcase.
+- [x] On the portal at `/simulator`, linked from `/technologic` (2026-10-12).
+- [ ] Deployed to production (droplet: `docker compose -f docker-compose.prod.yml … up -d --build portal-ui`, see §10).
+
+## 10. Deployment (production droplet)
+
+Production runs `docker-compose.prod.yml` behind Caddy (`deploy/Caddyfile.portal`, `portal.arosfinancialcore.com → 127.0.0.1:3200`). The page ships inside the `portal-ui` image (`COPY public`), so a release is a rebuild of that one service:
+
+```bash
+cd <repo checkout on the droplet>
+git fetch origin && git checkout <release branch> && git pull --ff-only
+docker compose -f docker-compose.prod.yml --env-file .env.production up -d --build portal-ui
+curl -sI http://127.0.0.1:3200/simulator | head -1   # expect 200
+```
+
+Rollback: check out the previous commit and run the same `up -d --build portal-ui`.

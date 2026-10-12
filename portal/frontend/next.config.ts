@@ -20,6 +20,11 @@ const nextConfig: NextConfig = {
         source: '/v1/:path*',
         destination: `${edgeUrl}/v1/:path*`,
       },
+      // Settlement Simulator: self-contained static page (docs/portal/SETTLEMENT-SIMULATOR.md)
+      {
+        source: '/simulator',
+        destination: '/simulator/index.html',
+      },
     ];
   },
 };
