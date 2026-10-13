@@ -168,22 +168,34 @@ Payroll batch of three payments to Banks X, Y, Z; Bank Z's account is closed in 
 - [ ] AFC/AST fee tariff ratified (replaces the sandbox fee rate in the simulator).
 - [ ] Legal review of on-screen copy (`afc-legal-review`).
 - [x] On the portal at `/simulator`, linked from `/technologic` (2026-10-12).
-- [ ] Deployed to production (droplet: `docker compose -f docker-compose.prod.yml … up -d --build portal-ui`, see §10).
+- [x] Deployed to production 2026-10-12 (owner ran §10 on the droplet; `/simulator` and `/technologic` return HTTP 200 through Caddy).
 
 ## 10. Deployment (production droplet)
 
-Production runs `docker-compose.prod.yml` behind Caddy (`deploy/Caddyfile.portal`, `portal.arosfinancialcore.com → 127.0.0.1:3200`). The page ships inside the `portal-ui` image (`COPY public`), so a release is a rebuild of that one service:
+Production runs `docker-compose.prod.yml` from **`/opt/ast-portal`** on the droplet `Aros-Studio-Portal`, behind Caddy (`deploy/Caddyfile.portal`, `portal.arosfinancialcore.com → 127.0.0.1:3200`). **`/opt/ast-portal` is a plain copy, not a git checkout**, so `git pull` does not work there. The page ships inside the `portal-ui` image (`COPY public`), so a site release replaces `portal/frontend` and rebuilds that one service. Run in the DigitalOcean Droplet Console (Droplets → droplet → Access → Launch Droplet Console), in one console window:
 
 ```bash
-cd <repo checkout on the droplet>
-git fetch origin && git checkout <release branch> && git pull --ff-only
+# 1. Download the release branch and list server-only files (no changes yet)
+cd /opt/ast-portal || exit
+STAMP=$(date +%Y%m%d-%H%M%S); echo "$STAMP"
+rm -rf /tmp/ast-new && mkdir -p /tmp/ast-new
+curl -fsSL "https://codeload.github.com/Aros-Technology-Studio/Aros-Studio-Tokenomics/tar.gz/refs/heads/<release-branch>" | tar -xz -C /tmp/ast-new --strip-components=1
+diff -rq portal/frontend /tmp/ast-new/portal/frontend | grep "^Only in portal/frontend" | grep -v node_modules   # must be empty, else stop
+
+# 2. Back up, replace, rebuild only portal-ui
+cp -a portal/frontend "portal/frontend.bak-$STAMP"
+rm -rf portal/frontend && cp -a /tmp/ast-new/portal/frontend portal/frontend
 docker compose -f docker-compose.prod.yml --env-file .env.production up -d --build --no-deps portal-ui
+
+# 3. Check
 curl -sI https://portal.arosfinancialcore.com/simulator | head -1   # expect 200
 ```
 
-`--no-deps` is required: without it Compose also rebuilds and recreates `portal-edge` and `core` (journal SoT) through `depends_on`. Run from the checkout that holds `.env.production`; its `:?` variables must be set even for a single-service release.
+`--no-deps` is required: without it Compose also rebuilds and recreates `portal-edge` and `core` (journal SoT) through `depends_on`. `.env.production` lives in `/opt/ast-portal`; its `:?` variables must be set even for a single-service release.
 
-Rollback: check out the previous commit and run the same `up -d --build --no-deps portal-ui` (the rebuild replaces the local image tag, so rollback is a rebuild too).
+Rollback (same window): `rm -rf portal/frontend && mv "portal/frontend.bak-$STAMP" portal/frontend`, then the same `up -d --build --no-deps portal-ui`.
+
+Follow-up for ops: turn `/opt/ast-portal` into a git checkout (or deploy images from CI) so releases are traceable to a commit; the droplet also reported pending OS updates and "System restart required" (2026-10-12) — schedule separately.
 
 ## 11. Visual polish (2026-10-12, owner request)
 
