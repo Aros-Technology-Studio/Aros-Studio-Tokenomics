@@ -27,24 +27,6 @@ const en: Messages = {
   'home.cta.system': 'What AST can do?',
   'home.cta.cabinet': 'Institution sign-in',
 
-  'about.eyebrow': 'About',
-  'about.h1': 'Aros Studio Tokenomics (AST)',
-  'about.lead':
-    'We connect institutional processes to Aros Studio Tokenomics (AST) — a system where digital units appear only after confirmed work (Proof of Transaction), and significant states are recorded on NodeChain.',
-  'about.who.h': 'Who we are talking to',
-  'about.who.p1':
-    'Institutions that already hold official valuations and need a disciplined path into a digital registry of rights — not a retail exchange, not a speculative token launch.',
-  'about.who.p2':
-    'And the public: journalists, counterparties, auditors, partners who need to see what the system is and check a process id without asking for a private key.',
-  'about.mission.h': 'Mission',
-  'about.mission.d':
-    'Record institutional valuation accurately and verifiably. Value is not invented in the portal. It is accepted as given by the institution, then gated by PoT on Core.',
-  'about.site.h': 'This website',
-  'about.site.d':
-    'Public story + public explorer + institutional cabinet. Edge software only. NodeChain is not rewritten here.',
-  'about.cta.system': 'System: can & cannot',
-  'about.cta.explore': 'Explore a process',
-
   'system.eyebrow': 'System boundaries',
   'system.h1': 'What AST is — and what it refuses',
   'system.lead':
@@ -214,24 +196,6 @@ const ru: Messages = {
   'home.cta.system': 'Что может AST?',
   'home.cta.cabinet': 'Вход для учреждения',
 
-  'about.eyebrow': 'О системе',
-  'about.h1': 'Aros Studio Tokenomics (AST)',
-  'about.lead':
-    'Мы связываем институциональные процессы с Aros Studio Tokenomics (AST) — системой, где цифровые единицы появляются только после подтверждённой работы (Proof of Transaction), а значимые состояния пишутся в NodeChain.',
-  'about.who.h': 'С кем мы говорим',
-  'about.who.p1':
-    'С учреждениями, у которых уже есть официальная оценка и нужен дисциплинированный путь в цифровой реестр прав — не биржа и не спекулятивный запуск токена.',
-  'about.who.p2':
-    'И с публикой: журналисты, контрагенты, аудиторы, партнёры — кто хочет понять систему и проверить process id без private key.',
-  'about.mission.h': 'Миссия',
-  'about.mission.d':
-    'Точно и проверяемо зафиксировать институциональную оценку. Ценность не придумывается в портале. Она принимается от учреждения и проходит PoT на Core.',
-  'about.site.h': 'Этот сайт',
-  'about.site.d':
-    'Публичная история + explorer + кабинет. Только edge. NodeChain здесь не переписывается.',
-  'about.cta.system': 'Система: можно / нельзя',
-  'about.cta.explore': 'Найти процесс',
-
   'system.eyebrow': 'Границы системы',
   'system.h1': 'Что такое AST — и от чего она отказывается',
   'system.lead':
@@ -400,24 +364,6 @@ const ka: Messages = {
   'home.cta.nodechain': 'NodeChain ჟურნალი',
   'home.cta.system': 'რა შეუძლია AST-ს?',
   'home.cta.cabinet': 'დაწესებულების შესვლა',
-
-  'about.eyebrow': 'შესახებ',
-  'about.h1': 'Aros Studio Tokenomics (AST)',
-  'about.lead':
-    'ვაკავშირებთ ინსტიტუციურ პროცესებს Aros Studio Tokenomics (AST)-თან — სისტემასთან, სადაც ციფრული ერთეულები ჩნდება მხოლოდ დადასტურებული სამუშაოს შემდეგ (Proof of Transaction), ხოლო მნიშვნელოვანი მდგომარეობები იწერება NodeChain-ზე.',
-  'about.who.h': 'ვისთან ვსაუბრობთ',
-  'about.who.p1':
-    'დაწესებულებებთან, რომლებსაც უკვე აქვთ ოფიციალური შეფასება და სჭირდებათ დისციპლინირებული გზა უფლებების ციფრულ რეესტრში — არა ბირჟა და არა სპეკულაციური ტოკენის გაშვება.',
-  'about.who.p2':
-    'და საზოგადოებასთან: ჟურნალისტები, კონტრაგენტები, აუდიტორები, პარტნიორები — ვისაც სურს ნახოს სისტემა და შეამოწმოს process id პირადი გასაღების გარეშე.',
-  'about.mission.h': 'მისია',
-  'about.mission.d':
-    'ზუსტად და გადამოწმებად დავაფიქსიროთ ინსტიტუციური შეფასება. ღირებულება პორტალში არ იგონება. მიღებულია დაწესებულებისგან, შემდეგ იკეტება PoT-ით Core-ზე.',
-  'about.site.h': 'ეს ვებსაიტი',
-  'about.site.d':
-    'საჯარო ისტორია + explorer + ინსტიტუციური კაბინეტი. მხოლოდ edge. NodeChain აქ არ გადაიწერება.',
-  'about.cta.system': 'სისტემა: შეუძლია / არ შეუძლია',
-  'about.cta.explore': 'პროცესის ძიება',
 
   'system.eyebrow': 'სისტემის საზღვრები',
   'system.h1': 'რა არის AST — და რას უარყოფს',

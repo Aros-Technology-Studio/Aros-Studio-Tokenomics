@@ -1,15 +1,33 @@
 # Content pack template (copy this and fill)
 
-**How to use:** duplicate this file (or paste into chat) once per page.  
-**Language:** one pack per language, or three sections `## EN` / `## RU` / `## KA`.
+Public page copy for the portal lives in **`portal/frontend/content-packs/<page>.<lang>.md`**
+(inside the frontend Docker build context, so production can read it).
+Blog posts live in **`portal/frontend/content-packs/blog/<slug>.<lang>.md`**.
+Edit a pack, rebuild the portal — no code change is needed for copy.
 
----
+| Route | Pack |
+|-------|------|
+| `/technologic/afc` | `technologic-afc` |
+| `/technologic/ast` | `technologic-ast` |
+| `/institutions` | `institutions` |
+| `/investment` | `investment` |
+| `/resources` | `resources` |
+| `/resources/afc-docs` | `afc-docs` |
+| `/resources/ast-docs` | `ast-docs` |
+| `/resources/blog` | `blog` (+ posts in `blog/`) |
+| `/whitepaper` | `whitepaper` |
+| `/deep-dive` | `deep-dive` |
+| `/docs` | `docs` |
+| `/showcase` | `showcase-home` |
+| `/contact` | `contact` |
 
-## Meta
+A missing `<page>.<lang>.md` falls back to `<page>.en.md`.
 
-- Page id: `showcase-home` | `ast-home` | `whitepaper` | `deep-dive` | `docs` | other: ___
-- Language: `en` / `ru` / `ka`
-- Author date:
+## Rules
+
+- One value per line (`key: value`). Values are plain text; inline `**bold**` and `[label](href)` are rendered. No HTML.
+- Canon vocabulary applies: the canon gate rejects forbidden terms (see `.github/scripts/canon-gate.sh`).
+- No legal absolutes, no performance numbers presented as measured unless they are, no token-sale language.
 
 ---
 
@@ -25,74 +43,48 @@ cta_secondary_label:
 cta_secondary_href:
 ```
 
----
-
-## Block: cards (repeat as needed)
+## Block: cards (repeat `id:` records; rendered as a grid)
 
 ```
 id: card-1
-title:
-body:
-```
-
-```
-id: card-2
-title:
-body:
-```
-
----
-
-## Block: features (optional)
-
-```
-id: f1
-title:
-body:
-```
-
----
-
-## Block: CTAs / doors
-
-```
-id: door-public
+tag:
 title:
 body:
 button_label:
 button_href:
 ```
 
+## Block: section (repeat the block for each section)
+
 ```
-id: door-ast
+id: section-id
+title:
+lead:
+- A paragraph line.
+* A bullet line (consecutive bullets form one list).
+- Another paragraph.
+callout: One highlighted line at the end of the section.
+```
+
+## Block: doors (calls to action at the bottom of the page)
+
+```
+id: door-1
 title:
 body:
 button_label:
 button_href:
 ```
 
+## Blog post
+
+```
+title:
+date: YYYY-MM-DD
+summary:
+author: Aros Studio
+order: 1
+tags: AFC, Settlement
 ---
-
-## Links to include on this page
-
-| Label | URL or path |
-|-------|-------------|
-| AST portal | |
-| White paper | |
-| Deep dive | |
-| Open-source docs | |
-| GitHub | |
-
----
-
-## Attachments
-
-- [ ] White paper PDF / MD path:  
-- [ ] Deep dive MD path:  
-- [ ] Logo / images:  
-
----
-
-## Notes for implementer
-
-(what must not change, legal lines, order of blocks)
+Markdown body: ## and ### headings, paragraphs, - lists, > quotes, **bold**, [links](https://…).
+```

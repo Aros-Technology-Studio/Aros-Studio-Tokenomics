@@ -23,7 +23,7 @@ Showcase is the **front door**. AST cabinet stays under `/login`, `/tokenization
 
 ## D10 — Content packs
 
-Location: `fixtures/content-packs/<page>.<lang>.md`
+Location: `portal/frontend/content-packs/<page>.<lang>.md`
 
 Demo packs shipped (English):
 

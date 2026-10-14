@@ -1,4 +1,4 @@
-import { Injectable } from '@nestjs/common';
+import { Injectable, Optional } from '@nestjs/common';
 import {
   makeProcessId,
   payloadFingerprint,
@@ -29,7 +29,7 @@ export class ProcessesService {
   private readonly core: CoreApiClient;
   private readonly store: EdgeProcessStore;
 
-  constructor(core?: CoreApiClient, store?: EdgeProcessStore) {
+  constructor(@Optional() core?: CoreApiClient, @Optional() store?: EdgeProcessStore) {
     this.core = core ?? new CoreApiClient();
     this.store = store ?? new EdgeProcessStore();
     this.hydrateFromDisk();

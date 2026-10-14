@@ -28,18 +28,25 @@ EXCLUDES=(
 )
 
 # Case-sensitive: "ALB" matches only the literal epoch acronym, never words like "totalBurned".
-FIREWALL='AFC|Aros Financial Core|LacMusa|Fiat Anchor|Crypto Anchor|Aros Logic Bridge|Illumination Banking|\bALB\b'
+# AFC ("Aros Financial Core") is cleared per product-owner ruling 2026-09-22
+# (see docs/AST-CORE-CANON.md §XIV): AFC is the process of executing the Aros
+# API Contract (AST <-> Anchors) — not a custodial entity, not a claim on
+# AST's reserve. It is intentionally NOT in this firewall. The remaining
+# terms (ALB / LacMusa / Fiat|Crypto Anchor / Aros Logic Bridge / Illumination
+# Banking) are still forbidden — they name the rejected custodial/bridge
+# concepts, unaffected by this ruling.
+FIREWALL='LacMusa|Fiat Anchor|Crypto Anchor|Aros Logic Bridge|Illumination Banking|\bALB\b'
 VOCAB='reward|incentive|stimulus'
 
 fail=0
 
 fw="$(grep -RInE "$FIREWALL" . "${EXCLUDES[@]}" 2>/dev/null || true)"
 if [ -n "$fw" ]; then
-  echo "::error::Firewall breach — the AST canon forbids AFC / ALB / LacMusa / Anchor references. The reserve is AST's own."
+  echo "::error::Firewall breach — the AST canon forbids ALB / LacMusa / Anchor / bridge references. The reserve is AST's own."
   echo "$fw"
   fail=1
 else
-  echo "Firewall gate: clean (no AFC / ALB / LacMusa / Anchor)."
+  echo "Firewall gate: clean (no ALB / LacMusa / Anchor / bridge)."
 fi
 
 vb="$(grep -RIniE "$VOCAB" . "${EXCLUDES[@]}" 2>/dev/null || true)"

@@ -47,7 +47,7 @@ services:
       # I4
       AST_LOG_JSON: ${AST_LOG_JSON:-1}
     ports:
-      - "${CORE_PUBLISH_PORT:-3000}:3000"
+      - "127.0.0.1:${CORE_PUBLISH_PORT:-3000}:3000"
     volumes:
       - ast_journal_prod:/data
     healthcheck:
@@ -79,7 +79,7 @@ services:
       REDIS_URL: ${REDIS_URL:-}
       AST_LOG_JSON: ${AST_LOG_JSON:-1}
     ports:
-      - "${PORTAL_EDGE_PUBLISH_PORT:-3100}:3100"
+      - "127.0.0.1:${PORTAL_EDGE_PUBLISH_PORT:-3100}:3100"
     depends_on:
       core:
         condition: service_healthy
@@ -89,6 +89,8 @@ services:
       context: ./portal/frontend
       args:
         NEXT_PUBLIC_PORTAL_API_URL: ${NEXT_PUBLIC_PORTAL_API_URL:-}
+        # Baked into routes-manifest.json at build time — same-origin /v1/* rewrite target.
+        PORTAL_EDGE_URL: http://portal-edge:3100
     image: ghcr.io/aros-technology-studio/ast-portal-ui:${AST_IMAGE_TAG:-1.2.0}
     restart: unless-stopped
     environment:
@@ -96,7 +98,7 @@ services:
       HOSTNAME: 0.0.0.0
       NODE_ENV: production
     ports:
-      - "${PORTAL_UI_PUBLISH_PORT:-3200}:3200"
+      - "127.0.0.1:${PORTAL_UI_PUBLISH_PORT:-3200}:3200"
     depends_on:
       - portal-edge
 
