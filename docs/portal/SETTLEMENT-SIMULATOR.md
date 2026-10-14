@@ -1,10 +1,10 @@
 # Settlement Simulator — specification
 
-**Status:** Spec v0.4 — interactive (topic → own data → route), framed in the site at `/simulator`; commercial scenarios 01–03 plus government scenarios G01–G12 (§12). Presentation only.
+**Status:** Spec v0.5 — one framed window: topic cards → own data → Today or With AFC → one animation at a time → translucent result window; commercial scenarios 01–03 plus government scenarios G01–G12 (§12). Presentation only.
 **Date:** 2026-10-09 · updated 2026-10-14
 **Owner decisions captured:** 2026-10-09 (chat with product owner).
 **Surface:** Public showcase (`docs/portal/PUBLIC-SHOWCASE-SITE.md`). UI language: English (other packs later).
-**Page:** `/simulator` is a site page (`portal/frontend/app/simulator/page.tsx`, site navigation and animated background). The simulator is a self-contained static file, `portal/frontend/public/embed/settlement-simulator.html` (no backend calls), embedded through a **transparent** same-origin frame (`components/ui/simulator-window.tsx`, `?embed=1`). In embed mode the simulator's own controls (topics, setup form, routes, playback) take the site's dark glass style and fonts over the animated background, and **only the animation tracks, the result table and the legend are white windows** (title bar with three dots), slightly scaled down (90%). The embedded page reports its height to the frame. An *Open full screen* link opens the standalone white version. Linked from the TECHNOlogic hub (`/technologic`).
+**Page:** `/simulator` is a site page (`portal/frontend/app/simulator/page.tsx`, site navigation and animated background). The simulator is a self-contained static file, `portal/frontend/public/embed/settlement-simulator.html` (no backend calls), embedded through a same-origin frame (`components/ui/simulator-window.tsx`, `?embed=1`). The embedded content is **one fixed-size white window titled "Settlement Simulator"** on the site's background; every screen of the flow replaces the previous one inside that window, so the page never grows into a long scroll (§5). The embedded page reports its height to the frame. An *Open full screen* link opens the standalone version (page heading plus the same window). Linked from the TECHNOlogic hub (`/technologic`).
 
 ## 1. Purpose
 
@@ -103,13 +103,15 @@ Participants: **Anchor A**, **Correspondent (FX executor)**, **Anchor B**. Above
 
 ## 5. Controls
 
-The viewer drives the simulator in three steps (owner request, 2026-10-14); nothing plays until a route is chosen:
+The whole flow lives in one framed window (owner request, 2026-10-14: "a frame on the page, titled Simulator; everything opens inside it, nothing long"). The window has a title bar (name, breadcrumb, *All topics*) and one screen at a time. Nothing plays until a route is chosen, and only the part that is playing is on screen.
 
-1. **Choose a topic** — scenario list grouped as *Commercial* and *Government*.
-2. **Set it up with your data** — scenario-specific form (`inputs` in the registry): at least the viewer's institution name (it labels that institution's circle and appears in captions), currency and amount, plus scenario-specific fields (e.g. number of beneficiaries, regions, milestones). Values are kept per scenario while the page is open.
-3. **Choose the route to play** — *Today*, *With AFC/AST*, or *Side by side*. Then Play/Pause · Step · Restart · Speed (0.5×–4×); *Change topic* returns to step 1.
+1. **Topics** — square cards, grouped *Commercial* and *Government* (filter chips *All / Commercial / Government*). A card shows number, name and a one-line subtitle; a ✓ mark appears once Today or With AFC has been watched with the current details.
+2. **Topic + your details** — title, short description, the two routes by name, and a form of the viewer's own details (`inputs` in the registry): at least the institution name (it labels that institution's circle and appears in captions), currency and amount, plus scenario-specific fields (number of beneficiaries, regions, milestones…). *Next →* sits in the bottom-right corner. Values are kept per scenario while the page is open; changing them clears earlier ✓ marks for that topic.
+3. **Today or With AFC** — two large choices (with a small drawing each) and a line repeating the viewer's details.
+4. **Play** — only the chosen route, fitted to the window: header with the clock, the animation, progress rail, caption, five live metrics, then *Pause/Play · Step · Restart · Speed (0.5×–4×) · Legend*. When the route ends, a *Continue →* button appears.
+5. **Result window** — *Continue* opens a translucent window over the finished animation: **what happened** (the route's closing sentence), **why** (a short explanation, per route), and **results** (the route's metrics). Buttons: *Replay*, *Choose another topic*, and *Next: With AFC →* after Today (or *Next: how it runs today →* if With AFC was watched first). After the second route the window shows both routes **side by side** in one table. The × closes the window to look at the animation again; *Show result* reopens it.
 
-Respects `prefers-reduced-motion`. Works at phone width. A `#<key>` link opens a topic directly at step 2.
+Respects `prefers-reduced-motion`. Works at phone width (the window is taller than wide, the animation scrolls sideways inside it). A `#<key>` link opens a topic directly at step 2; `Esc` closes the result window and the legend; `Space` plays/pauses.
 
 ## 6. Numbers and claims policy
 

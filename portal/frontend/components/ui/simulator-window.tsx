@@ -3,10 +3,10 @@
 import { useCallback, useEffect, useRef, useState } from 'react';
 
 /**
- * Settlement Simulator embedded in a site page. The frame is transparent: the
- * simulator's controls render in the site's dark style over the animated
- * background, and only the animation tracks are drawn as white windows.
- * The embedded page (same origin) reports its content height.
+ * Settlement Simulator embedded in a site page. The iframe is transparent: the
+ * simulator draws one fixed-size white window (topics → details → route → play
+ * → result) over the site's animated background. The embedded page (same
+ * origin) reports its content height.
  */
 export function SimulatorWindow({ src, title }: { src: string; title: string }) {
   const frame = useRef<HTMLIFrameElement>(null);
