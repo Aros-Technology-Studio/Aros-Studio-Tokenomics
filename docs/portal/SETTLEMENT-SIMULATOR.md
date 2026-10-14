@@ -4,7 +4,7 @@
 **Date:** 2026-10-09 · updated 2026-10-14
 **Owner decisions captured:** 2026-10-09 (chat with product owner).
 **Surface:** Public showcase (`docs/portal/PUBLIC-SHOWCASE-SITE.md`). UI language: English (other packs later).
-**Page:** `/simulator` is a site page (`portal/frontend/app/simulator/page.tsx`) with the site navigation and animated background; it frames the simulator in a window (`components/ui/simulator-window.tsx`). The simulator itself is a self-contained static file, `portal/frontend/public/embed/settlement-simulator.html` (no backend calls), embedded with `?embed=1` (no own header, scaled to 88%, reports its height to the window) and also opened full screen from the window bar. Linked from the TECHNOlogic hub (`/technologic`).
+**Page:** `/simulator` is a site page (`portal/frontend/app/simulator/page.tsx`, site navigation and animated background). The simulator is a self-contained static file, `portal/frontend/public/embed/settlement-simulator.html` (no backend calls), embedded through a **transparent** same-origin frame (`components/ui/simulator-window.tsx`, `?embed=1`). In embed mode the simulator's own controls (topics, setup form, routes, playback) take the site's dark glass style and fonts over the animated background, and **only the animation tracks, the result table and the legend are white windows** (title bar with three dots), slightly scaled down (90%). The embedded page reports its height to the frame. An *Open full screen* link opens the standalone white version. Linked from the TECHNOlogic hub (`/technologic`).
 
 ## 1. Purpose
 

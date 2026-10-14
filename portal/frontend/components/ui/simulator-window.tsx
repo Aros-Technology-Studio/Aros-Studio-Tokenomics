@@ -3,8 +3,10 @@
 import { useCallback, useEffect, useRef, useState } from 'react';
 
 /**
- * Settlement Simulator in a site "window": the static simulator page is embedded
- * (same origin) and reports its content height, so the window grows with it.
+ * Settlement Simulator embedded in a site page. The frame is transparent: the
+ * simulator's controls render in the site's dark style over the animated
+ * background, and only the animation tracks are drawn as white windows.
+ * The embedded page (same origin) reports its content height.
  */
 export function SimulatorWindow({ src, title }: { src: string; title: string }) {
   const frame = useRef<HTMLIFrameElement>(null);
@@ -34,21 +36,15 @@ export function SimulatorWindow({ src, title }: { src: string; title: string }) 
   }, [measure]);
 
   return (
-    <div className="sim-window">
-      <div className="sim-window__bar">
-        <span className="sim-window__dots" aria-hidden="true">
-          <i />
-          <i />
-          <i />
-        </span>
-        <span className="sim-window__title">{title}</span>
-        <a className="sim-window__open" href={src} target="_blank" rel="noopener noreferrer">
-          Full screen ↗
+    <div className="sim-embed">
+      <div className="sim-embed__bar">
+        <a className="sim-embed__open" href={src} target="_blank" rel="noopener noreferrer">
+          Open full screen ↗
         </a>
       </div>
       <iframe
         ref={frame}
-        className="sim-window__frame"
+        className="sim-embed__frame"
         src={`${src}?embed=1`}
         title={title}
         style={{ height }}
