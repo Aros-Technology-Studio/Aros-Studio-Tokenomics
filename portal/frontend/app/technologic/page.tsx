@@ -46,7 +46,7 @@ export default function TechnologicPage() {
         </div>
 
         <p className="home-hero__lead" style={{ marginTop: 32 }}>
-          <a href="/simulator">Settlement Simulator →</a>{' '}
+          <Link href="/simulator">Settlement Simulator →</Link>{' '}
           <span className="tl-card__go" style={{ marginTop: 0 }}>
             the same process today and with AFC / AST, side by side
           </span>

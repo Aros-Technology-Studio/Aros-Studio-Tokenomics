@@ -1,10 +1,10 @@
 # Settlement Simulator — specification
 
-**Status:** Spec v0.3 — on the portal at `/simulator` (scenarios 01–02 visible; 03–04 hidden pending owner decision). Presentation only.
-**Date:** 2026-10-09 · updated 2026-10-12
+**Status:** Spec v0.4 — interactive (topic → own data → route), framed in the site at `/simulator`; commercial scenarios 01–03 plus government scenarios G01–G12 (§12). Presentation only.
+**Date:** 2026-10-09 · updated 2026-10-14
 **Owner decisions captured:** 2026-10-09 (chat with product owner).
 **Surface:** Public showcase (`docs/portal/PUBLIC-SHOWCASE-SITE.md`). UI language: English (other packs later).
-**Page:** `portal/frontend/public/simulator/index.html` (static, self-contained, no backend calls), served at `/simulator` via a rewrite in `portal/frontend/next.config.ts`; linked from the TECHNOlogic hub (`/technologic`).
+**Page:** `/simulator` is a site page (`portal/frontend/app/simulator/page.tsx`) with the site navigation and animated background; it frames the simulator in a window (`components/ui/simulator-window.tsx`). The simulator itself is a self-contained static file, `portal/frontend/public/embed/settlement-simulator.html` (no backend calls), embedded with `?embed=1` (no own header, scaled to 88%, reports its height to the window) and also opened full screen from the window bar. Linked from the TECHNOlogic hub (`/technologic`).
 
 ## 1. Purpose
 
@@ -103,7 +103,13 @@ Participants: **Anchor A**, **Correspondent (FX executor)**, **Anchor B**. Above
 
 ## 5. Controls
 
-Mode (`Today` / `With AFC` / `Side by side`) · From currency · To currency · Amount · Play/Pause · Step · Restart · Speed (1×, 2×, 4×). Respects `prefers-reduced-motion` (rings stop spinning, pulses jump). Works at phone width.
+The viewer drives the simulator in three steps (owner request, 2026-10-14); nothing plays until a route is chosen:
+
+1. **Choose a topic** — scenario list grouped as *Commercial* and *Government*.
+2. **Set it up with your data** — scenario-specific form (`inputs` in the registry): at least the viewer's institution name (it labels that institution's circle and appears in captions), currency and amount, plus scenario-specific fields (e.g. number of beneficiaries, regions, milestones). Values are kept per scenario while the page is open.
+3. **Choose the route to play** — *Today*, *With AFC/AST*, or *Side by side*. Then Play/Pause · Step · Restart · Speed (0.5×–4×); *Change topic* returns to step 1.
+
+Respects `prefers-reduced-motion`. Works at phone width. A `#<key>` link opens a topic directly at step 2.
 
 ## 6. Numbers and claims policy
 
@@ -117,7 +123,7 @@ Mode (`Today` / `With AFC` / `Side by side`) · From currency · To currency · 
 
 ## 7. Scenarios 02–04
 
-> **Visibility (2026-10-12):** scenarios 03 (letter of credit) and 04 (bulk payouts) are **hidden** (`hidden: true` in the scenario registry). They were proposed by the assistant, not taken from the owner's portal text, and the owner questioned them. The owner's portal text (Notion, "Текст для контента на портал Aros Studio") lists other scenarios: last mile, digital-assets bridge, Nostro capital unlocking, new roads, and platform integrations — see §8.
+> **Visibility (2026-10-14, owner decision):** letter of credit and bulk payouts are **shown again** (now numbered 02 and 03 under *Commercial*). Asset tokenization is **hidden** (`hidden: true`): the owner rejected the current version; it stays in code for a possible rework.
 
 Every scenario keeps the same rules: identical participants in both tracks where they exist in reality, illustrative clocks, and AFC/AST drawn without custody.
 
@@ -200,3 +206,24 @@ Follow-up for ops: turn `/opt/ast-portal` into a git checkout (or deploy images 
 ## 11. Visual polish (2026-10-12, owner request)
 
 Check cards are level diagram callouts (no tilt), with a hairline under the issuer, check badges, a pointer toward their node, and a neon-green glow once the check has passed; failed checks glow red. The landing-page hero shift was scoped to the home page and capped so content never leaves the screen (it had pushed `/technologic` and narrow screens off the left edge).
+
+## 12. Government scenarios (G01–G12)
+
+Source: owner's research in Notion, "04 — Государственный пакет AFC/AST" (12 state scenarios with buyer, effect and main risk; reference procurement flow) and "03 — Сегменты аудитории и сквозные финансовые процессы" (sections E and F). Each scenario follows §4.3 and §6 plus these state-specific rules: the state keeps law, money and decisions; eligibility, assessment, clearance and inspections are done by the responsible authority on its own data; nobody is denied automatically (human review / appeal path); evidence that releases money is signed by an independent verifier; disputes put the process on hold; after external finality only compensation, never erasure; CBDC stays a central-bank liability and bond title stays with the registry/CSD; AFC never claims cross-system atomicity, sanctions circumvention or replacement of national infrastructure.
+
+| No | Scenario | Buyer | Effect | Main risk |
+|----|----------|-------|--------|-----------|
+| G01 | Targeted benefits | Ministry of Finance / social protection | Less leakage | Eligibility errors, discrimination |
+| G02 | Government procurement | Treasury | Milestone-linked payment | Oracle quality, corruption |
+| G03 | Taxes and refunds | Tax authority / treasury | Fast reconciliation | Erroneous automation |
+| G04 | Customs | Customs / banks | Duty and payment in sync | Trade-data secrecy |
+| G05 | Intergovernmental transfers | Ministry of Finance / regions | Traceability | Politicised conditions |
+| G06 | Disaster relief | Government / donors | Fast targeted payouts | Identity exclusion |
+| G07 | Aid and grants | IFIs / ministries | Impact evidence | Privacy, local capacity |
+| G08 | CBDC ↔ deposits | Central bank / banks | Interoperability | Monetary and legal finality |
+| G09 | Tokenised sovereign bonds | Debt office / CSD | DvP coordination and reporting | Securities law |
+| G10 | Carbon / energy subsidy | Ministries | Evidence-linked finance | Data / oracle quality |
+| G11 | State-owned enterprise treasury | Holdings / banks | Liquidity visibility | Concentration |
+| G12 | Cross-border trade corridor | Central banks / customs / banks | Faster compliant settlement | Sanctions, geopolitics |
+
+Per-scenario step tables follow (§12.1–12.12).

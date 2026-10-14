@@ -1,5 +1,5 @@
 <!doctype html>
-<!-- Settlement Simulator — spec: docs/portal/SETTLEMENT-SIMULATOR.md. Static page served at /simulator (next.config.ts rewrite). Presentation only: no API calls, no mint. -->
+<!-- Settlement Simulator — spec: docs/portal/SETTLEMENT-SIMULATOR.md. Embedded by the portal page /simulator (app/simulator/page.tsx) via ?embed=1; also opens full screen. Presentation only: no API calls, no mint. -->
 <html lang="en">
 <head>
 <meta charset="utf-8">
@@ -7,6 +7,7 @@
 <meta name="description" content="Settlement Simulator: the same institutional process today and with AFC / AST, side by side. Illustrative model.">
 <link rel="icon" href="/favicon.png">
 <style>html{-webkit-text-size-adjust:100%}body{margin:0}img{max-width:100%}[hidden]{display:none!important}:root{padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}</style>
+<script>if(/[?&]embed=1(&|$)/.test(location.search))document.documentElement.classList.add('embed')</script>
 <title>Settlement Simulator</title>
 <style>
 /* Open Sauce Sans (SIL OFL 1.1, marcologous/Open-Sauce-Fonts), embedded: not on Google Fonts. */
@@ -23,6 +24,7 @@
   color-scheme:light;
 }
 *{box-sizing:border-box}
+[hidden]{display:none!important}
 html,body{background:var(--bg);color:var(--ink)}
 body{font-family:var(--font);font-size:16px;line-height:1.45;padding-inline:16px;padding-block:32px 48px}
 .wrap{max-width:1180px;margin:0 auto;display:grid;gap:24px}
@@ -33,7 +35,14 @@ header{display:grid;gap:8px}
 h1{font-size:clamp(38px,5.4vw,64px);line-height:.95;font-weight:700;letter-spacing:-.025em;margin:0;text-wrap:balance}
 .lede{font-size:19px;color:var(--muted);max-width:64ch;margin:6px 0 0;font-weight:300;text-wrap:pretty}
 
-.tabs{display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:0;border-top:1px solid var(--ink);margin-top:14px}
+.tabs{display:grid;gap:18px;margin-top:14px}
+.tabgroup{display:grid;gap:0}
+.tabgroup__label{font-size:12px;letter-spacing:.16em;text-transform:uppercase;color:var(--muted);font-weight:500;padding-bottom:8px;border-bottom:1px solid var(--ink)}
+.tabs-row{display:grid;grid-template-columns:repeat(auto-fill,minmax(220px,1fr));column-gap:18px}
+.tabgroup--dense .tabs-row{grid-template-columns:repeat(auto-fill,minmax(190px,1fr))}
+.tabgroup--dense .tab .nm{font-size:16px}
+.tabgroup--dense .tab{padding:10px 12px 9px 0}
+.tabgroup--dense .tab[aria-selected="true"]{padding-bottom:7px}
 .tab{font:inherit;text-align:left;background:var(--bg);color:var(--ink);border:0;border-bottom:1px solid var(--line);padding:14px 16px 12px 0;cursor:pointer;display:grid;gap:2px;position:relative}
 .tab .no{font-size:12px;letter-spacing:.14em;color:var(--muted)}
 .tab .nm{font-size:19px;font-weight:500;line-height:1.15}
@@ -42,6 +51,23 @@ h1{font-size:clamp(38px,5.4vw,64px);line-height:.95;font-weight:700;letter-spaci
 .tab[aria-selected="true"] .nm{font-weight:700}
 .tab:hover .nm{text-decoration:underline;text-underline-offset:4px;text-decoration-thickness:1px}
 
+.step{display:grid;gap:14px;padding-top:6px}
+.step__head{display:flex;align-items:center;gap:12px;flex-wrap:wrap}
+.step__head h2{margin:0;font-size:22px;font-weight:600;letter-spacing:-.01em}
+.step__no{display:inline-grid;place-items:center;width:28px;height:28px;border-radius:50%;border:1.5px solid var(--ink);font-size:14px;font-weight:600;flex:none}
+.linkbtn{font:inherit;font-size:14px;background:none;border:0;color:var(--muted);cursor:pointer;margin-left:auto;padding:4px 0}
+.linkbtn:hover{color:var(--ink);text-decoration:underline;text-underline-offset:3px}
+.topic{display:grid;gap:4px}
+.topic__name{font-size:26px;font-weight:600;letter-spacing:-.01em}
+.topic__lede{margin:0;font-size:17px;color:var(--muted);max-width:72ch;font-weight:300}
+.setup{display:flex;flex-wrap:wrap;gap:14px 20px;align-items:end;padding:16px;border:1px solid var(--line);border-radius:12px;background:var(--soft)}
+.setup .field small{font-size:12px;color:var(--muted)}
+.setup input[type=text]{width:14rem}
+.routes{display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:12px}
+.route{font:inherit;text-align:left;display:grid;gap:8px;justify-items:start;padding:16px 18px;border:1px solid var(--ink);border-radius:12px;background:var(--bg);color:var(--ink);cursor:pointer}
+.route:hover{background:var(--soft)}
+.route[aria-pressed="true"]{box-shadow:inset 0 0 0 2px var(--ink);background:var(--soft)}
+.route__t{font-size:17px;font-weight:500;line-height:1.25}
 .controls{display:flex;flex-wrap:wrap;gap:14px 20px;align-items:end;padding-block:16px;border-bottom:1px solid var(--line)}
 .field{display:grid;gap:5px;min-width:0}
 .field>span{font-size:12px;letter-spacing:.12em;text-transform:uppercase;color:var(--muted)}
@@ -95,6 +121,10 @@ button:focus-visible,select:focus-visible,input:focus-visible{outline:2px solid 
 .note{font-size:13px;color:var(--muted);max-width:92ch;margin:0;font-weight:300}
 .note a{color:var(--ink)}
 @media (max-width:640px){.play{margin-left:0}.clock{margin-left:0;width:100%}.caption{font-size:17px}}
+/* Embedded in the portal window (/simulator): page header comes from the site; content scaled down a little. */
+html.embed body{zoom:.88;padding-block:22px 30px}
+html.embed header .eyebrow,html.embed header h1,html.embed header .lede{display:none}
+html.embed .tabs{margin-top:0}
 </style>
 </head>
 <body>
@@ -102,21 +132,28 @@ button:focus-visible,select:focus-visible,input:focus-visible{outline:2px solid 
   <header>
     <div class="eyebrow"><a href="/technologic">Aros Technologic</a> · AFC &amp; AST</div>
     <h1>Settlement Simulator</h1>
-    <p class="lede" id="lede"></p>
-    <div class="tabs" role="tablist" aria-label="Scenarios" id="tabs"></div>
+    <p class="lede">Pick a topic, set it up with your own data, then choose the route to play: how it runs today, with AFC, or both side by side.</p>
   </header>
 
-  <section class="controls" aria-label="Simulation controls">
-    <div class="field"><span>View</span>
-      <div class="seg" role="group" aria-label="View" id="modeSeg">
-        <button type="button" data-mode="today" aria-pressed="false">Today</button>
-        <button type="button" data-mode="next" aria-pressed="false" id="nextModeBtn">With AFC</button>
-        <button type="button" data-mode="both" aria-pressed="true">Side by side</button>
-      </div>
+  <section class="step" id="stepPick" aria-labelledby="pickH">
+    <div class="step__head"><span class="step__no">1</span><h2 id="pickH">Choose a topic</h2></div>
+    <div class="tabs" id="tabs"></div>
+  </section>
+
+  <section class="step" id="stepSetup" aria-labelledby="setupH" hidden>
+    <div class="step__head"><span class="step__no">2</span><h2 id="setupH">Set it up with your data</h2>
+      <button type="button" class="linkbtn" id="changeTopic">← Change topic</button></div>
+    <div class="topic"><div class="topic__name" id="topicName"></div><p class="topic__lede" id="lede"></p></div>
+    <form class="setup" id="setupForm" autocomplete="off"></form>
+    <div class="step__head"><span class="step__no">3</span><h2>Choose the route to play</h2></div>
+    <div class="routes" id="routes">
+      <button class="route" data-mode="today" type="button" aria-pressed="false"><span class="route__tag tag today">Today</span><span class="route__t" id="routeToday"></span></button>
+      <button class="route" data-mode="next" type="button" aria-pressed="false"><span class="route__tag tag next" id="routeNextTag">With AFC</span><span class="route__t" id="routeNext"></span></button>
+      <button class="route" data-mode="both" type="button" aria-pressed="false"><span class="route__tag tag">Side by side</span><span class="route__t">Both routes from the same start</span></button>
     </div>
-    <label class="field" id="fromField"><span>Currency</span><select id="from"></select></label>
-    <label class="field" id="toField"><span>Paid out in</span><select id="to"></select></label>
-    <label class="field"><span id="amountLabel">Amount</span><input id="amount" type="number" min="1" step="1000" value="1000000"></label>
+  </section>
+
+  <section class="controls" id="runControls" aria-label="Simulation controls" hidden>
     <label class="field"><span>Speed</span>
       <select id="speed"><option value="0.5">0.5×</option><option value="1" selected>1×</option><option value="2">2×</option><option value="4">4×</option></select>
     </label>
@@ -342,7 +379,7 @@ function makeNode(T, o){
   const flash = svgEl('circle',{r:r-3, fill:'#FFFFFF', opacity:0}, body);
   const labels = svgEl('g', null, g);
   const right = o.labelPos === 'right';
-  const l1 = svgEl('text',{x:right ? r+14 : 0, y:right ? -2 : r+40, 'text-anchor':right ? 'start' : 'middle', 'font-size':o.small ? 17 : 19, 'font-weight':600, fill:C.ink}, labels); l1.textContent = o.label;
+  const l1 = svgEl('text',{x:right ? r+14 : 0, y:right ? -2 : r+40, 'text-anchor':right ? 'start' : 'middle', 'font-size':o.small ? 17 : 19, 'font-weight':600, fill:C.ink}, labels); l1.textContent = o.label.length > 22 ? o.label.slice(0, 21) + '…' : o.label;
   const l2 = svgEl('text',{x:right ? r+14 : 0, y:right ? 16 : r+59, 'text-anchor':right ? 'start' : 'middle', 'font-size':13, 'letter-spacing':1.2, fill:C.muted}, labels); l2.textContent = (o.sub || '').toUpperCase();
   const [lx, ly] = o.lockAt || [-48, -(r+30)];
   const lockG = svgEl('g',{opacity:0}, g);
@@ -587,61 +624,63 @@ const R = {
 
 /* ================= Scenario 01 · Cross-border payment ================= */
 function paymentToday(T, K){
+  const nA = T.cfg.v.org || 'Bank A', nB = T.cfg.v.bene || 'Bank B';
   const {from, to, amount} = T.cfg, fx = from !== to, Y = 220, amt = money(amount, from);
-  const A = makeNode(T, {x:110, y:Y, label:'Bank A', sub:'Originator'});
+  const A = makeNode(T, {x:110, y:Y, label:`${nA}`, sub:'Originator'});
   const C1 = makeNode(T, {x:370, y:Y, label:'Correspondent 1', sub:'Intermediary', hidden:true});
   const C2 = makeNode(T, {x:630, y:Y, label:'Correspondent 2', sub:fx ? 'Intermediary · FX' : 'Intermediary', hidden:true});
-  const B = makeNode(T, {x:890, y:Y, label:'Bank B', sub:'Beneficiary', hidden:true});
+  const B = makeNode(T, {x:890, y:Y, label:`${nB}`, sub:'Beneficiary', hidden:true});
   const coins = makeCoins(T.layers.tokens, from, 4, A.x, Y + 16);
-  const cycle = (n, lines, ringsCap, holdCap, sim) => { if (holdCap) K.hold(n, amt, holdCap); K.check(n, ringsCap, sim); K.stamp(n, lines, `Checks passed. ${n === A ? 'Bank A' : n === B ? 'Bank B' : n === C1 ? 'Correspondent 1' : 'Correspondent 2'} stamps the payment.`); };
+  const cycle = (n, lines, ringsCap, holdCap, sim) => { if (holdCap) K.hold(n, amt, holdCap); K.check(n, ringsCap, sim); K.stamp(n, lines, `Checks passed. ${n === A ? '${nA}' : n === B ? '${nB}' : n === C1 ? 'Correspondent 1' : 'Correspondent 2'} stamps the payment.`); };
 
-  K.pulse(A, `Bank A receives a payment order: ${amt} to a client of Bank B, paid out in ${to}.`);
-  cycle(A, ['Clearing initiated', 'KYC/AML passed'], 'Bank A runs two checks in parallel: KYC/AML screening (violet) and the Nostro accounting entry (blue).', 'Bank A puts the client’s funds on hold. They leave circulation but have not moved anywhere.', 2);
-  K.travel(A, C1, makeEnvelope(T.layers.tokens, 1), 'Bank A sends an MT103 message. Correspondent 1 appears on the route.', 1, {count:'msgs'});
+  K.pulse(A, `${nA} receives a payment order: ${amt} to a client of ${nB}, paid out in ${to}.`);
+  cycle(A, ['Clearing initiated', 'KYC/AML passed'], `${nA} runs two checks in parallel: KYC/AML screening (violet) and the Nostro accounting entry (blue).`, `${nA} puts the client’s funds on hold. They leave circulation but have not moved anywhere.`, 2);
+  K.travel(A, C1, makeEnvelope(T.layers.tokens, 1), `${nA} sends an MT103 message. Correspondent 1 appears on the route.`, 1, {count:'msgs'});
   cycle(C1, ['Nostro rebalanced', 'Sanctions clear'], 'Correspondent 1 screens sanctions and fraud under its own rules and rebalances Nostro/Loro accounts.', 'Correspondent 1 reserves liquidity against the payment. Two institutions now hold the same amount.', 6.5);
   K.travel(C1, C2, makeEnvelope(T.layers.tokens, 2), 'The message, now carrying two stamps, moves on to Correspondent 2.', 2, {count:'msgs'});
   cycle(C2, fx ? ['Loro rebalanced', `FX ${from}→${to} quoted`] : ['Loro rebalanced', 'Liquidity confirmed'],
     fx ? `Correspondent 2 checks compliance in its jurisdiction, rebalances Loro accounts and quotes FX ${from}→${to}.` : 'Correspondent 2 checks compliance in its jurisdiction, rebalances Loro accounts and confirms liquidity.',
     'Correspondent 2 reserves liquidity too. Three institutions now hold the same payment.', 9.5);
-  K.travel(C2, B, makeEnvelope(T.layers.tokens, 3), 'The message reaches Bank B, the beneficiary’s bank.', 2, {count:'msgs'});
-  cycle(B, ['Beneficiary verified', 'Credit ready'], 'Bank B screens the beneficiary. The funds are still not credited.', null, 8);
+  K.travel(C2, B, makeEnvelope(T.layers.tokens, 3), `The message reaches ${nB}, the beneficiary’s bank.`, 2, {count:'msgs'});
+  cycle(B, ['Beneficiary verified', 'Credit ready'], `${nB} screens the beneficiary. The funds are still not credited.`, null, 8);
 
   const ack = makeSpark(T.layers.tokens, C.env, 6);
   const ackLeg = (a, b, cap) => K.add({dur:1150, sim:2, cap, start:() => T.m.msgs++, run:p => { ack.set(lerp(a.x, b.x, ease(p)), Y, 1); b.releaseLock(seg(p,.8,1)); }, end:() => { T.holdOff(); if (b === A) ack.set(b.x, Y, 0); }});
-  ackLeg(B, C2, 'Bank B sends an acknowledgement back down the chain. Correspondent 2 releases its hold.');
+  ackLeg(B, C2, `${nB} sends an acknowledgement back down the chain. Correspondent 2 releases its hold.`);
   ackLeg(C2, C1, 'The acknowledgement reaches Correspondent 1. Its hold is released.');
-  ackLeg(C1, A, 'The acknowledgement reaches Bank A. The client’s funds are released for debit.');
+  ackLeg(C1, A, `The acknowledgement reaches ${nA}. The client’s funds are released for debit.`);
 
   const usdAmt = T.amountUSD;
   K.coins(coins, A, C1, 'Funds move down the chain. Correspondent 1 takes its fee.', .7, {fee:`−${usd(FEE.corr)}`, end:() => T.addFee(FEE.corr)});
   K.coins(coins, C1, C2, fx ? `Correspondent 2 converts ${from} into ${to}, takes its fee and the FX spread.` : 'Correspondent 2 takes its fee.', .7,
     {fee:fx ? `−${usd(FEE.corr)} · spread` : `−${usd(FEE.corr)}`, arrive:() => { if (fx) { coins.recur(to); C2.setFlash(.6); setTimeout(() => C2.setFlash(0), 260); } },
      end:() => { T.addFee(FEE.corr); if (fx) T.addFee(usdAmt == null ? null : usdAmt*FEE.spread); }});
-  K.coins(coins, C2, B, 'Bank B credits the beneficiary, net of its lifting fee.', .7, {fee:`−${usd(FEE.lifting)}`, end:() => T.addFee(FEE.lifting)});
+  K.coins(coins, C2, B, `${nB} credits the beneficiary, net of its lifting fee.`, .7, {fee:`−${usd(FEE.lifting)}`, end:() => T.addFee(FEE.lifting)});
 
   T.rows = () => [R.holds(T), R.onHold(T), R.holdTime(T), R.msgs(T), R.fees(T)];
   T.extraSummary = () => [['Fees & FX spread', T.feesText()]];
   T.doneText = 'Settled. Three institutions held the same funds for most of the route, and every hop added a message, a check and a fee.';
 }
 function paymentAfc(T, K){
+  const nA = T.cfg.v.org || 'Bank A', nB = T.cfg.v.bene || 'Bank B';
   const {from, to, amount} = T.cfg, fx = from !== to, Y = 250, amt = money(amount, from);
   const layer = afcLayer(T);
-  const A = makeNode(T, {x:150, y:Y, label:'Anchor A', sub:'Originator'});
+  const A = makeNode(T, {x:150, y:Y, label:nA, sub:'Anchor · originator'});
   const M = makeNode(T, {x:500, y:Y, label:'Correspondent', sub:fx ? 'FX executor' : 'Executor'});
-  const B = makeNode(T, {x:850, y:Y, label:'Anchor B', sub:'Beneficiary'});
+  const B = makeNode(T, {x:850, y:Y, label:nB, sub:'Anchor · beneficiary'});
   layer.connect([A, M, B]); rail(T, A, M); rail(T, M, B);
   const coins = makeCoins(T.layers.tokens, from, 4, A.x, Y + 16);
 
-  K.pulse(A, `Anchor A receives the same payment order: ${amt} to a client of Anchor B, paid out in ${to}.`);
-  K.check(A, 'Anchor A completes its own KYC/AML and sanctions screening before it calls AFC. Compliance stays with the initiating institution.', .5, 2000);
-  K.api(A, layer, 'Anchor A submits the cleared order to AFC as one API call. No message chain, no holds at intermediaries.');
+  K.pulse(A, `${nA} receives the same payment order: ${amt} to a client of ${nB}, paid out in ${to}.`);
+  K.check(A, `${nA} completes its own KYC/AML and sanctions screening before it calls AFC. Compliance stays with the initiating institution.`, .5, 2000);
+  K.api(A, layer, `${nA} submits the cleared order to AFC as one API call. No message chain, no holds at intermediaries.`);
   K.onePass([A, M, B], layer, fx ? 'AFC coordinates one pass: each counterparty confirms its own account, liquidity and FX quote at the same time.' : 'AFC coordinates one pass: each counterparty confirms its own account and liquidity at the same time.');
   K.combined(['Contract terms', 'Accounts & liquidity', fx ? `FX ${from}→${to} quoted` : 'Settlement route'],
     'One combined confirmation: contract terms, accounts, liquidity and FX quote, each attested by its owner.', [210,58], .5, 'Confirmed by participants', [[A,'ok'],[M,'ok'],[B,'ok']]);
   K.pot(layer, 'Proof of Transaction: NodeChain (AST) records the verified execution. The AST fee is settled post-factum under the Canon.');
   K.coins(coins, A, M, fx ? `Anchors settle on their own books. The executor converts ${from} into ${to} at its quoted rate.` : 'Anchors settle on their own books through the executor.', 1.5,
     {fee:fx ? 'spread' : null, arrive:() => { if (fx) { coins.recur(to); M.setFlash(.6); setTimeout(() => M.setFlash(0), 260); } }, end:() => { if (fx) T.addFee(T.amountUSD == null ? null : T.amountUSD*FEE.spread); }});
-  K.coins(coins, M, B, 'Anchor B credits the beneficiary. AFC never held the funds.', 1.5);
+  K.coins(coins, M, B, `${nB} credits the beneficiary. AFC never held the funds.`, 1.5);
 
   T.rows = () => [R.holds(T), R.onHold(T), R.holdTime(T), R.api(T), R.fees(T)];
   T.extraSummary = () => [['Fees & FX spread', T.feesText()]];
@@ -711,10 +750,11 @@ function tokenAst(T, K){
 
 /* ================= Scenario 03 · Letter of credit ================= */
 function lcToday(T, K){
+  const nA = T.cfg.v.org || 'Issuing bank', nE = T.cfg.v.exporter || 'Exporter';
   const {from, to, amount} = T.cfg, fx = from !== to, Y = 220, amt = money(amount, from);
-  const A = makeNode(T, {x:110, y:Y, label:'Issuing bank', sub:'Importer’s bank'});
+  const A = makeNode(T, {x:110, y:Y, label:nA, sub:'Issuing · importer’s bank'});
   const Adv = makeNode(T, {x:370, y:Y, label:'Advising bank', sub:'Exporter’s bank', hidden:true});
-  const E = makeNode(T, {x:630, y:Y, label:'Exporter', sub:'Seller', hidden:true});
+  const E = makeNode(T, {x:630, y:Y, label:nE, sub:'Exporter · seller', hidden:true});
   const Car = makeNode(T, {x:890, y:Y, label:'Carrier', sub:'Shipping line', hidden:true});
   const coins = makeCoins(T.layers.tokens, from, 4, A.x, Y + 16);
   const box = makeBox(T.layers.tokens);
@@ -743,11 +783,12 @@ function lcToday(T, K){
   T.doneText = 'Paid. The importer’s funds stayed blocked for weeks, and paper documents crossed the route twice before money moved.';
 }
 function lcAfc(T, K){
+  const nA = T.cfg.v.org || 'Issuing bank', nE = T.cfg.v.exporter || 'Exporter';
   const {from, to, amount} = T.cfg, fx = from !== to, Y = 250, amt = money(amount, from);
   const layer = afcLayer(T);
-  const A = makeNode(T, {x:110, y:Y, label:'Issuing bank', sub:'Anchor'});
+  const A = makeNode(T, {x:110, y:Y, label:nA, sub:'Issuing · anchor'});
   const Adv = makeNode(T, {x:370, y:Y, label:'Advising bank', sub:'Anchor'});
-  const E = makeNode(T, {x:630, y:Y, label:'Exporter', sub:'Seller'});
+  const E = makeNode(T, {x:630, y:Y, label:nE, sub:'Exporter · seller'});
   const Car = makeNode(T, {x:890, y:Y, label:'Carrier', sub:'e-B/L issuer'});
   layer.connect([A, Adv, E, Car]); rail(T, A, Adv); rail(T, Adv, E); rail(T, E, Car);
   const coins = makeCoins(T.layers.tokens, from, 4, A.x, Y + 16);
@@ -773,8 +814,9 @@ function lcAfc(T, K){
 
 /* ================= Scenario 04 · Bulk payouts ================= */
 function payrollToday(T, K){
+  const nE = T.cfg.v.org || 'Employer’s bank';
   const {from, amount} = T.cfg, Y = 230, amt = money(amount, from), part = money(amount/3, from);
-  const E = makeNode(T, {x:110, y:Y, label:'Employer’s bank', sub:'Payer'});
+  const E = makeNode(T, {x:110, y:Y, label:nE, sub:'Employer’s bank · payer'});
   const H = makeNode(T, {x:380, y:Y, label:'Clearing house', sub:'Batch / ACH', hidden:true});
   const X = makeNode(T, {x:720, y:90, r:44, labelPos:'right', label:'Bank X', sub:'Beneficiary', hidden:true});
   const Yb = makeNode(T, {x:720, y:230, r:44, labelPos:'right', label:'Bank Y', sub:'Beneficiary', hidden:true});
@@ -808,9 +850,10 @@ function payrollToday(T, K){
   T.doneText = 'Done, mostly. Two salaries arrived the next day; the third bounced and came back days later, after the money had already left.';
 }
 function payrollAfc(T, K){
+  const nE = T.cfg.v.org || 'Employer’s bank';
   const {from, amount} = T.cfg, Y = 290, amt = money(amount, from), part = money(amount/3, from);
   const layer = afcLayer(T, {busY:150, ncY:56});
-  const E = makeNode(T, {x:130, y:Y, r:50, label:'Employer’s bank', sub:'Anchor'});
+  const E = makeNode(T, {x:130, y:Y, r:50, label:nE, sub:'Employer’s bank · anchor'});
   const X = makeNode(T, {x:430, y:Y, r:48, label:'Bank X', sub:'Anchor'});
   const Yb = makeNode(T, {x:630, y:Y, r:48, label:'Bank Y', sub:'Anchor'});
   const Z = makeNode(T, {x:830, y:Y, r:48, label:'Bank Z', sub:'Anchor'});
@@ -834,67 +877,150 @@ function payrollAfc(T, K){
   T.doneText = 'Done. Two salaries paid in one pass; the closed account was caught before money moved, so there was nothing to return.';
 }
 
+/* ---------- government scenarios (G01–G12) ---------- */
+// Each fragment defines its two builders and pushes one registry entry into GOV.
+const GOV = [];
+/* @@GOV_FRAGMENTS@@ */
+
 /* ---------- scenario registry ---------- */
 const SCENARIOS = [
-  {key:'payment', no:'01', name:'Cross-border payment', sub:'SWIFT correspondent chain vs AFC', to:true, amountLabel:'Amount',
+  {key:'payment', no:'01', group:'Commercial', name:'Cross-border payment', sub:'SWIFT correspondent chain vs AFC', to:true, amountLabel:'Amount',
+   inputs:[{id:'org', label:'Your bank (sender)', type:'text', def:'Bank A'}, {id:'bene', label:'Beneficiary’s bank', type:'text', def:'Bank B'}, {id:'from', label:'Send in', type:'currency', def:'USD'}, {id:'to', label:'Paid out in', type:'currency', def:'EUR'}, {id:'amount', label:'Amount', type:'amount', def:1000000}],
    lede:'One payment, two routes. First the correspondent chain banks use today, then the same institutions connected through the AFC protocol layer.',
    note:'Illustrative model. Timings, fees and FX rates are examples, not quotes, service levels or performance claims. The "Today" track shows a slow multi-hop corridor: SWIFT reports that most payments reach the beneficiary bank within an hour, while the BIS found that slow routes can take more than two days (<a href="https://www.swift.com/news-events/press-releases/swifts-cross-border-payments-processing-speed-surpasses-g20-target" target="_blank" rel="noopener">SWIFT, 2023</a>; <a href="https://www.bis.org/cpmi/publ/swift_gpi.pdf" target="_blank" rel="noopener">BIS CPMI, 2022</a>). AFC is a logical process layer: it holds no funds, issues no money and is not a party to settlement. Anchors settle on their own books. The protocol (PoT) fee is shown without an amount until its tariff is set; it follows the AST Canon formula (amount × fee rate). NodeChain belongs to AST.',
    today:{tag:'Today', title:'Correspondent chain (SWIFT)', vbH:380, unit:'h', build:paymentToday},
    next:{tag:'With AFC', title:'Same institutions, one AFC layer', vbH:380, unit:'s', band:'Seconds to minutes', build:paymentAfc}},
-  {key:'tokenize', no:'02', name:'Asset tokenization', sub:'Paper title transfer vs AST', to:false, amountLabel:'Valuation',
+  {key:'tokenize', no:'—', hidden:true, group:'Commercial', name:'Asset tokenization', sub:'Paper title transfer vs AST', to:false, amountLabel:'Valuation',
+   inputs:[{id:'from', label:'Valuation currency', type:'currency', def:'USD'}, {id:'amount', label:'Valuation', type:'amount', def:1000000}],
    lede:'An institution sells a share of a real asset. Today the rights move on paper through a notary and a registry. With AST, a signed valuation passes Proof of Transaction and the rights live in NodeChain.',
    note:'Illustrative model; notarial and registry steps vary by jurisdiction and asset class. AST does not appraise assets: it accepts an already confirmed institutional valuation and mints strictly at that price (AST Canon §5.1–5.2). AST may hold only its own funds, so the investor pays the owner directly (Canon §4.4). The title registry keeps its role and receives a "tokenized" mark (Canon §5.3). Timings are examples, not quotes, service levels or performance claims; registry marking depends on the registry.',
    today:{tag:'Today', title:'Notary, escrow and registry', vbH:430, unit:'h', build:tokenToday},
    next:{tag:'With AST', title:'Signed package, PoT, NodeChain', vbH:430, unit:'s', band:'Seconds to minutes', build:tokenAst}},
-  {key:'lc', no:'03', hidden:true, name:'Letter of credit', sub:'Paper documents vs AFC contract', to:true, amountLabel:'LC amount',
+  {key:'lc', no:'02', group:'Commercial', name:'Letter of credit', sub:'Paper documents vs AFC contract', to:true, amountLabel:'LC amount',
+   inputs:[{id:'org', label:'Issuing bank (importer’s)', type:'text', def:'Issuing bank'}, {id:'exporter', label:'Exporter', type:'text', def:'Exporter'}, {id:'from', label:'LC currency', type:'currency', def:'USD'}, {id:'to', label:'Exporter paid in', type:'currency', def:'EUR'}, {id:'amount', label:'LC amount', type:'amount', def:1000000}],
    lede:'Trade finance. An importer’s bank guarantees payment to an exporter once shipment is proven. Today proof travels as paper, checked twice. With AFC, the terms and the evidence meet in one place.',
    note:'Illustrative model. UCP 600 (art. 14) allows each bank up to five banking days to examine documents; courier and review times vary. Voyage time is excluded from both clocks. Electronic bills of lading require carrier and legal support in the corridor. Banks keep their roles and their checks; AFC holds no funds and does not take credit risk.',
    today:{tag:'Today', title:'Documentary credit on paper', vbH:380, unit:'h', build:lcToday},
    next:{tag:'With AFC', title:'LC as a machine-readable contract', vbH:380, unit:'h', build:lcAfc}},
-  {key:'payroll', no:'04', hidden:true, name:'Bulk payouts', sub:'Overnight batch vs one AFC pass', to:false, amountLabel:'Batch total',
+  {key:'payroll', no:'03', group:'Commercial', name:'Bulk payouts', sub:'Overnight batch vs one AFC pass', to:false, amountLabel:'Batch total',
+   inputs:[{id:'org', label:'Employer’s bank', type:'text', def:'Employer’s bank'}, {id:'from', label:'Currency', type:'currency', def:'USD'}, {id:'amount', label:'Batch total', type:'amount', def:300000}],
    lede:'A payroll batch to three banks. Today it waits for a clearing window, and a bad account shows up days later as a return. With AFC, every bank confirms its account before money moves.',
    note:'Illustrative model. Clearing windows, cut-offs and return periods vary by scheme and country. Account checks are performed by each beneficiary bank on its own data; AFC orchestrates the requests and holds no funds.',
    today:{tag:'Today', title:'Batch file through a clearing house', vbH:460, unit:'h', build:payrollToday},
-   next:{tag:'With AFC', title:'One pass across all banks', vbH:420, unit:'s', band:'Seconds to minutes', build:payrollAfc}}
+   next:{tag:'With AFC', title:'One pass across all banks', vbH:420, unit:'s', band:'Seconds to minutes', build:payrollAfc}},
+  ...GOV
 ];
 
 /* ---------- app state, loop and controls ---------- */
-const state = {scn:SCENARIOS[0], mode:'both', playing:true, speed:1};
+const state = {scn:null, mode:'both', playing:false, speed:1, vals:{}};
 let tracks = [];
-function fillCurrencies(){
+
+/* Currency options (every ISO 4217 code the browser knows), built once. */
+let CUR_OPTS = null;
+function currencyOptions(){
+  if (CUR_OPTS) return CUR_OPTS;
   let codes = [];
   try { codes = Intl.supportedValuesOf('currency'); } catch { codes = Object.keys(RATES); }
   let names; try { names = new Intl.DisplayNames(['en'],{type:'currency'}); } catch { names = null; }
   const first = ['USD','EUR','GBP','CHF','JPY','CNY','AED','GEL'];
   const rest = codes.filter(c => !first.includes(c)).sort();
-  for (const sel of [$('#from'), $('#to')]) {
-    const add = (c, parent) => { const o = document.createElement('option'); o.value = c; o.textContent = c + ' — ' + (names ? names.of(c) : c); parent.appendChild(o); };
-    const g1 = document.createElement('optgroup'); g1.label = 'Common'; first.forEach(c => add(c, g1));
-    const g2 = document.createElement('optgroup'); g2.label = 'All currencies'; rest.forEach(c => add(c, g2));
-    sel.append(g1, g2);
-  }
-  $('#from').value = 'USD'; $('#to').value = 'EUR';
+  const opt = c => `<option value="${c}">${c} — ${(names ? names.of(c) : c).replace(/</g,'&lt;')}</option>`;
+  CUR_OPTS = `<optgroup label="Common">${first.map(opt).join('')}</optgroup><optgroup label="All currencies">${rest.map(opt).join('')}</optgroup>`;
+  return CUR_OPTS;
 }
+
+/* Step 1 — topics */
 function renderTabs(){
   const host = $('#tabs'); host.replaceChildren();
-  SCENARIOS.filter(s => !s.hidden).forEach(s => {
-    const b = document.createElement('button');
-    b.type = 'button'; b.className = 'tab'; b.setAttribute('role','tab'); b.setAttribute('aria-selected', String(s === state.scn));
-    b.innerHTML = `<span class="no">${s.no}</span><span class="nm"></span><span class="sb"></span>`;
-    b.querySelector('.nm').textContent = s.name; b.querySelector('.sb').textContent = s.sub;
-    b.addEventListener('click', () => { state.scn = s; try { history.replaceState(null, '', '#' + s.key); } catch {} renderTabs(); applyScenario(); });
-    host.appendChild(b);
+  const groups = [...new Set(SCENARIOS.filter(s => !s.hidden).map(s => s.group || 'Scenarios'))];
+  groups.forEach(gname => {
+    const list = SCENARIOS.filter(s => !s.hidden && (s.group || 'Scenarios') === gname);
+    const grp = document.createElement('div'); grp.className = 'tabgroup' + (list.length > 4 ? ' tabgroup--dense' : '');
+    const lab = document.createElement('div'); lab.className = 'tabgroup__label'; lab.textContent = `${gname} · ${list.length} scenario${list.length > 1 ? 's' : ''}`;
+    const row = document.createElement('div'); row.className = 'tabs-row'; row.setAttribute('role','tablist'); row.setAttribute('aria-label', gname);
+    grp.append(lab, row); host.appendChild(grp);
+    list.forEach(s => renderTab(s, row));
   });
 }
-function applyScenario(){
-  const s = state.scn;
-  $('#lede').textContent = s.lede; $('#note').innerHTML = s.note;
-  $('#toField').hidden = !s.to; $('#amountLabel').textContent = s.amountLabel;
-  $('#fromField span').textContent = s.to ? 'From' : 'Currency';
-  $('#nextModeBtn').textContent = s.next.tag;
-  state.playing = true; build();
+function renderTab(s, host){
+  const b = document.createElement('button');
+  b.type = 'button'; b.className = 'tab'; b.setAttribute('role','tab'); b.setAttribute('aria-selected', String(s === state.scn));
+  b.innerHTML = `<span class="no">${s.no}</span><span class="nm"></span><span class="sb"></span>`;
+  b.querySelector('.nm').textContent = s.name; b.querySelector('.sb').textContent = s.sub;
+  b.addEventListener('click', () => selectScenario(s, true));
+  host.appendChild(b);
 }
-function cfg(){ return {from:$('#from').value, to:state.scn.to ? $('#to').value : $('#from').value, amount:Math.max(1, Number($('#amount').value) || 1)}; }
+
+/* Step 2 — setup with the viewer's own data */
+function renderSetup(){
+  const s = state.scn, vals = state.vals[s.key] || {};
+  const f = $('#setupForm'); f.replaceChildren();
+  (s.inputs || []).forEach(inp => {
+    const lab = document.createElement('label'); lab.className = 'field';
+    const sp = document.createElement('span'); sp.textContent = inp.label; lab.appendChild(sp);
+    let el;
+    if (inp.type === 'currency') { el = document.createElement('select'); el.innerHTML = currencyOptions(); }
+    else if (inp.type === 'select') { el = document.createElement('select'); inp.options.forEach(o => { const op = document.createElement('option'); op.value = o; op.textContent = o; el.appendChild(op); }); }
+    else {
+      el = document.createElement('input');
+      if (inp.type === 'amount' || inp.type === 'number') { el.type = 'number'; el.min = inp.min ?? 1; if (inp.max) el.max = inp.max; el.step = inp.step ?? (inp.type === 'amount' ? 1000 : 1); }
+      else { el.type = 'text'; el.maxLength = inp.maxLength || 26; el.spellcheck = false; }
+    }
+    el.id = 'in-' + inp.id; el.name = inp.id; el.value = vals[inp.id] ?? inp.def;
+    lab.appendChild(el);
+    if (inp.hint) { const h = document.createElement('small'); h.textContent = inp.hint; lab.appendChild(h); }
+    f.appendChild(lab);
+  });
+}
+function readSetup(){
+  const s = state.scn, v = {};
+  (s.inputs || []).forEach(inp => {
+    const el = $('#in-' + inp.id); let x = el ? el.value : inp.def;
+    if (inp.type === 'amount' || inp.type === 'number') { x = Number(x); if (!isFinite(x) || x < (inp.min ?? 1)) x = inp.def; if (inp.max) x = Math.min(inp.max, x); }
+    else if (inp.type === 'text') { x = String(x || '').replace(/\s+/g, ' ').trim().slice(0, inp.maxLength || 26) || inp.def; }
+    v[inp.id] = x;
+  });
+  state.vals[s.key] = v; return v;
+}
+function cfg(){
+  const v = state.vals[state.scn.key] || {};
+  const from = v.from || 'USD';
+  return {from, to: v.to || from, amount: Number(v.amount) || 1000000, v};
+}
+function selectScenario(s, fromClick){
+  state.scn = s;
+  if (fromClick) { try { history.replaceState(null, '', '#' + s.key); } catch {} }
+  stopRun();
+  $('#topicName').textContent = `${s.no} · ${s.name}`;
+  $('#lede').textContent = s.lede; $('#note').innerHTML = s.note;
+  $('#routeToday').textContent = s.today.title;
+  $('#routeNextTag').textContent = s.next.tag; $('#routeNext').textContent = s.next.title;
+  renderSetup();
+  $('#stepPick').hidden = true; $('#stepSetup').hidden = false;
+  document.querySelectorAll('.route').forEach(r => r.setAttribute('aria-pressed', 'false'));
+  if (fromClick) $('#stepSetup').scrollIntoView({block:'start', behavior: reduce ? 'auto' : 'smooth'});
+}
+function showPick(){
+  stopRun(); state.scn = null;
+  try { history.replaceState(null, '', location.pathname + location.search); } catch {}
+  $('#stepPick').hidden = false; $('#stepSetup').hidden = true;
+  $('#note').innerHTML = GENERIC_NOTE;
+  renderTabs();
+}
+
+/* Step 3 — route, then run */
+function startRoute(mode){
+  readSetup();
+  state.mode = mode;
+  document.querySelectorAll('.route').forEach(r => r.setAttribute('aria-pressed', String(r.dataset.mode === mode)));
+  $('#runControls').hidden = false;
+  state.playing = true; build();
+  $('#runControls').scrollIntoView({block:'start', behavior: reduce ? 'auto' : 'smooth'});
+}
+function stopRun(){
+  tracks = []; $('#panels').replaceChildren(); $('#compare').hidden = true; compared = false;
+  $('#runControls').hidden = true; state.playing = false;
+}
 function build(){
   const host = $('#panels'); host.replaceChildren();
   const c = cfg(), s = state.scn;
@@ -921,6 +1047,7 @@ function renderCompare(){
   $('#compare').hidden = false;
 }
 function updatePlay(){
+  if (!tracks.length) return;
   const allDone = tracks.every(t => t.done);
   $('#playBtn').textContent = allDone ? 'Replay' : (state.playing ? 'Pause' : 'Play');
 }
@@ -928,7 +1055,7 @@ let last = performance.now();
 function loop(now){
   const dt = Math.min(64, now - last) * state.speed; last = now;
   for (const t of tracks) { if (state.playing && !t.paused) t.advance(dt); t.tick(now); }
-  if (state.playing && tracks.every(t => t.done || t.paused)) {
+  if (tracks.length && state.playing && tracks.every(t => t.done || t.paused)) {
     if (tracks.every(t => t.done)) state.playing = false;
     else { state.playing = false; tracks.forEach(t => t.paused = false); }
     updatePlay();
@@ -936,31 +1063,38 @@ function loop(now){
   renderCompare();
   requestAnimationFrame(loop);
 }
-document.querySelectorAll('#modeSeg button').forEach(b => b.addEventListener('click', () => {
-  state.mode = b.dataset.mode;
-  document.querySelectorAll('#modeSeg button').forEach(x => x.setAttribute('aria-pressed', String(x === b)));
-  state.playing = true; build();
-}));
-['#from', '#to', '#amount'].forEach(s => $(s).addEventListener('change', () => { state.playing = true; build(); }));
+const GENERIC_NOTE = 'Illustrative model. Timings, fees and FX rates are examples, not quotes, service levels or performance claims. AFC is a logical process layer: it holds no funds, issues no money and is not a party to settlement; licensed institutions keep their roles, checks and decisions. NodeChain belongs to AST.';
+
+$('#changeTopic').addEventListener('click', showPick);
+document.querySelectorAll('.route').forEach(r => r.addEventListener('click', () => startRoute(r.dataset.mode)));
+$('#setupForm').addEventListener('submit', e => { e.preventDefault(); startRoute('both'); });
 $('#speed').addEventListener('change', e => { state.speed = Number(e.target.value); });
 $('#playBtn').addEventListener('click', () => {
+  if (!tracks.length) return;
   if (tracks.every(t => t.done)) { state.playing = true; build(); return; }
   state.playing = !state.playing; tracks.forEach(t => t.paused = false); updatePlay();
 });
 $('#stepBtn').addEventListener('click', () => {
+  if (!tracks.length) return;
   if (tracks.every(t => t.done)) build();
   tracks.forEach(t => { t.paused = false; t.stopAfterStep = !t.done; });
   state.playing = true; updatePlay();
 });
-$('#restartBtn').addEventListener('click', () => { state.playing = true; build(); });
-document.addEventListener('keydown', e => { if (e.code === 'Space' && !['INPUT','SELECT','BUTTON'].includes(document.activeElement.tagName)) { e.preventDefault(); $('#playBtn').click(); } });
+$('#restartBtn').addEventListener('click', () => { if (!tracks.length) return; readSetup(); state.playing = true; build(); });
+document.addEventListener('keydown', e => { if (e.code === 'Space' && tracks.length && !['INPUT','SELECT','BUTTON','TEXTAREA'].includes(document.activeElement.tagName)) { e.preventDefault(); $('#playBtn').click(); } });
 
-fillCurrencies();
-const fromHash = SCENARIOS.find(s => !s.hidden && s.key === location.hash.slice(1));
-if (fromHash) state.scn = fromHash;
 renderTabs();
-applyScenario();
+$('#note').innerHTML = GENERIC_NOTE;
+const fromHash = SCENARIOS.find(s => !s.hidden && s.key === location.hash.slice(1));
+if (fromHash) selectScenario(fromHash, false);
 requestAnimationFrame(loop);
+
+// Embedded: tell the portal page how tall the content is, so its window fits without a second scrollbar.
+if (document.documentElement.classList.contains('embed') && window.parent !== window) {
+  const post = () => window.parent.postMessage({type:'aros-sim-height', h:Math.ceil(document.documentElement.scrollHeight)}, location.origin);
+  try { new ResizeObserver(post).observe(document.body); } catch {}
+  window.addEventListener('load', post); post();
+}
 })();
 </script>
 </body>
