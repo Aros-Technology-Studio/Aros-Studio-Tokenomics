@@ -1502,8 +1502,8 @@ button.primary {
 }
 
 /* ---- Settlement Simulator (/simulator) ----
-   Transparent frame: the simulator's controls blend into the site; its
-   animation tracks are white windows drawn by the simulator itself. */
+   Transparent iframe: the simulator draws its own white window (title bar,
+   one screen at a time) over the site's animated background. */
 .sim-embed {
   margin-top: 36px;
 }
