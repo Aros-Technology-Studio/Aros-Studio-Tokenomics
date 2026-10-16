@@ -207,7 +207,7 @@ function closeResult(){
 function showResult(){
   const s = state.scn, side = state.side, r = state.results[s.key] || {}, mine = r[side];
   if (!mine) return;
-  const other = side === 'today' ? 'next' : 'today', both = !!(r.today && r.next);
+  const both = !!(r.today && r.next);
   const labels = [...new Set([].concat(...['today','next'].filter(k => r[k]).map(k => r[k].rows.map(x => x[0]))))];
   const val = (k, l) => ((r[k].rows.find(x => x[0] === l)) || [, '—'])[1];
   let head, body;
