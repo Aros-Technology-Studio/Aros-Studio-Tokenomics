@@ -69,7 +69,7 @@ function g03Queue(T, x, y){
 
 /* ---------- Today: the real path, with every hand-off, check, hold and wait ---------- */
 function g03Today(T, K){
-  const {org, co, from, amount, pct, rf, amt, rfT, id} = g03Vars(T), refund = pct > 0, lockT = g03Lock(amount, from);
+  const {org, co, from, amount, pct, amt, rfT, id} = g03Vars(T), refund = pct > 0, lockT = g03Lock(amount, from);
   const D = (l, sealed) => makeDoc(T.layers.tokens, l, sealed);
   const P = makeNode(T, {x:120, y:192, r:48, label:co, sub:'Taxpayer'});
   const TA = makeNode(T, {x:500, y:192, r:48, label:org, sub:'Assessment · refunds'});
@@ -166,7 +166,7 @@ function g03Today(T, K){
 
 /* ---------- With AFC: one process space; institutions outside, reaching it only through the gateway ---------- */
 function g03Afc(T, K){
-  const {org, co, from, amount, pct, amt, rfT, id} = g03Vars(T), refund = pct > 0, N = refund ? 5 : 3;
+  const {org, co, from, pct, rfT, id} = g03Vars(T), refund = pct > 0, N = refund ? 5 : 3;
   // Inside the frame: the payer's anchor, NodeChain (AST) and the treasury's anchor. The routing component is not drawn; it is named in captions only.
   const space = afcSpace(T, 'AFC · PROCESS SPACE', [
     ['fromAnchor', `Anchor · ${from}`, 'Payer leg'],

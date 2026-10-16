@@ -1475,7 +1475,7 @@ function g03Queue(T, x, y){
 
 /* ---------- Today: the real path, with every hand-off, check, hold and wait ---------- */
 function g03Today(T, K){
-  const {org, co, from, amount, pct, rf, amt, rfT, id} = g03Vars(T), refund = pct > 0, lockT = g03Lock(amount, from);
+  const {org, co, from, amount, pct, amt, rfT, id} = g03Vars(T), refund = pct > 0, lockT = g03Lock(amount, from);
   const D = (l, sealed) => makeDoc(T.layers.tokens, l, sealed);
   const P = makeNode(T, {x:120, y:192, r:48, label:co, sub:'Taxpayer'});
   const TA = makeNode(T, {x:500, y:192, r:48, label:org, sub:'Assessment · refunds'});
@@ -1572,7 +1572,7 @@ function g03Today(T, K){
 
 /* ---------- With AFC: one process space; institutions outside, reaching it only through the gateway ---------- */
 function g03Afc(T, K){
-  const {org, co, from, amount, pct, amt, rfT, id} = g03Vars(T), refund = pct > 0, N = refund ? 5 : 3;
+  const {org, co, from, pct, rfT, id} = g03Vars(T), refund = pct > 0, N = refund ? 5 : 3;
   // Inside the frame: the payer's anchor, NodeChain (AST) and the treasury's anchor. The routing component is not drawn; it is named in captions only.
   const space = afcSpace(T, 'AFC · PROCESS SPACE', [
     ['fromAnchor', `Anchor · ${from}`, 'Payer leg'],
@@ -2043,7 +2043,7 @@ function g05Today(T, K){
 /* ---- With AFC: one process in its own space; institutions outside it, reaching it only through the gateway ---- */
 function g05Afc(T, K){
   const v = T.cfg.v, org = v.org || 'Ministry of Finance', r1 = v.region || 'Region 1', n = g05N(v);
-  const {from, amount} = T.cfg, perT = money(amount/n, from), amt = money(amount, from);
+  const {from, amount} = T.cfg, perT = money(amount/n, from);
   T.holdAmount = amount/n; T.m.g05conf = 0;
   // Inside the frame: a source anchor, NodeChain and a payout anchor. AFC is not drawn; it is named in the captions only.
   const space = afcSpace(T, 'AFC · PROCESS SPACE', [
@@ -2053,7 +2053,6 @@ function g05Afc(T, K){
   ]);
   const I = space.inside;
   // Institutions sit under the frame. Each reaches the gateway straight above it; none is linked to another.
-  const gateAt = node => ({x:node.x, y:space.busY, r:0, presence:1, setPresence(){}});
   const M = makeNode(T, {x:110, y:INST_Y, r:50, label:g05Fit(org, 20), sub:'Pays transfers', lockAt:[70, -20]});
   const regs = (n === 1 ? [500] : Array.from({length:n}, (_, i) => 270 + i*460/(n - 1))).map((x, i) => makeNode(T, {x, y:INST_Y, r:38, small:true, label:i === 0 ? g05Fit(r1, n >= 4 ? 12 : 16) : `Region ${i + 1}`, sub:'Treasury', lockAt:[70, -20]}));
   const Au = makeNode(T, {x:900, y:INST_Y, r:42, small:true, label:'Audit office', sub:'Audit view', lockAt:[70, -20]});
