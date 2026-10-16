@@ -1,0 +1,9 @@
+/* Layout v2: one fixed-size frame; one screen at a time. Single light theme by owner decision. */
+:root{
+  --bg:#FFFFFF; --ink:#14161A; --muted:#646B77; --line:#E4E7EC; --soft:#F6F8FA;
+  --afc:#0F9F78; --hold:#C2391E; --ok:#178A4C; --gold:#B8860B;
+  --font:"Open Sauce Sans", "Helvetica Neue", Arial, sans-serif;
+  color-scheme:light;
+}
+*{box-sizing:border-box}
+[hidden]{display:none!important}

@@ -168,7 +168,7 @@ input[type=number]{font-variant-numeric:tabular-nums}
 .ov thead th{font-size:12px;letter-spacing:.12em;text-transform:uppercase;color:var(--muted);font-weight:500;border-bottom:1px solid var(--ink)}
 .ov td:first-child{color:var(--muted);font-size:14.5px}
 .ov td.t{color:var(--hold)} .ov td.n{color:var(--afc);font-weight:600}
-.ov__actions{display:flex;flex-wrap:wrap;gap:10px 14px;align-items:center;padding-top:4px}
+.ov__actions{position:sticky;bottom:0;display:flex;flex-wrap:wrap;gap:10px 14px;align-items:center;margin:0 -30px -22px;padding:16px 30px 22px;background:linear-gradient(rgba(255,255,255,0),rgba(255,255,255,.94) 34%)}
 .ov__actions .btn.primary{margin-left:auto}
 
 .note{font-size:13px;color:var(--muted);max-width:92ch;margin:0;font-weight:300}
@@ -196,6 +196,7 @@ input[type=number]{font-variant-numeric:tabular-nums}
   .route__art{display:none}
   .ov{padding:10px}
   .ov__card{padding:18px 18px 16px}
+  .ov__actions{margin:0 -18px -16px;padding:14px 18px 16px}
   .ov__card h3{font-size:21px}
   .ov th,.ov td{font-size:14.5px}
 }
@@ -918,144 +919,266 @@ function tokenAst(T, K){
   T.doneText = 'Done. One signed package, one PoT verdict, tokens minted at the institutional price and a transfer recorded in NodeChain. No escrow held by AST.';
 }
 
-/* ================= Scenario 03 · Letter of credit ================= */
-function lcToday(T, K){
-  const nA = T.cfg.v.org || 'Issuing bank', nE = T.cfg.v.exporter || 'Exporter';
-  const {from, to, amount} = T.cfg, fx = from !== to, Y = 220, amt = money(amount, from);
-  const A = makeNode(T, {x:110, y:Y, label:nA, sub:'Issuing · importer’s bank'});
-  const Adv = makeNode(T, {x:370, y:Y, label:'Advising bank', sub:'Exporter’s bank', hidden:true});
-  const E = makeNode(T, {x:630, y:Y, label:nE, sub:'Exporter · seller', hidden:true});
-  const Car = makeNode(T, {x:890, y:Y, label:'Carrier', sub:'Shipping line', hidden:true});
-  const coins = makeCoins(T.layers.tokens, from, 4, A.x, Y + 16);
-  const box = makeBox(T.layers.tokens);
-
-  K.pulse(A, `An importer asks its bank to issue a letter of credit for ${amt} in favour of an overseas exporter.`);
-  K.hold(A, amt, 'The issuing bank blocks the importer’s funds or credit line for the full amount.', 4);
-  K.check(A, 'The bank checks the importer (violet) and its credit limit and collateral (blue).', 20);
-  K.stamp(A, ['Applicant cleared', 'LC issued'], 'The letter of credit is issued.');
-  K.travel(A, Adv, makeEnvelope(T.layers.tokens, 1, 'MT700'), 'The LC travels as an MT700 message to the advising bank.', 4, {count:'msgs'});
-  K.check(Adv, 'The advising bank authenticates the LC and screens the parties.', 20);
-  K.stamp(Adv, ['LC authenticated', 'Parties screened'], 'The advising bank confirms the LC is genuine.');
-  K.travel(Adv, E, makeDoc(T.layers.tokens, 'LC NOTICE'), 'The exporter receives the LC terms on paper and starts production.', 6, {count:'docs'});
-  K.travel(E, Car, box, 'The exporter hands the goods to the carrier. The voyage itself is excluded from both clocks.', 0, {lineOpacity:.3});
-  K.travel(Car, E, makeDoc(T.layers.tokens, 'BILL OF LADING'), 'The carrier issues a paper bill of lading to the exporter.', 24, {count:'docs', burn:false});
-  K.travel(E, Adv, makeDoc(T.layers.tokens, 'B/L · INVOICE'), 'The exporter couriers the document set to its bank.', 72, {count:'docs', burn:false});
-  K.check(Adv, 'The advising bank examines every document against the LC terms. UCP 600 allows up to five banking days.', 96, 3000);
-  K.stamp(Adv, ['Documents compliant', 'Presentation forwarded'], 'Documents found compliant.');
-  K.travel(Adv, A, makeDoc(T.layers.tokens, 'DOCUMENTS'), 'The originals are couriered on to the issuing bank.', 72, {count:'docs', burn:false});
-  K.check(A, 'The issuing bank examines the same documents again, with its own five-day window.', 96, 3000);
-  K.stamp(A, ['Documents accepted', 'Payment authorised'], 'The issuing bank accepts the documents.');
-  K.release(A, 'The block on the importer’s funds turns into a payment.', 2);
-  K.coins(coins, A, Adv, 'Funds move to the advising bank over the correspondent network.', 12, {fee:'−fees'});
-  K.coins(coins, Adv, E, fx ? `The exporter is paid in ${to} after conversion.` : 'The exporter is paid.', 6, {arrive:() => { if (fx) coins.recur(to); }});
-
-  T.rows = () => [R.holds(T), R.onHold(T), R.holdTime(T), R.msgs(T), R.docs(T)];
-  T.doneText = 'Paid. The importer’s funds stayed blocked for weeks, and paper documents crossed the route twice before money moved.';
-}
-function lcAfc(T, K){
-  const nA = T.cfg.v.org || 'Issuing bank', nE = T.cfg.v.exporter || 'Exporter';
-  const {from, to, amount} = T.cfg, fx = from !== to, Y = 250, amt = money(amount, from);
-  const layer = afcLayer(T);
-  const A = makeNode(T, {x:110, y:Y, label:nA, sub:'Issuing · anchor'});
-  const Adv = makeNode(T, {x:370, y:Y, label:'Advising bank', sub:'Anchor'});
-  const E = makeNode(T, {x:630, y:Y, label:nE, sub:'Exporter · seller'});
-  const Car = makeNode(T, {x:890, y:Y, label:'Carrier', sub:'e-B/L issuer'});
-  layer.connect([A, Adv, E, Car]); rail(T, A, Adv); rail(T, Adv, E); rail(T, E, Car);
-  const coins = makeCoins(T.layers.tokens, from, 4, A.x, Y + 16);
-  const box = makeBox(T.layers.tokens);
-
-  K.pulse(A, `The same importer asks the same bank for a letter of credit for ${amt}.`);
-  K.hold(A, amt, 'The issuing bank still blocks the importer’s funds: the guarantee is real. What changes is how long.', .3);
-  K.api(A, layer, 'The LC terms go to AFC as a machine-readable contract: amount, goods, dates, required evidence.', .5);
-  K.onePass([A, Adv, E], layer, 'One pass: issuing bank, advising bank and exporter each confirm the terms and run their own checks at the same time.', 1);
-  K.combined(['LC terms agreed', 'Parties screened', 'Evidence rules fixed'], 'All three parties are bound to one set of terms.', [210,58], .5, 'AFC · LC contract', [[A,'ok'],[Adv,'ok'],[E,'ok']]);
-  K.travel(E, Car, box, 'The exporter hands the goods to the carrier. The voyage is excluded from both clocks.', 0, {burn:false});
-  K.api(Car, layer, 'The carrier posts the electronic bill of lading to AFC as an event.', .5);
-  K.onePass([A, Adv], layer, 'Both banks check the shipment data against the agreed terms at the same time, in one place.', 2);
-  K.pot(layer, 'PoT confirms the agreed evidence arrived. NodeChain (AST) records it and receives the fee in ArosCoin.', .2);
-  K.release(A, 'The condition is met. The issuing bank turns the block into a payment.', .1);
-  K.coins(coins, A, Adv, 'The anchors settle on their own books.', .3);
-  K.coins(coins, Adv, E, fx ? `The exporter is paid in ${to}. AFC never held the funds.` : 'The exporter is paid. AFC never held the funds.', .3, {arrive:() => { if (fx) coins.recur(to); }});
-
-  T.rows = () => [R.holds(T), R.onHold(T), R.holdTime(T), R.api(T), ['Paper documents', '0', false]];
-  T.extraSummary = () => [['PoT fee (ArosCoin)', T.feesText()]];
-  T.doneText = 'Paid. The guarantee still held, but only until the shipment evidence was verified, not for weeks of couriers and repeated reviews.';
-}
-
-/* ================= Scenario 04 · Bulk payouts ================= */
-function payrollToday(T, K){
-  const nE = T.cfg.v.org || 'Employer’s bank';
-  const {from, amount} = T.cfg, Y = 230, amt = money(amount, from), part = money(amount/3, from);
-  const E = makeNode(T, {x:110, y:Y, label:nE, sub:'Employer’s bank · payer'});
-  const H = makeNode(T, {x:380, y:Y, label:'Clearing house', sub:'Batch / ACH', hidden:true});
-  const X = makeNode(T, {x:720, y:90, r:44, labelPos:'right', label:'Bank X', sub:'Beneficiary', hidden:true});
-  const Yb = makeNode(T, {x:720, y:230, r:44, labelPos:'right', label:'Bank Y', sub:'Beneficiary', hidden:true});
-  const Z = makeNode(T, {x:720, y:370, r:44, labelPos:'right', label:'Bank Z', sub:'Beneficiary', hidden:true});
-  const cX = makeCoins(T.layers.tokens, from, 2, E.x - 18, Y + 18), cY = makeCoins(T.layers.tokens, from, 2, E.x, Y + 22), cZ = makeCoins(T.layers.tokens, from, 2, E.x + 18, Y + 18);
-  T.holdAmount = amount;
-
-  K.pulse(E, `The employer uploads a payroll batch: three salaries, ${amt} in total, to accounts at three different banks.`);
-  K.hold(E, amt, 'The bank reserves the full batch amount on the employer’s account.', .5);
-  K.check(E, 'The bank validates the file format and screens the payees.', 2);
-  K.stamp(E, ['File validated', 'Payees screened'], 'The batch is accepted.');
-  K.add({dur:1500, sim:14, cap:'The batch waits for the next clearing window, usually overnight.', run:p => E.setFlash(.25*Math.sin(Math.PI*p*2))});
-  K.travel(E, H, makeDoc(T.layers.tokens, 'BATCH FILE'), 'The batch goes to the clearing house in the next file run.', 1, {count:'msgs'});
-  K.check(H, 'The clearing house sorts payments by bank and nets positions between members.', 3);
-  K.stamp(H, ['Sorted by bank', 'Positions netted'], 'Positions are netted.');
-  K.release(E, 'Settlement: the employer’s account is debited.', .5);
-  [[X, cX], [Yb, cY], [Z, cZ]].forEach(([b, c], i) => {
-    K.travel(H, b, makeDoc(T.layers.tokens, 'FILE'), i === 0 ? 'Each beneficiary bank receives its own file.' : 'Each beneficiary bank receives its own file.', 1, {count:'msgs', dur:900});
-  });
-  K.add({dur:1300, sim:4, cap:`Funds follow: ${part} to each bank.`, run:p => {
-    const q = ease(seg(p,0,.85));
-    [[X, cX], [Yb, cY], [Z, cZ]].forEach(([b, c], i) => { const sx = E.x + (i - 1)*18; c.set(lerp(sx, b.x, q), lerp(Y + 18, b.y + 14, q), 1); });
-  }});
-  K.check([X, Yb, Z], 'Each bank posts the credit to its customer.', 6);
-  K.badge([[X,'ok'],[Yb,'ok'],[Z,'fail']], 'Bank X and Bank Y credit their customers. Bank Z finds the account closed.');
-  K.travel(Z, H, makeDoc(T.layers.tokens, 'RETURN'), 'Bank Z sends the payment back as a return in its next file.', 48, {count:'msgs', burn:false});
-  K.coins(cZ, Z, E, 'The money comes back to the employer days later, and the employee is still unpaid.', 12, {from:[Z.x, Z.y + 14], end:() => T.m.returned++});
-
-  T.rows = () => [R.holds(T), R.onHold(T), R.holdTime(T), R.msgs(T), ['Payments returned late', String(T.m.returned), T.m.returned > 0]];
-  T.extraSummary = () => [['Failed payment found', T.m.returned ? 'days later, as a return' : '—']];
-  T.doneText = 'Done, mostly. Two salaries arrived the next day; the third bounced and came back days later, after the money had already left.';
-}
-function payrollAfc(T, K){
-  const nE = T.cfg.v.org || 'Employer’s bank';
-  const {from, amount} = T.cfg, Y = 290, amt = money(amount, from), part = money(amount/3, from);
-  const layer = afcLayer(T, {busY:150, ncY:56});
-  const E = makeNode(T, {x:130, y:Y, r:50, label:nE, sub:'Employer’s bank · anchor'});
-  const X = makeNode(T, {x:430, y:Y, r:48, label:'Bank X', sub:'Anchor'});
-  const Yb = makeNode(T, {x:630, y:Y, r:48, label:'Bank Y', sub:'Anchor'});
-  const Z = makeNode(T, {x:830, y:Y, r:48, label:'Bank Z', sub:'Anchor'});
-  layer.connect([E, X, Yb, Z]);
-  const cX = makeCoins(T.layers.tokens, from, 2, E.x - 18, Y + 18), cY = makeCoins(T.layers.tokens, from, 2, E.x, Y + 22), cZ = makeCoins(T.layers.tokens, from, 2, E.x + 18, Y + 18);
-  T.holdAmount = amount;
-
-  K.pulse(E, `The same payroll batch: three salaries, ${amt} in total, to accounts at three banks.`);
-  K.api(E, layer, 'The employer’s bank submits the batch to AFC as one API call, at any hour.');
-  K.onePass([E, X, Yb, Z], layer, 'One pass: every beneficiary bank confirms its account and screens its customer at the same time.', 3);
-  K.combined(['X: account active', 'Y: account active', 'Z: account closed'], 'Bank Z reports the account is closed before any money moves. The employer is told at once.', [230,64], .5, 'AFC · batch check', [[X,'ok'],[Yb,'ok'],[Z,'fail']]);
-  K.add({dur:400, sim:0, cap:'Bank Z reports the account is closed before any money moves. The employer is told at once.', end:() => { T.m.flagged = 1; cZ.set(E.x + 18, Y + 18, .35); }});
-  K.pot(layer, 'PoT records the two valid payments in NodeChain (AST), with the fee in ArosCoin.');
-  K.add({dur:1500, sim:2, cap:`Two anchors credit ${part} each. The third salary never left the employer’s account.`, run:p => {
-    const q = ease(seg(p,0,.85));
-    [[X, cX, -18], [Yb, cY, 0]].forEach(([b, c, dx]) => { const [x, y] = quad(E.x + dx, Y + 18, (E.x + b.x)/2, Y - 170, b.x, Y + 14, q); c.set(x, y, 1); });
-  }});
-
-  T.rows = () => [R.holds(T), R.holdTime(T), R.api(T), ['Flagged before payment', String(T.m.flagged), false], ['Payments returned late', '0', false]];
-  T.extraSummary = () => [['Failed payment found', T.m.flagged ? 'before payment, in one pass' : '—']];
-  T.doneText = 'Done. Two salaries paid in one pass; the closed account was caught before money moved, so there was nothing to return.';
-}
-
 /* ---------- government scenarios (G01–G12) ---------- */
 // Each fragment defines its two builders and pushes one registry entry into GOV.
 const GOV = [];
 /* @@GOV_FRAGMENTS@@ */
 
 
+/* ================= Flagship · Two currencies, no USD ================= */
+function fxToday(T, K){
+  const nA = T.cfg.v.org || 'Bank A', nB = T.cfg.v.bene || 'Bank B';
+  const {from, to, amount} = T.cfg, Y = 250, amt = money(amount, from);
+  const A = makeNode(T, {x:150, y:Y, label:nA, sub:'Originator'});
+  const M = makeNode(T, {x:500, y:Y, label:'Correspondent', sub:'Intermediary', hidden:true});
+  const B = makeNode(T, {x:850, y:Y, label:nB, sub:'Beneficiary', hidden:true});
+  const coins = makeCoins(T.layers.tokens, from, 4, A.x, Y + 16);
+
+  K.pulse(A, `${nA} receives the order: ${amt} to a client of ${nB}, paid out in ${to}.`);
+  K.hold(A, amt, `${nA} holds the client’s funds. They leave circulation but have not moved.`);
+  K.travel(A, M, makeEnvelope(T.layers.tokens, 1), `${nA} sends a payment message to the correspondent.`, 2, {count:'msgs'});
+  K.check(M, 'The correspondent screens the payment and rebalances its own accounts.', 2);
+  K.hold(M, amt, 'The correspondent reserves liquidity. Two institutions now hold the same amount.');
+  K.travel(M, B, makeEnvelope(T.layers.tokens, 2), `The message reaches ${nB}, the beneficiary’s bank.`, 2, {count:'msgs'});
+  K.check(B, `${nB} checks the beneficiary. The funds are not credited yet.`, 4);
+  K.travel(B, M, makeEnvelope(T.layers.tokens, 3), 'Acknowledgement goes back down the chain.', 2, {count:'msgs', burn:false});
+  K.release(M, 'The correspondent releases its hold.', 2);
+  K.travel(M, A, makeEnvelope(T.layers.tokens, 4), `The acknowledgement reaches ${nA}.`, 2, {count:'msgs', burn:false});
+  K.release(A, 'The client’s funds are released.', 2);
+  K.coins(coins, A, M, 'Funds move down the chain.', 1);
+  K.coins(coins, M, B, `${nB} credits the beneficiary.`, 1);
+
+  T.rows = () => [R.holds(T), R.onHold(T), R.holdTime(T), R.msgs(T)];
+  T.extraSummary = () => [];
+  T.doneText = 'Settled. The payment waited on each institution in turn, and every hop added a message and a hold.';
+}
+/* ---------- AFC process space ----------
+   The AFC process is its own space, drawn with a visible boundary. Its internal components
+   (API contract, anchors, LacMusa, NodeChain) sit inside it. Institutions sit outside and reach
+   it only through the API GATEWAY strip on its lower edge. No institution is ever linked to an
+   internal component directly. Money never crosses the boundary: it settles on each
+   institution's own books (settleStep). */
+const SPACE_GW = 202, INST_Y = 290, SLOT_Y = 100;
+function afcSpace(T, label='AFC · PROCESS SPACE', slots){
+  const L = T.layers, clipId = `${T.id}-gwclip`;
+  const frame = svgEl('rect',{x:40, y:16, width:920, height:186, rx:16, fill:'#F5FBF8', stroke:C.afc, 'stroke-width':1.4, 'stroke-dasharray':'8 5'}, L.paths);
+  const title = svgEl('text',{x:62, y:40, 'font-size':13, 'letter-spacing':2, 'font-weight':600, fill:C.afc}, L.paths);
+  title.textContent = label;
+  const cp = svgEl('clipPath',{id:clipId}, T.defs);
+  svgEl('rect',{x:70, y:SPACE_GW-13, width:860, height:26, rx:13}, cp);
+  const gw = svgEl('rect',{x:70, y:SPACE_GW-13, width:860, height:26, rx:13, fill:'#FFFFFF', stroke:C.ink, 'stroke-width':1.3}, L.paths);
+  const scan = svgEl('rect',{x:-90, y:SPACE_GW-13, width:160, height:26, fill:`url(#${T.id}-scan)`, 'clip-path':`url(#${clipId})`, opacity:0}, L.paths);
+  const gt = svgEl('text',{x:500, y:SPACE_GW+4.5, 'text-anchor':'middle', 'font-size':12.5, 'letter-spacing':2, 'font-weight':500, fill:C.ink}, L.paths);
+  gt.textContent = 'API GATEWAY';
+  const gate = {x:500, y:SPACE_GW, r:0, presence:1, setPresence(){}};
+  const sig = () => makeSpark(L.tokens, C.afc, 5);
+  const slot = (x, label, sub) => makeNode(T, {x, y:SLOT_Y, r:26, small:true, label, sub});
+  const defs = slots || [['fromAnchor', `Anchor · ${T.cfg.from}`, 'Fiat leg'], ['lacmusa', 'LacMusa', 'Signal'], ['chain', 'NodeChain', 'AST · PoT'], ['toAnchor', `Anchor · ${T.cfg.to}`, 'Fiat leg']];
+  const xs = defs.length === 4 ? [190, 400, 600, 810] : Array.from({length:defs.length}, (_, i) => Math.round(160 + 680*i/(defs.length - 1)));
+  const inside = {};
+  defs.forEach(([key, l, sb], i) => { inside[key] = slot(xs[i], l, sb); });
+  return {
+    busY: SPACE_GW, gate, inside, sig,
+    connect(nodes){ nodes.forEach(n => svgEl('line',{x1:n.x, y1:n.y-n.r-2, x2:n.x, y2:SPACE_GW+14, stroke:C.ink, 'stroke-width':1.2, 'stroke-dasharray':'4 5', opacity:.45}, L.paths)); },
+    glow(on){ frame.setAttribute('stroke-width', on ? 2.2 : 1.4); gw.setAttribute('stroke', on ? C.afc : C.ink); },
+    scan(p, a){ scan.setAttribute('opacity', a); scan.setAttribute('x', lerp(-90, 930, (p*2) % 1)); }
+  };
+}
+/* Institution x-positions outside the space (2–6 participants). */
+function planeXs(n){
+  if (n <= 1) return [500];
+  const [lo, hi] = n <= 2 ? [200, 800] : [170, 830];
+  return Array.from({length:n}, (_, i) => Math.round(lo + (hi - lo)*i/(n - 1)));
+}
+/* The process inside the space. Funds arrive with the request, already verified and approved
+   by the institution. The fiat anchor accepts them on its own reserve account. Only after the
+   real transaction is confirmed does proof of transaction (PoT) exist; only then AST issues
+   ArosCoin 1 = 1. The token does not exist before PoT. No holds are used on this track. */
+function afcInside(T, K, space, o={}){
+  const I = space.inside, s = () => space.sig();
+  const funds = makeCoins(T.layers.tokens, o.from, 4, o.sender.x, o.sender.y + 16);
+  const aro = makeCoins(T.layers.tokens, 'ARO', 4, I.chain.x, I.chain.y + 16, 0);
+  K.travel(space.gate, I.lacmusa, s(), 'The gateway delivers the request to LacMusa, first.', o.sim ?? 1, {burn:false});
+  K.pulse(I.lacmusa, `LacMusa processes the request and routes it to the ${o.from} leg.`, 1);
+  K.coins(funds, o.sender, I.fromAnchor, `The ${o.from} funds are accepted on the fiat anchor’s reserve account for AFC.`, 1.5, {fadeOut:true});
+  K.check([I.lacmusa, I.fromAnchor], 'LacMusa checks the arrived funds against the request.', 1);
+  K.badge([[I.fromAnchor, 'ok']], `The ${o.from} credit is confirmed. The transaction is real.`, 1);
+  K.add({dur:900, sim:1, cap:'Proof of transaction goes to NodeChain (AST). No token exists before this point.', start:() => { T.m.pot++; }, run:p => { s; }});
+  K.travel(I.lacmusa, I.chain, s(), 'Proof of transaction reaches NodeChain (AST).', 1);
+  K.pulse(I.chain, `Only now AST issues ArosCoin 1 = 1 against the confirmed ${o.from} funds.`, 1);
+  K.add({dur:900, sim:1, cap:`ArosCoin is issued 1 = 1 against the confirmed ${o.from} funds.`, run:p => aro.set(I.chain.x, I.chain.y + 16, seg(p, 0, .5))});
+  K.coins(aro, I.chain, I.toAnchor, `ArosCoin moves to the ${o.to} leg, 1 = 1.`, 1.2, {arrive:() => aro.recur(o.to), fadeOut:true});
+  K.check([I.lacmusa, I.toAnchor], `LacMusa routes the payout to the ${o.to} leg and checks its reserve.`, 1);
+  K.badge([[I.toAnchor, 'ok']], `The ${o.to} reserve covers the payout.`, 1);
+}
+
+/* Money leaves one institution’s books and arrives on another’s. It never crosses the space. */
+function settleStep(T, K, a, b, curOut, curIn, cap, sim=1, dur=1200){
+  const out = makeCoins(T.layers.tokens, curOut, 3, a.x, a.y + 16, 0);
+  const inn = makeCoins(T.layers.tokens, curIn, 3, b.x, b.y + 16, 0);
+  K.add({dur, sim, cap, run:p => { out.set(a.x, a.y + 16, 1 - seg(p, 0, .6)); inn.set(b.x, b.y + 16, seg(p, .4, 1)); }});
+}
+/* One notice leaves the space through the gateway, straight to one institution. */
+function notify(T, K, space, node, cap, sim=1){
+  const gate = {x:node.x, y:space.busY, r:0, presence:1, setPresence(){}};
+  K.travel(gate, node, makeEnvelope(T.layers.tokens, null, 'NOTICE'), cap, sim, {color:C.goldLine});
+}
+
+function fxAfc(T, K){
+  const nA = T.cfg.v.org || 'Sender', nB = T.cfg.v.bene || 'Beneficiary';
+  const {from, to, amount} = T.cfg, amt = money(amount, from);
+  const space = afcSpace(T);
+  const [xA, xB] = planeXs(2);
+  const A = makeNode(T, {x:xA, y:INST_Y, label:nA, sub:'Institutional client', lockAt:[70, -20]});
+  const B = makeNode(T, {x:xB, y:INST_Y, label:nB, sub:to, lockAt:[70, -20]});
+  space.connect([A, B]);
+
+  K.pulse(A, `${nA} sends one request: ${amt}, paid out in ${to}. The approved funds travel with it.`);
+  K.api(A, space, 'The request and the funds reach the AFC gateway together.');
+  afcInside(T, K, space, {from, to, sim:1.5, sender:A});
+  settleStep(T, K, space.inside.toAnchor, B, to, to, `${nB} receives ${to} on its own books.`, 1.2);
+  notify(T, K, space, A, `Notice to ${nA}.`);
+  notify(T, K, space, B, `Notice to ${nB}.`);
+
+  T.rows = () => [['API calls', String(T.m.api), false], ['Proof of transaction', T.m.pot ? '1' : '0', false], ['Token before proof', '0', false], ['Settled on own books', 'yes', false]];
+  T.extraSummary = () => [];
+  T.doneText = 'Done. The funds were accepted on the fiat reserve, the transaction was confirmed, and only then ArosCoin was issued and paid out in the other currency.';
+}
+
+/* ================= Main scenario · Fiat to a crypto wallet · Today (full path) ================= */
+function fcToday(T, K){
+  const nA = T.cfg.v.org || 'Sending bank', nW = T.cfg.v.wallet || 'Recipient wallet', cry = T.cfg.v.crypto || 'BTC';
+  const {from, amount} = T.cfg, amt = money(amount, from), L = T.layers;
+  let checks = 0;
+  const chk = (nodes, cap, sim, dur) => { checks++; K.check(nodes, cap, sim, dur); };
+
+  // exchange frame: its backend is drawn inside, the app / API is its only door
+  svgEl('rect',{x:300, y:30, width:400, height:322, rx:16, fill:'#FBFBFC', stroke:C.ink, 'stroke-width':1.2, 'stroke-dasharray':'6 5'}, L.paths);
+  const ft = svgEl('text',{x:320, y:54, 'font-size':13, 'letter-spacing':2, 'font-weight':600, fill:C.ink}, L.paths);
+  ft.textContent = 'CRYPTO EXCHANGE · BACKEND';
+  svgEl('rect',{x:320, y:336, width:360, height:24, rx:12, fill:'#FFFFFF', stroke:C.ink, 'stroke-width':1.2}, L.paths);
+  const gt = svgEl('text',{x:500, y:352, 'text-anchor':'middle', 'font-size':12, 'letter-spacing':2, fill:C.ink}, L.paths);
+  gt.textContent = 'APP / API';
+  const gate = {x:500, y:348, r:0, presence:1, setPresence(){}};
+  const slot = (x, y, label, sub) => makeNode(T, {x, y, r:26, small:true, label, sub});
+  const KYC = slot(370, 112, 'KYC & limits', 'Identity');
+  const PAY = slot(500, 112, 'Card & bank rails', 'Payments');
+  const LIQ = slot(630, 112, 'Liquidity', 'Buys crypto');
+  const LED = slot(430, 240, 'Custody ledger', 'Balances');
+  const WD = slot(570, 240, 'Withdrawals', 'On-chain');
+
+  // outside the exchange
+  const BK = makeNode(T, {x:120, y:110, label:nA, sub:"Sender's bank"});
+  const SN = makeNode(T, {x:120, y:360, label:'Sender', sub:'Client'});
+  const BC = makeNode(T, {x:880, y:110, label:'Blockchain', sub:'Public network'});
+  const RW = makeNode(T, {x:880, y:360, label:nW, sub:`Crypto · ${cry}`, hidden:true});
+
+  const cash = makeCoins(L.tokens, from, 4, BK.x, BK.y + 16);
+  const crypto = makeCoins(L.tokens, cry, 4, LIQ.x, LIQ.y + 16, 0);
+
+  // 1 · the sender and the sending bank
+  K.pulse(SN, `The sender wants to deliver ${amt} as ${cry} to one wallet. A bank cannot pay a crypto wallet directly.`);
+  K.pulse(BK, `${nA} receives the order and checks the customer before it moves any money.`);
+  chk(BK, 'The bank checks the customer: identity, login, one-time code, daily limit, sanctions and AML screening.', 1);
+  K.badge([[BK, 'ok']], `${nA} approves a card payment to a crypto exchange. It cannot send crypto to the wallet.`, 1);
+
+  // 2 · the sender leaves the bank and opens an exchange account
+  K.travel(SN, gate, makeEnvelope(L.tokens, 1), 'The sender leaves the bank and opens the exchange app.', 2, {count:'msgs', burn:false});
+  K.pulse(KYC, 'Registration: e-mail, phone, password and a two-factor code. The account exists but cannot buy yet.', 2);
+  chk(KYC, 'KYC tier 1: full name, date of birth and a photo of the ID document, matched to a selfie.', 2, 2600);
+  chk(KYC, 'Sanctions and PEP screening of the sender. Each check is run again at every new tier.', 2, 2600);
+  K.badge([[KYC, 'ok']], 'Tier 1 is approved, with a low purchase limit. The purchase is above it.', 2);
+  chk(KYC, `Tier 2 review: proof of address and source of funds are read. This can take hours or days.`, 4, 3200);
+  K.badge([[KYC, 'ok']], `Tier 2 is approved. The purchase limit now covers ${amt}.`, 4);
+
+  // 3 · the sender pays for the purchase
+  K.travel(gate, PAY, makeEnvelope(L.tokens, null), 'The purchase order reaches the card and bank rails.', 4.5, {burn:false});
+  K.travel(PAY, BK, makeEnvelope(L.tokens, null, 'AUTH'), `The card rails ask ${nA} to authorise ${amt}.`, 4.5, {count:'msgs'});
+  chk(BK, 'The bank checks the card: one-time code (3-D Secure), available balance and fraud score.', 4.5, 2600);
+  K.hold(BK, amt, `${nA} holds ${amt} on the card as an authorisation. No money has moved yet.`, 4.5);
+  K.travel(BK, PAY, makeEnvelope(L.tokens, null, 'AUTH'), `${nA} confirms the authorisation to the card rails.`, 4.5, {count:'msgs', burn:false});
+  chk(PAY, 'The payment processor checks the merchant, the fraud rules and the currency. The purchase is authorised, not settled.', 5, 2600);
+  K.coins(cash, BK, PAY, 'Settlement is scheduled. The card amount reaches the exchange’s bank later, often a day or more.', 1.5);
+
+  // 4 · the exchange buys crypto from its liquidity provider
+  K.travel(PAY, LIQ, makeEnvelope(L.tokens, null, 'ORDER'), 'The paid order goes to the liquidity desk: buy crypto for the sender.', 1.5, {count:'msgs'});
+  chk(LIQ, 'The liquidity provider quotes its price for the order at this moment. The exchange accepts the quote.', 1.5, 2400);
+  K.badge([[LIQ, 'ok']], `The exchange buys ${cry} with its own USD inventory, at its price. The card settles later.`, 1.5);
+  K.coins(cash, PAY, LIQ, `USD pays the liquidity provider from the exchange’s inventory.`, 1.2, {fadeOut:true});
+  K.coins(crypto, LIQ, LED, `${cry} comes back to the exchange. It is recorded in the custody ledger.`, 1.5);
+
+  // 5 · the sender's balance is custody, not a wallet
+  chk(LED, `The ledger credits the sender’s account with ${cry}. The exchange holds it, not the sender.`, 1.5, 2400);
+  K.badge([[LED, 'ok']], `The sender’s balance shows ${cry}. The sender does not control a wallet yet.`, 1.5);
+  K.travel(gate, SN, makeEnvelope(L.tokens, null, 'NOTICE'), `The app shows the ${cry} balance to the sender.`, 1.5, {color:C.goldLine});
+
+  // 6 · withdrawal to a wallet the sender may not know
+  K.travel(SN, gate, makeEnvelope(L.tokens, null), `The sender asks to withdraw ${cry} to the recipient’s wallet address.`, 2, {count:'msgs', burn:false});
+  K.travel(gate, WD, makeEnvelope(L.tokens, null), 'The withdrawal request reaches the withdrawal service.', 1.5, {burn:false});
+  chk(WD, 'Two-factor code and an e-mail confirmation for the new address. A cooling-off period may apply.', 2, 2600);
+  chk(WD, 'Travel rule: the exchange needs the recipient’s name and address. If the sender does not know them, the withdrawal stops here.', 2.5, 3000);
+  K.badge([[WD, 'ok']], 'The recipient details are on file. The withdrawal is accepted.', 2.5);
+  K.coins(crypto, LED, WD, 'The network fee and the exchange’s withdrawal fee come out of the balance.', 1.2);
+
+  // 7 · the transfer on the public blockchain
+  K.travel(WD, BC, makeEnvelope(L.tokens, null, 'TX'), 'The exchange signs the transfer from its own hot wallet and broadcasts it.', 2, {count:'msgs'});
+  chk(BC, 'Validators add the transfer to a block and check it against the ledger.', 2, 3000);
+  chk(BC, 'Confirmations build up. The transfer is treated as final only after several of them.', 3, 3200);
+  K.travel(BC, RW, makeEnvelope(L.tokens, null, 'TX'), `The transfer reaches ${nW}. The sender’s bank cannot see who owns this wallet.`, 1.5, {burn:false});
+  K.coins(crypto, BC, RW, `${cry} arrives in the recipient’s wallet.`, 1.5);
+
+  // 8 · settlement of the card and release of the hold
+  K.add({dur:900, sim:2, cap:`The card settles with the exchange’s bank, one or more days after the authorisation.`, run:() => {}});
+  K.release(BK, `${nA} releases the card hold after settlement.`, 2);
+  K.travel(gate, SN, makeEnvelope(L.tokens, null, 'NOTICE'), 'The sender is told the transfer is complete. From here only the recipient controls the wallet.', 1.5, {color:C.goldLine});
+
+  T.rows = () => [R.holds(T), R.onHold(T), R.holdTime(T), R.msgs(T), ['Checks run', String(checks), false]];
+  T.extraSummary = () => [];
+  T.doneText = 'Delivered. The sender had to be checked by the bank, onboarded at the exchange, pass tiers, buy through the exchange’s own inventory, and withdraw with a travel-rule check before the crypto reached the wallet.';
+}
+
+function fcAfc(T, K){
+  const nA = T.cfg.v.org || 'Sending bank', nW = T.cfg.v.wallet || 'Recipient wallet';
+  const {from, amount} = T.cfg, amt = money(amount, from), crypto = T.cfg.v.crypto || 'BTC';
+  const space = afcSpace(T, 'AFC · PROCESS SPACE', [
+    ['fromAnchor', `Anchor · ${from}`, 'Accepts'],
+    ['chain', 'NodeChain', 'AST · PoT'],
+    ['cryptoAnchor', 'Crypto anchor', 'Converts']
+  ]);
+  const I = space.inside;
+  const [xA, xW] = planeXs(2);
+  const A = makeNode(T, {x:xA, y:INST_Y, label:nA, sub:'Institutional client'});
+  const W = makeNode(T, {x:xW, y:INST_Y, label:nW, sub:`Crypto · ${crypto}`});
+  space.connect([A, W]);
+  const cash = makeCoins(T.layers.tokens, from, 4, A.x, A.y + 16);
+  const aro = makeCoins(T.layers.tokens, 'ARO', 4, I.chain.x, I.chain.y + 16, 0);
+  const spark = space.sig();
+
+  // 1 of 5 · the request arrives; LacMusa routes it to the fiat anchor
+  K.api(A, space, `1 of 5 · Request. The confirmed ${amt} transaction arrives. LacMusa, the control layer, routes it to the ${from} anchor.`);
+  // 2 of 5 · the fiat anchor accepts the funds
+  K.coins(cash, A, I.fromAnchor, `2 of 5 · Accept. The ${from} anchor accepts the funds on its reserve account.`, 1.5, {fadeOut:true});
+  // 3 of 5 · after acceptance LacMusa instructs AST; the proof is recorded; ArosCoin is issued 1 = 1
+  K.add({dur:1500, sim:1.5, cap:'3 of 5 · Issue. After acceptance, LacMusa instructs AST. The proof is recorded and ArosCoin is issued 1 = 1.',
+    start:() => { T.m.pot++; },
+    run:p => {
+      const [x, y] = quad(I.fromAnchor.x, I.fromAnchor.y, (I.fromAnchor.x + I.chain.x)/2, I.fromAnchor.y - 60, I.chain.x, I.chain.y, ease(seg(p, 0, .7)));
+      spark.set(x, y, fade(p, .05, .65));
+      aro.set(I.chain.x, I.chain.y + 16, seg(p, .6, 1));
+    }});
+  // 4 of 5 · the crypto anchor accepts ArosCoin and converts it into the requested crypto
+  K.coins(aro, I.chain, I.cryptoAnchor, `4 of 5 · Accept and convert. The crypto anchor accepts ArosCoin and converts it into ${crypto}.`, 1.2, {arrive:() => aro.recur(crypto)});
+  // 5 of 5 · output
+  K.coins(aro, I.cryptoAnchor, W, `5 of 5 · Output. The crypto anchor issues ${crypto} to ${nW}. The process ends here.`, 1.2);
+
+  T.rows = () => [['Steps', '5', false], ['Proof of transaction', T.m.pot ? '1' : '0', false], ['Token before acceptance', '0', false], ['API calls', String(T.m.api), false]];
+  T.extraSummary = () => [];
+  T.doneText = `Done. Five steps: request, accept, issue, accept and convert, output. ${crypto} reached the named wallet.`;
+}
+
 /* ---------- scenario registry ---------- */
 const SCENARIOS = [
-  {key:'payment', no:'01', group:'Commercial', name:'Cross-border payment', sub:'SWIFT correspondent chain vs AFC', to:true, amountLabel:'Amount',
+  {key:'payment', no:'03', hidden:true, group:'Commercial', name:'Cross-border payment', sub:'SWIFT correspondent chain vs AFC', to:true, amountLabel:'Amount',
    inputs:[{id:'org', label:'Your bank (sender)', type:'text', def:'Bank A'}, {id:'bene', label:'Beneficiary’s bank', type:'text', def:'Bank B'}, {id:'from', label:'Send in', type:'currency', def:'USD'}, {id:'to', label:'Paid out in', type:'currency', def:'EUR'}, {id:'amount', label:'Amount', type:'amount', def:1000000}],
    lede:'One payment, two routes. First the correspondent chain banks use today, then the same institutions connected through the AFC protocol layer.',
    note:'Illustrative model. Timings, fees and FX rates are examples, not quotes, service levels or performance claims. The "Today" track shows a slow multi-hop corridor: SWIFT reports that most payments reach the beneficiary bank within an hour, while the BIS found that slow routes can take more than two days (<a href="https://www.swift.com/news-events/press-releases/swifts-cross-border-payments-processing-speed-surpasses-g20-target" target="_blank" rel="noopener">SWIFT, 2023</a>; <a href="https://www.bis.org/cpmi/publ/swift_gpi.pdf" target="_blank" rel="noopener">BIS CPMI, 2022</a>). AFC is a logical process layer: it holds no funds, issues no money and is not a party to settlement. Anchors settle on their own books. The protocol (PoT) fee is shown without an amount until its tariff is set; it follows the AST Canon formula (amount × fee rate). NodeChain belongs to AST.',
@@ -1067,18 +1190,18 @@ const SCENARIOS = [
    note:'Illustrative model; notarial and registry steps vary by jurisdiction and asset class. AST does not appraise assets: it accepts an already confirmed institutional valuation and mints strictly at that price (AST Canon §5.1–5.2). AST may hold only its own funds, so the investor pays the owner directly (Canon §4.4). The title registry keeps its role and receives a "tokenized" mark (Canon §5.3). Timings are examples, not quotes, service levels or performance claims; registry marking depends on the registry.',
    today:{tag:'Today', title:'Notary, escrow and registry', vbH:430, unit:'h', build:tokenToday},
    next:{tag:'With AST', title:'Signed package, PoT, NodeChain', vbH:430, unit:'s', band:'Seconds to minutes', build:tokenAst}},
-  {key:'lc', no:'02', group:'Commercial', name:'Letter of credit', sub:'Paper documents vs AFC contract', to:true, amountLabel:'LC amount',
-   inputs:[{id:'org', label:'Issuing bank (importer’s)', type:'text', def:'Issuing bank'}, {id:'exporter', label:'Exporter', type:'text', def:'Exporter'}, {id:'from', label:'LC currency', type:'currency', def:'USD'}, {id:'to', label:'Exporter paid in', type:'currency', def:'EUR'}, {id:'amount', label:'LC amount', type:'amount', def:1000000}],
-   lede:'Trade finance. An importer’s bank guarantees payment to an exporter once shipment is proven. Today proof travels as paper, checked twice. With AFC, the terms and the evidence meet in one place.',
-   note:'Illustrative model. UCP 600 (art. 14) allows each bank up to five banking days to examine documents; courier and review times vary. Voyage time is excluded from both clocks. Electronic bills of lading require carrier and legal support in the corridor. Banks keep their roles and their checks; AFC holds no funds and does not take credit risk.',
-   today:{tag:'Today', title:'Documentary credit on paper', vbH:380, unit:'h', build:lcToday},
-   next:{tag:'With AFC', title:'LC as a machine-readable contract', vbH:380, unit:'h', build:lcAfc}},
-  {key:'payroll', no:'03', group:'Commercial', name:'Bulk payouts', sub:'Overnight batch vs one AFC pass', to:false, amountLabel:'Batch total',
-   inputs:[{id:'org', label:'Employer’s bank', type:'text', def:'Employer’s bank'}, {id:'from', label:'Currency', type:'currency', def:'USD'}, {id:'amount', label:'Batch total', type:'amount', def:300000}],
-   lede:'A payroll batch to three banks. Today it waits for a clearing window, and a bad account shows up days later as a return. With AFC, every bank confirms its account before money moves.',
-   note:'Illustrative model. Clearing windows, cut-offs and return periods vary by scheme and country. Account checks are performed by each beneficiary bank on its own data; AFC orchestrates the requests and holds no funds.',
-   today:{tag:'Today', title:'Batch file through a clearing house', vbH:460, unit:'h', build:payrollToday},
-   next:{tag:'With AFC', title:'One pass across all banks', vbH:420, unit:'s', band:'Seconds to minutes', build:payrollAfc}},
+  {key:'fc', no:'01', group:'Commercial', name:'Fiat to a crypto wallet', sub:'Any bank, any wallet, one request', to:false, amountLabel:'Amount',
+   inputs:[{id:'org', label:'Sending bank', type:'text', def:'Sending bank'}, {id:'wallet', label:'Recipient wallet', type:'text', def:'Recipient wallet'}, {id:'from', label:'Send in', type:'currency', def:'USD'}, {id:'crypto', label:'Crypto asset', type:'text', def:'BTC'}, {id:'amount', label:'Amount', type:'amount', def:1000000}],
+   lede:'A bank sends a fiat amount to one crypto wallet, delivered in the asset the request names. Today it passes through an exchange with holds at every hop. With AFC, one process delivers it.',
+   note:'Illustrative model. AFC holds no funds; the anchors hold their own reserves. The crypto anchor converts only because the request names a crypto asset. Timings are examples, not quotes.',
+   today:{tag:'Today', title:'Bank, exchange, blockchain', vbH:480, unit:'h', build:fcToday},
+   next:{tag:'With AFC', title:'One request, one wallet', vbH:420, unit:'s', band:'Seconds to minutes', build:fcAfc}},
+  {key:'fx2', no:'02', hidden:true, group:'Commercial', name:'Two currencies, no USD', sub:'GEL → KZT through the AFC process', to:true, amountLabel:'Amount',
+   inputs:[{id:'org', label:'Sender', type:'text', def:'Sender'}, {id:'bene', label:'Beneficiary', type:'text', def:'Beneficiary'}, {id:'from', label:'Send in', type:'currency', def:'GEL'}, {id:'to', label:'Paid out in', type:'currency', def:'KZT'}, {id:'amount', label:'Amount', type:'amount', def:1000000}],
+   lede:'Two different currencies, no dollar on the route. Today the payment passes through correspondents. With AFC, one process settles it in seconds.',
+   note:'Illustrative model. AFC holds no funds; each institution settles on its own books. AFC is a logical process layer.',
+   today:{tag:'Today', title:'Correspondent chain', vbH:380, unit:'h', build:fxToday},
+   next:{tag:'With AFC', title:'One process, one pass', vbH:420, unit:'s', band:'Seconds to minutes', build:fxAfc}},
   ...GOV
 ];
 

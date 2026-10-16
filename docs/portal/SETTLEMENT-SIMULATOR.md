@@ -125,7 +125,7 @@ Respects `prefers-reduced-motion`. Works at phone width (the window is taller th
 
 ## 7. Scenarios 02–04
 
-> **Visibility (2026-10-14, owner decision):** letter of credit and bulk payouts are **shown again** (now numbered 02 and 03 under *Commercial*). Asset tokenization is **hidden** (`hidden: true`): the owner rejected the current version; it stays in code for a possible rework.
+> **Visibility (2026-10-16, owner decision):** letter of credit and bulk payouts are **removed** from the simulator; the tables below are history only. Asset tokenization stays **hidden** (`hidden: true`). Cross-border payment and the two-currency scenario are **hidden** until their With-AFC tracks are rewritten to the current model (§13).
 
 Every scenario keeps the same rules: identical participants in both tracks where they exist in reality, illustrative clocks, and AFC/AST drawn without custody.
 
@@ -167,7 +167,7 @@ Payroll batch of three payments to Banks X, Y, Z; Bank Z's account is closed in 
 
 1. **Align the AFC tracks with the owner's portal text:** fiat → process-bound ArosCoin (AST mint) → fiat at a second anchor → external bank payout → AST burn; KYC/AML at the initiating institution before AFC; API Gateway + protocol validation inside AFC; 5–15 min shown as a target, not an SLA. Blocked on owner decisions: (a) naming — the canon gate forbids the terms used in the Notion text; (b) ArosCoin in the conversion route vs. the legal-review position.
 2. **Scenarios from the owner's portal text:** last mile, digital-assets bridge, Nostro capital unlocking (liquidity on demand), new roads (tokenized bond via a neutral corridor), sovereign bond purchase; platform integrations shown only as proposed models, never as live partnerships.
-3. Decide on scenarios 03–04 (keep hidden, rework, or delete).
+3. Scenarios 03–04 (letter of credit, bulk payouts) are removed from the simulator (2026-10-16); decide whether to rework them later.
 
 ## 9. Acceptance
 
@@ -229,3 +229,15 @@ Source: owner's research in Notion, "04 — Государственный па�
 | G12 | Cross-border trade corridor | Central banks / customs / banks | Faster compliant settlement | Sanctions, geopolitics |
 
 Per-scenario step tables follow (§12.1–12.12).
+
+## 13. Main scenario — Fiat to a crypto wallet (2026-10-16)
+
+Key `fc`. Any institution sends an amount to one crypto wallet, delivered in the crypto asset the request names (example: USD 1,000,000 delivered as BTC).
+
+**Today (no AFC).** Real path, step by step, 40 steps: the sending bank checks the customer and authorises a card payment to an exchange (holds the authorisation); the client opens an exchange account, passes KYC tiers; the exchange's backend (card and bank rails, liquidity, custody ledger, withdrawals) buys the crypto and credits a custody balance; the withdrawal to the wallet goes through the travel-rule check; the exchange broadcasts the transfer; the blockchain confirms it; the card settles one or more days later. Holds and messages are shown on each hop.
+
+**With AFC.** Five steps: (1) the request, with an already confirmed transaction, arrives through the API gateway and LacMusa routes it to the fiat anchor; (2) the fiat anchor accepts the funds on its reserve account; (3) after acceptance, LacMusa instructs AST, the proof of transaction is recorded and ArosCoin is issued 1 = 1; (4) the crypto anchor accepts ArosCoin and converts it into the requested crypto (only because the request names one); (5) the crypto is issued to the wallet and the process ends.
+
+Model rules for the With-AFC track: LacMusa is a supra-architectural control layer inside the AFC space, drawn as a layer rather than as a link (the main scenario does not draw it yet). Anchors accept money on reserve accounts and never accept requests. No holds on the With-AFC track. No token exists before acceptance.
+
+**Timing.** The band "Seconds to minutes (target · PoT ≤ 15 min)" describes the whole transaction, from the initiating institution to the receiving side, including the checks each side performs before it accepts. It is not AFC's processing time alone.
