@@ -320,10 +320,10 @@ These values are ratified for implementation defaults; changing them is a config
 
 | Item | Default |
 |------|---------|
-| PoT confirmation timeout | 15 minutes |
-| Orchestrator per-step timeout | 5 minutes (configurable) |
-| Orchestrator process timeout | 30 minutes |
-| Node suspend grace period | 24 hours |
+| PoT confirmation timeout | 20 seconds |
+| Orchestrator per-step timeout | 5-7 seconds (configurable) |
+| Orchestrator process timeout | 30-60 seconds |
+| Node suspend grace period | 60 min |
 | Min ARO dust | 0.000000001 (10⁻⁹ ARO / 1 arx) |
 | Commission split (nodes / AST) | 70% / 30% (ship default; configurable) |
 | Sandbox example feeRate | 0.15% |
