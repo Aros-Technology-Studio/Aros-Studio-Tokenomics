@@ -180,11 +180,13 @@ Payroll batch of three payments to Banks X, Y, Z; Bank Z's account is closed in 
 
 ## 10. Deployment (production droplet)
 
-Production runs `docker-compose.prod.yml` from **`/opt/ast-portal`** on the droplet `Aros-Studio-Portal`, behind Caddy (`deploy/Caddyfile.portal`, `portal.arosfinancialcore.com → 127.0.0.1:3200`). **`/opt/ast-portal` is a plain copy, not a git checkout**, so `git pull` does not work there. The page ships inside the `portal-ui` image (`COPY public`), so a site release replaces `portal/frontend` and rebuilds that one service. Run in the DigitalOcean Droplet Console (Droplets → droplet → Access → Launch Droplet Console), in one console window:
+> **2026-11-12:** the original droplet was deleted (billing lapse, no snapshots; journal and secrets lost). Production was rebuilt on a new droplet in FRA1 (Ubuntu 24.04, 2 vCPU / 4 GB, host Caddy + Docker, ufw 22/80/443) from `main` at `1f6089f`, with freshly generated `.env.production` secrets. The app directory is now **`/opt/ast`**; the deployed commit is recorded in `/opt/ast/RELEASE_COMMIT`. The DNS `A` record for `portal` is managed at Namecheap, not DigitalOcean.
+
+Production runs `docker-compose.prod.yml` from **`/opt/ast`** on the droplet, behind Caddy (`deploy/Caddyfile.portal`, `portal.arosfinancialcore.com → 127.0.0.1:3200`). **`/opt/ast` is a plain copy, not a git checkout**, so `git pull` does not work there. The page ships inside the `portal-ui` image (`COPY public`), so a site release replaces `portal/frontend` and rebuilds that one service. Run in the DigitalOcean Droplet Console (Droplets → droplet → Access → Launch Droplet Console), in one console window:
 
 ```bash
 # 1. Download the release branch and list server-only files (no changes yet)
-cd /opt/ast-portal || exit
+cd /opt/ast || exit
 STAMP=$(date +%Y%m%d-%H%M%S); echo "$STAMP"
 rm -rf /tmp/ast-new && mkdir -p /tmp/ast-new
 curl -fsSL "https://codeload.github.com/Aros-Technology-Studio/Aros-Studio-Tokenomics/tar.gz/refs/heads/<release-branch>" | tar -xz -C /tmp/ast-new --strip-components=1
@@ -199,11 +201,11 @@ docker compose -f docker-compose.prod.yml --env-file .env.production up -d --bui
 curl -sI https://portal.arosfinancialcore.com/simulator | head -1   # expect 200
 ```
 
-`--no-deps` is required: without it Compose also rebuilds and recreates `portal-edge` and `core` (journal SoT) through `depends_on`. `.env.production` lives in `/opt/ast-portal`; its `:?` variables must be set even for a single-service release.
+`--no-deps` is required: without it Compose also rebuilds and recreates `portal-edge` and `core` (journal SoT) through `depends_on`. `.env.production` lives in `/opt/ast`; its `:?` variables (including `POSTGRES_PASSWORD`, even without the `with-postgres` profile) must be set even for a single-service release.
 
 Rollback (same window): `rm -rf portal/frontend && mv "portal/frontend.bak-$STAMP" portal/frontend`, then the same `up -d --build --no-deps portal-ui`.
 
-Follow-up for ops: turn `/opt/ast-portal` into a git checkout (or deploy images from CI) so releases are traceable to a commit; the droplet also reported pending OS updates and "System restart required" (2026-10-12) — schedule separately.
+Follow-up for ops: turn `/opt/ast` into a git checkout (or deploy images from CI) so releases are traceable to a commit, and enable droplet backups or scheduled snapshots so a billing lapse cannot lose the journal again.
 
 ## 11. Visual polish (2026-10-12, owner request)
 
