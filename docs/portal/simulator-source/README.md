@@ -8,7 +8,7 @@ Source of truth for the portal embed `portal/frontend/public/embed/settlement-si
 
 Build the portal embed (run from this folder):
 
-    python3 v2/build.py simulator.html ../../../v2-portal.html
-    python3 gen_portal.py ../../../v2-portal.html ../../../portal/frontend/public/embed/settlement-simulator.html
+    python3 v2/build.py simulator.html /tmp/v2-portal.html gov/*.js
+    python3 gen_portal.py /tmp/v2-portal.html ../../../portal/frontend/public/embed/settlement-simulator.html
 
-Government scenarios (G01–G12) are not in this folder yet; they still use the previous With-AFC model.
+The fragments include government, treasury and capital markets cases. Historical deep-link keys are preserved.

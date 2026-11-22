@@ -635,3 +635,18 @@ Key `fc`. Any institution sends an amount to one crypto wallet, delivered in the
 The animation is an explanatory architecture diagram. Neither the requesting institution nor any participant can observe the full internal sequence. Signals, fiat account credit and wallet movements are distinct events.
 
 **Timing.** The band "Seconds to minutes (target · PoT ≤ 15 min)" describes the whole transaction, from the initiating institution to the receiving side, including the checks each side performs before it accepts. It is not AFC's processing time alone.
+
+## Institutional scenario revision
+
+The live catalogue compares an identical mandate and completion event in both tracks.
+G03–G08 and G10–G12 supersede the earlier government scripts above. Legacy URL keys
+are retained for bookmarks. Their current mandates are respectively inter-fund reallocation,
+cross-chain cash withdrawal, bank liquidity outside a bilateral network, beneficiary
+credit, conditional budget disbursement, CBDC perimeter exit, fund redemption into GEL,
+FX liquidity funding and international bond subscription. G02 and G09 remain procurement
+and sovereign bond servicing. Primary references and model assumptions accompany each
+scenario. A bank approves a client mandate before submitting it to AFC. An external
+institution cannot inspect AFC's internal route. A proposed connector, settlement
+agreement or central-bank permission is a scenario assumption. Neither an on-chain
+receipt nor a payment instruction proves beneficiary credit. A sequential workflow does
+not imply atomic settlement. No measured processing times or savings exist for these comparisons.

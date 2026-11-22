@@ -161,7 +161,8 @@ function openRoute(){
   const r = state.results[s.key] || {};
   document.querySelectorAll('.route').forEach(b => b.classList.toggle('played', !!r[b.dataset.side]));
   const rd = $('#routeData'); rd.replaceChildren();
-  rd.append('Your details: ');
+  rd.hidden = !(s.inputs || []).length;
+  if (!rd.hidden) rd.append('Your details: ');
   (s.inputs || []).filter(i => i.type !== 'currency' || i.id === 'from').slice(0, 4).forEach((inp, n) => {
     if (n) rd.append(' · ');
     const b = document.createElement('b'); b.textContent = inp.type === 'amount' ? money(v[inp.id], v.from || 'USD') : String(v[inp.id]); rd.appendChild(b);

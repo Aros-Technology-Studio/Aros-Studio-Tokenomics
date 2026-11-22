@@ -561,7 +561,7 @@ class Track {
   buildDom(host){
     const sec = document.createElement('section'); sec.className = 'panel ' + this.side;
     sec.innerHTML = `<div class="panel-head"><span class="tag ${this.side}">${this.def.tag}</span><h2>${this.def.title}</h2>
-      <div class="clock"><span class="cv">T+0</span><small>${this.def.band ? 'target · PoT ≤ 15 min' : 'illustrative'}</small></div></div>
+      <div class="clock"><span class="cv">T+0</span><small>${['Stage sequence', 'Event sequence'].includes(this.def.band) ? 'timing unmeasured' : this.def.band ? 'target · PoT ≤ 15 min' : 'illustrative'}</small></div></div>
       <div class="stage-scroll"><svg class="stage" viewBox="0 0 1000 ${this.def.vbH}" role="img" aria-label="${this.def.tag}: ${this.def.title}"></svg></div>
       <div class="rail"><span class="sc"></span><div class="bar"><i></i></div></div>
       <p class="caption" aria-live="polite"></p><dl class="metrics"></dl>`;
@@ -1041,9 +1041,9 @@ const SCENARIOS = [
    note:'Illustrative model; notarial and registry steps vary by jurisdiction and asset class. AST does not appraise assets: it accepts an already confirmed institutional valuation and mints strictly at that price (AST Canon §5.1–5.2). AST may hold only its own funds, so the investor pays the owner directly (Canon §4.4). The title registry keeps its role and receives a "tokenized" mark (Canon §5.3). Timings are examples, not quotes, service levels or performance claims; registry marking depends on the registry.',
    today:{tag:'Today', title:'Notary, escrow and registry', vbH:430, unit:'h', build:tokenToday},
    next:{tag:'With AST', title:'Signed package, PoT, NodeChain', vbH:430, unit:'s', band:'Seconds to minutes', build:tokenAst}},
-  {key:'fc', no:'01', group:'Commercial', name:'Fiat to a crypto wallet', sub:'Any bank, any wallet, one request', to:false, amountLabel:'Amount',
+  {key:'fc', no:'01', group:'Commercial', name:'Fiat to a crypto wallet', sub:'Bank-approved fiat payment to a crypto wallet', to:false, amountLabel:'Amount',
    inputs:[{id:'org', label:'Sending bank', type:'text', def:'Sending bank'}, {id:'wallet', label:'Recipient wallet', type:'text', def:'Recipient wallet'}, {id:'from', label:'Send in', type:'currency', def:'USD'}, {id:'crypto', label:'Crypto asset', type:'text', def:'BTC'}, {id:'amount', label:'Amount', type:'amount', def:1000000}],
-   lede:'A bank sends a fiat amount to one crypto wallet, delivered in the asset the request names. Today it passes through an exchange with holds at every hop. With AFC, one process delivers it.',
+   lede:'A bank sends a fiat amount to one crypto wallet, delivered in the asset the request names. The baseline illustrates one exchange-funded withdrawal. With AFC, one process delivers it.',
    note:'Architecture illustration only. The requesting institution interacts only with AFC. No participant sees the full internal sequence. AFC holds no funds; the anchors hold their own reserves. The crypto anchor converts only because the request names a crypto asset. Timings are examples, not quotes.',
    today:{tag:'Today', title:'Bank, exchange, blockchain', vbH:480, unit:'h', build:fcToday},
    next:{tag:'With AFC', title:'One request, one wallet', why:'The fiat credit triggers AST through AFC. AST completion returns to AFC before the crypto anchor is instructed.', vbH:420, unit:'s', band:'Seconds to minutes', build:fcAfc}},
