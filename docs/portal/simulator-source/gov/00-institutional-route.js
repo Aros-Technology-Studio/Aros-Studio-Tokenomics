@@ -1,8 +1,23 @@
-// Each route follows one mandate. The step counter is not a settlement clock.
+// Each route follows one mandate. Windows below are operational ranges, not SLA
+// claims. AFC shortens the coordination/settlement segment; approvals,
+// eligibility and asset-life events remain with their owners.
+const INSTITUTIONAL_WINDOWS = {
+  'gov-tax':       {today: '1–3 business days', next: 'same day–1 business day'},
+  'gov-customs':   {today: 'minutes–1 business day', next: 'minutes–same day'},
+  'gov-transfers': {today: '1–5 business days', next: 'same day–1 business day'},
+  'gov-disaster':  {today: 'days–weeks', next: 'hours–1 business day after approval'},
+  'gov-aid':       {today: 'weeks–months', next: 'days–weeks; programme checks remain'},
+  'gov-cbdc':      {today: 'hours–2 business days', next: 'minutes–same day'},
+  'gov-bonds':     {today: 'stage dates vary; coupon/redemption at maturity', next: 'stage dates vary; AST records confirmed events'},
+  'gov-carbon':    {today: 'weeks–months', next: 'days–weeks; evidence gates remain'},
+  'gov-soe':       {today: 'hours–2 business days', next: 'minutes–same day'},
+  'gov-trade':     {today: '1–3 business days', next: 'same day–1 business day'}
+};
 function institutionalScenario({key, no, group, name, mandate, assumption, source, today, next, outcome}) {
   function track(tag, events) {
+    const window = (INSTITUTIONAL_WINDOWS[key] || {})[tag === 'Today' ? 'today' : 'next'] || 'varies by institution and corridor';
     return {
-      tag, title: name + ' · ' + tag, band: 'Event sequence', vbH: 350, unit: 'h',
+      tag, title: name + ' · ' + tag, band: window, vbH: 350, unit: 'h',
       why: events[events.length - 1][1],
       build(T, K) {
         events.forEach(([label, caption], i) => {
@@ -11,7 +26,7 @@ function institutionalScenario({key, no, group, name, mandate, assumption, sourc
           K.pulse(node, caption, 0);
         });
         T.rows = () => [['Current event', events[Math.min(T.idx, events.length - 1)][0]]];
-        T.summary = () => [['Completion evidence', outcome], ['Cost and duration', 'Not measured']];
+        T.summary = () => [['Completion evidence', outcome], ['Realistic operating window', window]];
         T.doneText = events[events.length - 1][1];
       }
     };
