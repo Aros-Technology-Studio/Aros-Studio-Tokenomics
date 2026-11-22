@@ -422,6 +422,21 @@ a {
   color: var(--ink);
   font-weight: 500;
 }
+/* Landing positioning statement: a paragraph block + list, so it needs a
+   wider measure than the one-line lead used on /technologic. */
+.home-hero--landing .home-hero__lead {
+  max-width: 46ch;
+}
+.home-hero--landing .home-hero__lead p {
+  margin: 0 0 14px;
+}
+.home-hero--landing .home-hero__lead ul {
+  margin: 0;
+  padding-left: 1.2em;
+}
+.home-hero--landing .home-hero__lead li + li {
+  margin-top: 6px;
+}
 
 /* ---- TECHNOlogic cards ---- */
 .tl-grid {
