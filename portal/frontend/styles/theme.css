@@ -382,11 +382,11 @@ a {
 }
 /* Landing page only: owner-tuned 230px shift to the left (unchanged from
    ~1362px wide up). Below that the shift is capped by the free margin beside
-   the 1180px .pad column, so the mark and tagline never
+   the hero column (~906px wide when centred), so the mark and tagline never
    leave the screen on laptops or phones. Other pages using .home-hero
    (e.g. /technologic) are not shifted. */
 .home-hero--landing .pad {
-  transform: translateX(calc(-1 * min(230px, max(0px, (100vw - 1180px) / 2))));
+  transform: translateX(calc(-1 * min(230px, max(0px, (100vw - 906px) / 2 + 2px))));
 }
 .home-hero__mark {
   margin-bottom: 28px;
@@ -421,46 +421,6 @@ a {
 .home-hero__lead strong {
   color: var(--ink);
   font-weight: 500;
-}
-/* Landing positioning statement: a paragraph block + list, so it needs a
-   wider measure than the one-line lead used on /technologic. */
-/* Landing typography (owner direction 2026-11-22): League Spartan, tighter
-   tracking, statement justified across the full column width. */
-.home-hero--landing .home-hero__title,
-.home-hero--landing .home-hero__lead {
-  font-family: var(--font-spartan), var(--t-font);
-  letter-spacing: -0.035em;
-}
-/* Copy block shrinks to the tagline's width; the statement is then forced to
-   exactly that width (width:0 + min-width:100%) so both edges line up. */
-.home-hero__copy {
-  display: inline-block;
-  max-width: 100%;
-}
-.home-hero--landing .home-hero__lead {
-  width: 0;
-  min-width: 100%;
-  max-width: none;
-  font-weight: 400;
-  color: rgba(255, 255, 255, 0.94);
-  text-shadow: 0 1px 14px rgba(0, 0, 0, 0.35);
-  font-size: clamp(16px, 1.4vw, 21px);
-  text-align: justify;
-  text-wrap: pretty;
-}
-/* Bullets are one-liners; justifying a wrapped bullet opens huge gaps. */
-.home-hero--landing .home-hero__lead li {
-  text-align: left;
-}
-.home-hero--landing .home-hero__lead p {
-  margin: 0 0 14px;
-}
-.home-hero--landing .home-hero__lead ul {
-  margin: 0;
-  padding-left: 1.2em;
-}
-.home-hero--landing .home-hero__lead li + li {
-  margin-top: 6px;
 }
 
 /* ---- TECHNOlogic cards ---- */
