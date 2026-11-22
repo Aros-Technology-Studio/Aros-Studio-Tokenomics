@@ -5,6 +5,7 @@ import { useEffect, useState } from 'react';
 import { useParams, useRouter } from 'next/navigation';
 import { loadSession, portalFetch } from '../../../../lib/auth';
 import { StatusBadge } from '../../../../components/ui/status-badge';
+import { T } from '../../../../components/ui/t';
 
 export default function AssetClaimPage() {
   const params = useParams();
@@ -37,7 +38,7 @@ export default function AssetClaimPage() {
         <Link href="/assets">← Assets</Link>
       </p>
       <h1>
-        Claim <code style={{ fontSize: '0.85em' }}>{claimId}</code>
+        <T>Claim</T> <code style={{ fontSize: '0.85em' }}>{claimId}</code>
       </h1>
       {error && <p className="err">{error}</p>}
       {data && (
@@ -46,12 +47,12 @@ export default function AssetClaimPage() {
             <StatusBadge status={String(data.status)} />
           </p>
           <p className="lead">
-            Valuation <strong className="mono">{String(data.valuation)}</strong> · Holder{' '}
+            <T>Valuation</T> <strong className="mono">{String(data.valuation)}</strong> · <T>Holder</T>{' '}
             <strong>{String(data.holderId)}</strong>
           </p>
           <p>
             <Link href={`/tokenization/${encodeURIComponent(String(data.processId ?? claimId))}`}>
-              Open process status →
+              <T>Open process status →</T>
             </Link>
           </p>
           <pre className="result">{JSON.stringify(data, null, 2)}</pre>

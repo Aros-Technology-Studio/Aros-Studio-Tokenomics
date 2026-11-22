@@ -356,7 +356,6 @@ const ka: Messages = {
   'footer.sot': 'NodeChain არის SoT',
   'lang.label': 'ენა',
 
-  'home.h1': 'ინსტიტუციური შეფასება, დაფიქსირებული დადასტურებული სამუშაოს შემდეგ',
   'home.lead.before':
     'AST აფიქსირებს შეფასებას, რომელიც დაწესებულებამ უკვე დაადასტურა. ციფრული ერთეულები ჩნდება მხოლოდ Proof of Transaction-ის შემდეგ. ',
   'home.lead.after':
@@ -366,7 +365,6 @@ const ka: Messages = {
   'home.cta.cabinet': 'დაწესებულების შესვლა',
 
   'system.eyebrow': 'სისტემის საზღვრები',
-  'system.h1': 'რა არის AST — და რას უარყოფს',
   'system.lead':
     'სიცხადე ქმნის ნდობას. ქვემოთ არის Aros Studio Tokenomics-ის საჯარო საზღვარი ამ პორტალით. სრული კანონი — Core Canon-ში; ეს გვერდი — გარე სამყაროს შეჯამება.',
   'system.can.h': 'რას შეუძლია',
@@ -398,7 +396,6 @@ const ka: Messages = {
   'system.cta.nodechain': 'NodeChain ჟურნალი',
 
   'explore.eyebrow': 'საჯარო ძიება',
-  'explore.h1': 'იპოვეთ პროცესი — რეგისტრაციის გარეშე',
   'explore.lead':
     'შეიყვანეთ AST processId. ნებისმიერს შეუძლია წაიკითხოს შემოკლებული სტატუსი. გასაღების გარეშე. ჩაწერის გარეშე. NodeChain რჩება SoT Core hand-off-ის შემდეგ.',
   'explore.label': 'Process ID',
@@ -410,23 +407,22 @@ const ka: Messages = {
   'explore.public': 'საჯარო ხედი',
   'explore.source': 'წყარო',
 
-  'login.title': 'დაწესებულების შესვლა',
-  'login.lead': 'მხოლოდ allowlist. პორტალი ARO-ს არ მინტავს.',
+  'login.title': 'Institution login',
+  'login.lead': 'მხოლოდ allowlist-ში შეყვანილი ინსტიტუციებისთვის. პორტალი ARO-ს არ მინტავს.',
   'login.login': 'ლოგინი',
-  'login.salt': 'მარილი',
+  'login.salt': 'Salt',
   'login.submit': 'შესვლა',
   'login.busy': 'შესვლა…',
   'login.stack.edge': 'Edge',
   'login.stack.core': 'Core',
-  'login.stack.up': 'კი',
-  'login.stack.down': 'არა',
+  'login.stack.up': 'მუშაობს',
+  'login.stack.down': 'გათიშულია',
   'login.stack.checking': 'შემოწმება',
   'login.stack.unknown': 'უცნობი',
   'login.hint': 'პილოტი: login pilot · salt pilot',
   'login.known': 'ცნობილი დაწესებულებები',
 
   'nc.eyebrow': 'NodeChain · რეგისტრაციის ჟურნალი',
-  'nc.h1': 'NodeChain ჟურნალი',
   'nc.lead':
     'ჯაჭვის თითოეული ერთეული არის კვანძი height-ით, დროით და prevHash-ით წინა კვანძზე. მხოლოდ append: ისტორია არ გადაიწერება. Explorer AST-სთვის — mint-ისა და ბრაუზერიდან ჩაწერის გარეშე.',
   'nc.refresh': 'განახლება',

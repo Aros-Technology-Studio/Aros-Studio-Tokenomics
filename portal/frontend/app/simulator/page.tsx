@@ -1,5 +1,6 @@
 import type { Metadata } from 'next';
 import { SimulatorWindow } from '../../components/ui/simulator-window';
+import { getLocale } from '../../lib/i18n/server';
 
 export const metadata: Metadata = {
   title: 'Settlement Simulator',
@@ -8,16 +9,19 @@ export const metadata: Metadata = {
 };
 
 /** Spec: docs/portal/SETTLEMENT-SIMULATOR.md. The simulator itself is public/embed/settlement-simulator.html. */
-export default function SimulatorPage() {
+const LEAD = {
+  en: 'One institutional process, two routes: how it runs today, and how it runs when the same institutions are connected through AFC. Illustrative model.',
+  ka: 'ერთი ინსტიტუციური პროცესი, ორი მარშრუტი: როგორ მიმდინარეობს დღეს და როგორ — როცა იგივე ინსტიტუციები AFC-ით არიან დაკავშირებული. საილუსტრაციო მოდელი.',
+};
+
+export default async function SimulatorPage() {
+  const lead = LEAD[await getLocale()];
   return (
     <section className="page">
       <div className="pad">
         <p className="page__eyebrow">TECHNOlogic · Simulator</p>
         <h1 className="page__title">Settlement Simulator</h1>
-        <p className="page__lead">
-          One institutional process, two routes: how it runs today, and how it runs when the same institutions are
-          connected through AFC. Illustrative model.
-        </p>
+        <p className="page__lead">{lead}</p>
         <SimulatorWindow src="/embed/settlement-simulator.html" title="settlement-simulator · illustrative model" />
       </div>
     </section>

@@ -17,6 +17,8 @@ import {
   type AssetTypeSummary,
   type EvidenceSlot,
 } from '../../../lib/asset-evidence';
+import { T, L } from '../../../components/ui/t';
+import { useI18n } from '../../../lib/i18n/context';
 
 function randomIdem(): string {
   if (typeof crypto !== 'undefined' && crypto.randomUUID) return crypto.randomUUID();
@@ -74,6 +76,7 @@ type SigVerify = {
  * 5) Start tokenization → certificate
  */
 export default function TokenizationWizardPage() {
+  const { tx } = useI18n();
   const router = useRouter();
   const [step, setStep] = useState(0);
 
@@ -497,32 +500,33 @@ export default function TokenizationWizardPage() {
       <p className="muted" style={{ marginTop: 0 }}>
         <Link href="/dashboard">← Cabinet</Link>
       </p>
-      <p className="eyebrow">Institutional client · document-first</p>
+      <p className="eyebrow"><T>Institutional client · document-first</T></p>
       <h1>Tokenize from a signed document package</h1>
       <p className="lead">
-        Choose the <strong>asset type</strong>, upload the <strong>typed evidence documents</strong>,
-        confirm e-signature, restate only what the package states. Optional bureau enrichment assists
-        confirmation — it does not invent price. AST does not appraise. Portal never mints.
+        <L
+          en={<>Choose the <strong>asset type</strong>, upload the <strong>typed evidence documents</strong>, confirm e-signature, restate only what the package states. Optional bureau enrichment assists confirmation — it does not invent price. AST does not appraise. Portal never mints.</>}
+          ka={<>აირჩიეთ <strong>აქტივის ტიპი</strong>, ატვირთეთ <strong>ტიპის შესაბამისი მტკიცებულებითი დოკუმენტები</strong>, დაადასტურეთ ელ-ხელმოწერა და გადმოიტანეთ მხოლოდ ის, რაც პაკეტშია მითითებული. ბიუროს არასავალდებულო გამდიდრება დადასტურებას ეხმარება — ფასს არ იგონებს. AST შეფასებას არ ახდენს. პორტალი არასოდეს მინტავს.</>}
+        />
       </p>
 
       <ul className="steps">
         <li className={step === 0 ? 'active' : step > 0 ? 'done' : ''}>
-          <span className="n">0</span> Asset type
+          <span className="n">0</span> <T>Asset type</T>
         </li>
         <li className={step === 1 ? 'active' : step > 1 ? 'done' : ''}>
-          <span className="n">1</span> Evidence
+          <span className="n">1</span> <T>Evidence</T>
         </li>
         <li className={step === 2 ? 'active' : step > 2 ? 'done' : ''}>
-          <span className="n">2</span> E-signature
+          <span className="n">2</span> <T>E-signature</T>
         </li>
         <li className={step === 3 ? 'active' : step > 3 ? 'done' : ''}>
-          <span className="n">3</span> From document
+          <span className="n">3</span> <T>From document</T>
         </li>
         <li className={step === 4 ? 'active' : step > 4 ? 'done' : ''}>
-          <span className="n">4</span> Enrich
+          <span className="n">4</span> <T>Enrich</T>
         </li>
         <li className={step === 5 ? 'active' : step > 5 ? 'done' : ''}>
-          <span className="n">5</span> Start
+          <span className="n">5</span> <T>Start</T>
         </li>
       </ul>
 
@@ -532,11 +536,9 @@ export default function TokenizationWizardPage() {
           <>
             <h2 style={{ marginTop: 0 }}>0 · Select asset type</h2>
             <p className="muted">
-              Each asset type requires a different set of evidentiary documents. Pick the type that
-              matches the package you will upload. You can change type only by restarting this step
-              (uploads reset).
+              <T>Each asset type requires a different set of evidentiary documents. Pick the type that matches the package you will upload. You can change type only by restarting this step (uploads reset).</T>
             </p>
-            <label htmlFor="assetType0">Asset type</label>
+            <label htmlFor="assetType0"><T>Asset type</T></label>
             <select
               id="assetType0"
               value={assetType}
@@ -554,25 +556,25 @@ export default function TokenizationWizardPage() {
             >
               {assetTypeOptions.map((t) => (
                 <option key={t.id} value={t.id}>
-                  {t.label}
+                  {tx(t.label)}
                 </option>
               ))}
             </select>
             {evidenceDef && (
               <div className="card flat" style={{ marginTop: '1rem' }}>
                 <p style={{ marginTop: 0 }}>
-                  <strong>{evidenceDef.label}</strong>
+                  <strong>{tx(evidenceDef.label)}</strong>
                 </p>
-                <p className="muted">{evidenceDef.description}</p>
+                <p className="muted">{tx(evidenceDef.description)}</p>
                 <p style={{ marginBottom: 0 }}>
-                  <strong>Evidence you will need:</strong>
+                  <strong><T>Evidence you will need:</T></strong>
                 </p>
                 <ul>
                   {evidenceDef.slots.map((s) => (
                     <li key={s.id}>
-                      {s.label}{' '}
+                      {tx(s.label)}{' '}
                       <span className="muted">
-                        ({s.required ? 'required' : 'optional'}) — {s.purpose}
+                        ({tx(s.required ? 'required' : 'optional')}) — {tx(s.purpose)}
                       </span>
                     </li>
                   ))}
@@ -589,7 +591,7 @@ export default function TokenizationWizardPage() {
                   setStep(1);
                 }}
               >
-                Continue → evidence package
+                <T>Continue → evidence package</T>
               </button>
             </div>
           </>
@@ -600,17 +602,16 @@ export default function TokenizationWizardPage() {
           <>
             <h2 style={{ marginTop: 0 }}>1 · Upload evidence for {evidenceDef?.label ?? assetType}</h2>
             <p className="muted">
-              Fill each slot with the matching institutional document. Required slots must not be
-              empty. All files become one package fingerprint (SHA-256).
+              <T>Fill each slot with the matching institutional document. Required slots must not be empty. All files become one package fingerprint (SHA-256).</T>
             </p>
             {slots.map((s) => (
               <div key={s.id} className="card flat" style={{ marginBottom: '0.75rem' }}>
                 <label htmlFor={`slot-${s.id}`}>
-                  {s.label}{' '}
-                  <span className="muted">{s.required ? '(required)' : '(optional)'}</span>
+                  {tx(s.label)}{' '}
+                  <span className="muted">{tx(s.required ? '(required)' : '(optional)')}</span>
                 </label>
                 <p className="muted" style={{ margin: '0.25rem 0 0.5rem', fontSize: '0.85rem' }}>
-                  {s.purpose}
+                  {tx(s.purpose)}
                 </p>
                 <input
                   id={`slot-${s.id}`}
@@ -631,17 +632,16 @@ export default function TokenizationWizardPage() {
                 )}
               </div>
             ))}
-            {hashBusy && <p className="muted">Fingerprinting package…</p>}
+            {hashBusy && <p className="muted"><T>Fingerprinting package…</T></p>}
             {fileMeta && <p className="ok">{fileMeta}</p>}
             {documentPackageHash && (
               <>
-                <label>Package fingerprint (SHA-256)</label>
+                <label><T>Package fingerprint (SHA-256)</T></label>
                 <input className="mono" readOnly value={documentPackageHash} />
               </>
             )}
             <div className="callout">
-              Edge keeps the package hash, not a second NodeChain. Economic mint happens only on
-              Core after PoT.
+              <T>Edge keeps the package hash, not a second NodeChain. Economic mint happens only on Core after PoT.</T>
             </div>
             <div className="actions">
               <button
@@ -649,7 +649,7 @@ export default function TokenizationWizardPage() {
                 className="secondary"
                 onClick={() => setStep(0)}
               >
-                Back
+                <T>Back</T>
               </button>
               <button
                 type="button"
@@ -657,7 +657,7 @@ export default function TokenizationWizardPage() {
                 disabled={!step1Ok}
                 onClick={() => setStep(2)}
               >
-                Continue → e-signature
+                <T>Continue → e-signature</T>
               </button>
             </div>
           </>
@@ -668,13 +668,11 @@ export default function TokenizationWizardPage() {
           <>
             <h2 style={{ marginTop: 0 }}>2 · Confirm electronic signature</h2>
             <p className="muted">
-              Tokenization may proceed only after signature confirmation. Use institutional
-              attestation (pilot) or cryptographic X.509 detached verification (D4). National QTSP
-              profiles remain residual.
+              <T>Tokenization may proceed only after signature confirmation. Use institutional attestation (pilot) or cryptographic X.509 detached verification (D4). National QTSP profiles remain residual.</T>
             </p>
             <div className="card flat" style={{ marginBottom: '1rem' }}>
               <p style={{ margin: 0 }}>
-                <strong>Package:</strong>{' '}
+                <strong><T>Package:</T></strong>{' '}
                 {files.length ? files.map((f) => f.name).join(', ') : '—'}
               </p>
               <p className="muted mono" style={{ margin: '0.35rem 0 0', fontSize: '0.8rem' }}>
@@ -690,9 +688,9 @@ export default function TokenizationWizardPage() {
                   setSigVerify(null);
                 }}
               />
-              Qualified electronic signature is present and binds this document (required)
+              <T>Qualified electronic signature is present and binds this document (required)</T>
             </label>
-            <label htmlFor="sigMode">Verification mode</label>
+            <label htmlFor="sigMode"><T>Verification mode</T></label>
             <select
               id="sigMode"
               value={sigMode}
@@ -701,30 +699,30 @@ export default function TokenizationWizardPage() {
                 setSigVerify(null);
               }}
             >
-              <option value="institutional_attestation">Institutional attestation (pilot v1)</option>
-              <option value="x509_detached">X.509 detached (D4 crypto)</option>
+              <option value="institutional_attestation">{tx('Institutional attestation (pilot v1)')}</option>
+              <option value="x509_detached">{tx('X.509 detached (D4 crypto)')}</option>
             </select>
-            <label htmlFor="signer">Signer / seal id (optional)</label>
+            <label htmlFor="signer"><T>Signer / seal id (optional)</T></label>
             <input
               id="signer"
               value={signerId}
               onChange={(e) => setSignerId(e.target.value)}
-              placeholder="NAPR / notary / institution seal reference"
+              placeholder={tx('NAPR / notary / institution seal reference')}
             />
             {sigMode === 'institutional_attestation' ? (
               <>
-                <label htmlFor="att">Signature attestation (required)</label>
+                <label htmlFor="att"><T>Signature attestation (required)</T></label>
                 <textarea
                   id="att"
                   rows={3}
                   value={signatureAttestation}
                   onChange={(e) => setSignatureAttestation(e.target.value)}
-                  placeholder="QES reference, serial, or verification page note (min 8 characters)"
+                  placeholder={tx('QES reference, serial, or verification page note (min 8 characters)')}
                 />
               </>
             ) : (
               <>
-                <label htmlFor="leafPem">Signer certificate PEM (leaf)</label>
+                <label htmlFor="leafPem"><T>Signer certificate PEM (leaf)</T></label>
                 <textarea
                   id="leafPem"
                   rows={5}
@@ -733,23 +731,23 @@ export default function TokenizationWizardPage() {
                   onChange={(e) => setSignerCertificatePem(e.target.value)}
                   placeholder="-----BEGIN CERTIFICATE-----"
                 />
-                <label htmlFor="sigB64">Detached signature (Base64 over package hash bytes)</label>
+                <label htmlFor="sigB64"><T>Detached signature (Base64 over package hash bytes)</T></label>
                 <textarea
                   id="sigB64"
                   rows={3}
                   className="mono"
                   value={signatureBase64}
                   onChange={(e) => setSignatureBase64(e.target.value)}
-                  placeholder="Base64 RSA-SHA256 / ECDSA signature"
+                  placeholder={tx('Base64 RSA-SHA256 / ECDSA signature')}
                 />
-                <label htmlFor="chainPem">Intermediate chain PEM (optional)</label>
+                <label htmlFor="chainPem"><T>Intermediate chain PEM (optional)</T></label>
                 <textarea
                   id="chainPem"
                   rows={3}
                   className="mono"
                   value={certificateChainPem}
                   onChange={(e) => setCertificateChainPem(e.target.value)}
-                  placeholder="Optional intermediates"
+                  placeholder={tx('Optional intermediates')}
                 />
               </>
             )}
@@ -762,7 +760,7 @@ export default function TokenizationWizardPage() {
                   setSigVerify(null);
                 }}
               >
-                Back
+                <T>Back</T>
               </button>
               <button
                 type="button"
@@ -790,29 +788,28 @@ export default function TokenizationWizardPage() {
             <h2 style={{ marginTop: 0 }}>3 · Data as stated in the document</h2>
             {sigVerify?.verified && (
               <div className="banner ok">
-                Signature confirmed · mode{' '}
+                <T>Signature confirmed · mode</T>{' '}
                 <code className="mono">{sigVerify.mode ?? 'attestation'}</code> · id{' '}
                 <code className="mono">{sigVerify.verificationId}</code>
                 {sigVerify.signer?.subject && (
                   <>
                     <br />
                     <span className="muted" style={{ fontSize: '0.85rem' }}>
-                      Signer: {sigVerify.signer.subject}
+                      <T>Signer:</T> {sigVerify.signer.subject}
                       {sigVerify.chainDepth != null ? ` · chain depth ${sigVerify.chainDepth}` : ''}
                     </span>
                   </>
                 )}
                 <br />
                 <span className="muted" style={{ fontSize: '0.85rem' }}>
-                  Enter only facts that appear on the verified package. Assist below is optional —
-                  you confirm.
+                  <T>Enter only facts that appear on the verified package. Assist below is optional — you confirm.</T>
                 </span>
               </div>
             )}
             {extractHints && (
               <div className="card flat" style={{ marginBottom: '1rem' }}>
                 <p style={{ marginTop: 0 }}>
-                  <strong>Document assist</strong>{' '}
+                  <strong><T>Document assist</T></strong>{' '}
                   <span className="muted">({extractHints.mode})</span>
                 </p>
                 {extractHints.notes?.map((n) => (
@@ -829,7 +826,7 @@ export default function TokenizationWizardPage() {
                         setAmountFromDocument(extractHints.suggestedValuation!)
                       }
                     >
-                      Use amount {extractHints.suggestedValuation}
+                      <T>Use amount</T> {extractHints.suggestedValuation}
                     </button>
                   )}
                   {extractHints.suggestedHolderId && (
@@ -838,7 +835,7 @@ export default function TokenizationWizardPage() {
                       className="secondary"
                       onClick={() => setHolderId(extractHints.suggestedHolderId!)}
                     >
-                      Use holder {extractHints.suggestedHolderId}
+                      <T>Use holder</T> {extractHints.suggestedHolderId}
                     </button>
                   )}
                   {extractHints.suggestedAssetId && (
@@ -847,19 +844,19 @@ export default function TokenizationWizardPage() {
                       className="secondary"
                       onClick={() => setAssetId(extractHints.suggestedAssetId!)}
                     >
-                      Use asset id
+                      <T>Use asset id</T>
                     </button>
                   )}
                 </div>
                 {extractHints.amountsFound?.length > 1 && (
                   <p className="muted" style={{ fontSize: '0.8rem' }}>
-                    Other amounts seen: {extractHints.amountsFound.slice(0, 5).join(', ')}
+                    <T>Other amounts seen:</T> {extractHints.amountsFound.slice(0, 5).join(', ')}
                   </p>
                 )}
                 {extractHints.textPreview && (
                   <details style={{ marginTop: '0.5rem' }}>
                     <summary className="muted" style={{ cursor: 'pointer' }}>
-                      Text preview from package
+                      <T>Text preview from package</T>
                     </summary>
                     <pre className="result" style={{ maxHeight: 160, fontSize: '0.75rem' }}>
                       {extractHints.textPreview}
@@ -869,39 +866,36 @@ export default function TokenizationWizardPage() {
               </div>
             )}
             <p className="muted">
-              Open the PDF, transfer official figures, use assist buttons only if they match the
-              paper.
+              <T>Open the PDF, transfer official figures, use assist buttons only if they match the paper.</T>
             </p>
 
             <p className="muted">
-              Asset type locked from step 0: <strong>{evidenceDef?.label ?? assetType}</strong>
+              <T>Asset type locked from step 0:</T> <strong>{evidenceDef?.label ?? assetType}</strong>
             </p>
 
             <div className="callout" style={{ marginBottom: '1rem' }}>
-              <strong>Amount + currency only (from the paper)</strong>
+              <strong><T>Amount + currency only (from the paper)</T></strong>
               <br />
-              Enter what is written on the signed document. You do <strong>not</strong> invent an ARO
-              exchange rate or “final network price” before the process ends.
-              <br />
-              After PoT, Core records the <strong>same figure</strong> as ARO units (fixed 1:1
-              mapping of the document number). Currency is the label of the source unit (USD, EUR,
-              GEL…). AST does not set market FX.
+              <L
+                en={<>Enter what is written on the signed document. You do <strong>not</strong> invent an ARO exchange rate or “final network price” before the process ends.<br />After PoT, Core records the <strong>same figure</strong> as ARO units (fixed 1:1 mapping of the document number). Currency is the label of the source unit (USD, EUR, GEL…). AST does not set market FX.</>}
+                ka={<>შეიყვანეთ ის, რაც ხელმოწერილ დოკუმენტშია დაწერილი. პროცესის დასრულებამდე თქვენ <strong>არ</strong> იგონებთ ARO-ს გაცვლით კურსს ან „საბოლოო ქსელურ ფასს“.<br />PoT-ის შემდეგ Core <strong>იმავე ციფრს</strong> ARO ერთეულებად აღრიცხავს (დოკუმენტის რიცხვის ფიქსირებული 1:1 შესაბამისობა). ვალუტა წყარო ერთეულის აღნიშვნაა (USD, EUR, GEL…). AST საბაზრო კურსს არ ადგენს.</>}
+              />
             </div>
 
             <div className="grid2">
               <div>
-                <label htmlFor="docAmount">Amount from document</label>
+                <label htmlFor="docAmount"><T>Amount from document</T></label>
                 <input
                   id="docAmount"
                   className="mono"
                   value={amountFromDocument}
                   onChange={(e) => setAmountFromDocument(e.target.value)}
-                  placeholder="e.g. 150000 or 150000.50"
+                  placeholder={tx('e.g. 150000 or 150000.50')}
                   required
                 />
               </div>
               <div>
-                <label htmlFor="currency">Currency on document</label>
+                <label htmlFor="currency"><T>Currency on document</T></label>
                 <select
                   id="currency"
                   value={valuationCurrency}
@@ -911,7 +905,7 @@ export default function TokenizationWizardPage() {
                 >
                   {VALUATION_CURRENCIES.map((c) => (
                     <option key={c.code} value={c.code}>
-                      {c.label}
+                      {tx(c.label)}
                     </option>
                   ))}
                 </select>
@@ -919,40 +913,40 @@ export default function TokenizationWizardPage() {
             </div>
 
             <div className="card flat" style={{ marginBottom: '1rem' }}>
-              <div className="muted">Network record after PoT (automatic, not your guess)</div>
+              <div className="muted"><T>Network record after PoT (automatic, not your guess)</T></div>
               <div className="mono" style={{ fontSize: '1.05rem', fontWeight: 650 }}>
                 {aroMintAmount
                   ? `${aroMintAmount} ARO  ←  ${amountFromDocument || '…'} ${valuationCurrency}`
                   : '—'}
               </div>
               <p className="muted" style={{ margin: '0.35rem 0 0', fontSize: '0.82rem' }}>
-                No extra rate field. Initiator only restates document amount + currency.
+                <T>No extra rate field. Initiator only restates document amount + currency.</T>
               </p>
             </div>
 
             <div className="grid2">
               <div>
-                <label htmlFor="holder">Rights holder from document</label>
+                <label htmlFor="holder"><T>Rights holder from document</T></label>
                 <input
                   id="holder"
                   value={holderId}
                   onChange={(e) => setHolderId(e.target.value)}
-                  placeholder="owner id as on the extract"
+                  placeholder={tx('owner id as on the extract')}
                   required
                 />
               </div>
               <div>
-                <label htmlFor="asset2">Asset id (optional)</label>
+                <label htmlFor="asset2"><T>Asset id (optional)</T></label>
                 <input
                   id="asset2"
                   value={assetId}
                   onChange={(e) => setAssetId(e.target.value)}
-                  placeholder="cadastral / internal id"
+                  placeholder={tx('cadastral / internal id')}
                 />
               </div>
             </div>
 
-            <label htmlFor="wallet">Crypto wallet (optional, for certificate / wallets)</label>
+            <label htmlFor="wallet"><T>Crypto wallet (optional, for certificate / wallets)</T></label>
             <input
               id="wallet"
               className="mono"
@@ -962,10 +956,9 @@ export default function TokenizationWizardPage() {
               spellCheck={false}
             />
             <p className="muted" style={{ fontSize: '0.8rem', marginTop: '-0.5rem' }}>
-              Not SoT. Binds wallet-compatible certificate export (EIP-681 / ERC-721 metadata). On-chain
-              mint is a future adapter.
+              <T>Not SoT. Binds wallet-compatible certificate export (EIP-681 / ERC-721 metadata). On-chain mint is a future adapter.</T>
             </p>
-            <label htmlFor="note">Note (optional)</label>
+            <label htmlFor="note"><T>Note (optional)</T></label>
             <input id="note" value={note} onChange={(e) => setNote(e.target.value)} />
 
             <label className="inline">
@@ -974,13 +967,12 @@ export default function TokenizationWizardPage() {
                 checked={fieldsFromDocument}
                 onChange={(e) => setFieldsFromDocument(e.target.checked)}
               />
-              I declare these values are taken from the verified signed document (not free
-              appraisal by the portal user)
+              <T>I declare these values are taken from the verified signed document (not free appraisal by the portal user)</T>
             </label>
 
             <div className="actions">
               <button type="button" className="secondary" onClick={() => setStep(2)}>
-                Back
+                <T>Back</T>
               </button>
               <button
                 type="button"
@@ -988,7 +980,7 @@ export default function TokenizationWizardPage() {
                 disabled={!step3Ok}
                 onClick={() => setStep(4)}
               >
-                Continue → enrichment
+                <T>Continue → enrichment</T>
               </button>
             </div>
           </>
@@ -999,9 +991,10 @@ export default function TokenizationWizardPage() {
           <>
             <h2 style={{ marginTop: 0 }}>4 · Enrich confirmation (optional bureau)</h2>
             <p className="muted">
-              Optional check against an enrichment gateway (mock by default; live bureau such as a
-              credit/asset data provider via <code>AST_ENRICHMENT_URL</code>). Signals help you
-              confirm identity / asset presence — they do <strong>not</strong> set the mint amount.
+              <L
+                en={<>Optional check against an enrichment gateway (mock by default; live bureau such as a credit/asset data provider via <code>AST_ENRICHMENT_URL</code>). Signals help you confirm identity / asset presence — they do <strong>not</strong> set the mint amount.</>}
+                ka={<>არასავალდებულო შემოწმება გამდიდრების კარიბჭესთან (ნაგულისხმევად — სატესტო რეჟიმი; ცოცხალი ბიურო, მაგალითად საკრედიტო ან აქტივების მონაცემთა პროვაიდერი, <code>AST_ENRICHMENT_URL</code>-ის მეშვეობით). სიგნალები გეხმარებათ იდენტობისა და აქტივის არსებობის დადასტურებაში — ისინი მინტის თანხას <strong>არ</strong> ადგენენ.</>}
+              />
             </p>
             <div className="actions" style={{ marginBottom: '1rem' }}>
               <button
@@ -1020,23 +1013,23 @@ export default function TokenizationWizardPage() {
                   setEnrichmentConfirmed(true);
                 }}
               >
-                Skip enrichment
+                <T>Skip enrichment</T>
               </button>
             </div>
             {enrichment && (
               <div className="card flat">
                 <p style={{ marginTop: 0 }}>
-                  <strong>Provider:</strong> {enrichment.provider} ·{' '}
+                  <strong><T>Provider:</T></strong> {enrichment.provider} ·{' '}
                   <code className="mono">{enrichment.enrichmentId}</code>
                 </p>
                 <p>
-                  Identity match: <strong>{enrichment.signals.identityMatch}</strong>
+                  <T>Identity match:</T> <strong>{enrichment.signals.identityMatch}</strong>
                 </p>
                 <p>
-                  Asset presence: <strong>{enrichment.signals.assetPresence}</strong>
+                  <T>Asset presence:</T> <strong>{enrichment.signals.assetPresence}</strong>
                 </p>
                 <p>
-                  Value context: <strong>{enrichment.signals.valueContext}</strong>
+                  <T>Value context:</T> <strong>{enrichment.signals.valueContext}</strong>
                 </p>
                 <ul>
                   {enrichment.signals.notes.map((n) => (
@@ -1054,17 +1047,16 @@ export default function TokenizationWizardPage() {
                     checked={enrichmentConfirmed}
                     onChange={(e) => setEnrichmentConfirmed(e.target.checked)}
                   />
-                  I have reviewed enrichment signals; institutional documents remain the source of
-                  valuation
+                  <T>I have reviewed enrichment signals; institutional documents remain the source of valuation</T>
                 </label>
               </div>
             )}
             {enrichmentConfirmed && !enrichment && (
-              <p className="ok">Enrichment skipped — package documents remain sole valuation source.</p>
+              <p className="ok"><T>Enrichment skipped — package documents remain sole valuation source.</T></p>
             )}
             <div className="actions">
               <button type="button" className="secondary" onClick={() => setStep(3)}>
-                Back
+                <T>Back</T>
               </button>
               <button
                 type="button"
@@ -1072,7 +1064,7 @@ export default function TokenizationWizardPage() {
                 disabled={!step4Ok}
                 onClick={() => setStep(5)}
               >
-                Continue → start
+                <T>Continue → start</T>
               </button>
             </div>
           </>
@@ -1084,35 +1076,35 @@ export default function TokenizationWizardPage() {
             <h2 style={{ marginTop: 0 }}>5 · Start tokenization</h2>
             <div className="card flat">
               <p style={{ marginTop: 0 }}>
-                <strong>Asset type:</strong> {evidenceDef?.label ?? assetType}
+                <strong><T>Asset type:</T></strong> {evidenceDef?.label ?? assetType}
               </p>
               <p>
-                <strong>Document package:</strong>{' '}
+                <strong><T>Document package:</T></strong>{' '}
                 {files.map((f) => f.name).join(', ') || '—'}
               </p>
               <p>
-                <strong>Signature:</strong>{' '}
+                <strong><T>Signature:</T></strong>{' '}
                 {sigVerify?.verified ? (
-                  <span className="ok">confirmed · {sigVerify.verificationId}</span>
+                  <span className="ok">{tx('confirmed')} · {sigVerify.verificationId}</span>
                 ) : (
                   '—'
                 )}
               </p>
               <p>
-                <strong>Document amount:</strong>{' '}
+                <strong><T>Document amount:</T></strong>{' '}
                 <span className="mono">
                   {amountFromDocument} {valuationCurrency}
                 </span>
               </p>
               <p>
-                <strong>Network ARO (auto 1:1 of document figure):</strong>{' '}
+                <strong><T>Network ARO (auto 1:1 of document figure):</T></strong>{' '}
                 <span className="mono">{aroMintAmount}</span>
               </p>
               <p>
-                <strong>Holder (from package):</strong> {holderId}
+                <strong><T>Holder (from package):</T></strong> {holderId}
               </p>
               <p>
-                <strong>Enrichment:</strong>{' '}
+                <strong><T>Enrichment:</T></strong>{' '}
                 {enrichment
                   ? `${enrichment.provider} · ${enrichment.enrichmentId}`
                   : enrichmentConfirmed
@@ -1120,11 +1112,10 @@ export default function TokenizationWizardPage() {
                     : '—'}
               </p>
               <p className="muted" style={{ marginBottom: 0 }}>
-                Submit → portal edge → Core → PoT → NodeChain. You receive a digitization
-                certificate on the next screen.
+                <T>Submit → portal edge → Core → PoT → NodeChain. You receive a digitization certificate on the next screen.</T>
               </p>
             </div>
-            <label htmlFor="idem">Idempotency key</label>
+            <label htmlFor="idem"><T>Idempotency key</T></label>
             <input
               id="idem"
               className="mono"
@@ -1133,7 +1124,7 @@ export default function TokenizationWizardPage() {
             />
             <div className="actions">
               <button type="button" className="secondary" onClick={() => setStep(4)}>
-                Back
+                <T>Back</T>
               </button>
               <button className="primary" type="submit" disabled={!canSubmit || busy}>
                 {busy ? 'Starting…' : 'Start tokenization process'}

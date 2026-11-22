@@ -4,6 +4,7 @@ import { FormEvent, useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { apiBase, loadSession, saveSession } from '../../../lib/auth';
 import { useI18n } from '../../../lib/i18n/context';
+import { T } from '../../../components/ui/t';
 
 type StackHealth = {
   edge: 'up' | 'down' | 'checking';
@@ -149,7 +150,7 @@ export default function LoginPage() {
           ) : null}
           <div className="actions" style={{ marginTop: '0.5rem' }}>
             <button type="button" className="secondary" onClick={() => void probeStack()}>
-              Retry
+              <T>Retry</T>
             </button>
           </div>
         </div>
@@ -162,7 +163,7 @@ export default function LoginPage() {
           </strong>
           <div className="actions" style={{ marginTop: '0.5rem' }}>
             <button type="button" className="secondary" onClick={() => void probeStack()}>
-              Retry
+              <T>Retry</T>
             </button>
           </div>
         </div>

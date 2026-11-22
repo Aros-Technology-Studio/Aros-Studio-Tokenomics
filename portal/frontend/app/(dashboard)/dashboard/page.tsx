@@ -6,6 +6,7 @@ import { useRouter } from 'next/navigation';
 import { loadSession, portalFetch } from '../../../lib/auth';
 import { StatusBadge } from '../../../components/ui/status-badge';
 import { useI18n } from '../../../lib/i18n/context';
+import { T, L } from '../../../components/ui/t';
 
 interface ProcessRow {
   processId: string;
@@ -27,7 +28,7 @@ interface Stats {
 
 export default function DashboardPage() {
   const router = useRouter();
-  const { t } = useI18n();
+  const { t, tx } = useI18n();
   const [rows, setRows] = useState<ProcessRow[]>([]);
   const [stats, setStats] = useState<Stats | null>(null);
   const [error, setError] = useState<string | null>(null);
@@ -119,38 +120,40 @@ export default function DashboardPage() {
 
       {coreOk === false && (
         <div className="banner warn">
-          Core Orchestrator is unreachable from the edge. You can still prepare packages; hand-off
-          will stay <code>awaiting_core</code> until Core is back (no mint on portal).
+          <L
+            en={<>Core Orchestrator is unreachable from the edge. You can still prepare packages; hand-off will stay <code>awaiting_core</code> until Core is back (no mint on portal).</>}
+            ka={<>Core Orchestrator edge-დან მიუწვდომელია. პაკეტების მომზადება მაინც შეგიძლიათ; გადაცემა დარჩება მდგომარეობაში <code>awaiting_core</code>, სანამ Core არ აღდგება (პორტალზე მინტი არ ხდება).</>}
+          />
         </div>
       )}
       {coreOk === true && (
-        <div className="banner ok">Core hand-off path is reachable.</div>
+        <div className="banner ok"><T>Core hand-off path is reachable.</T></div>
       )}
 
       <div className="kpis">
         <div className="kpi">
-          <div className="label">Total processes</div>
+          <div className="label"><T>Total processes</T></div>
           <div className="value">{stats?.total ?? rows.length}</div>
-          <div className="hint">Edge-tracked for this institution</div>
+          <div className="hint"><T>Edge-tracked for this institution</T></div>
         </div>
         <div className="kpi">
-          <div className="label">At Core</div>
+          <div className="label"><T>At Core</T></div>
           <div className="value">{stats?.submittedToCore ?? '—'}</div>
           <div className="hint">submitted_to_core</div>
         </div>
         <div className="kpi">
-          <div className="label">Awaiting Core</div>
+          <div className="label"><T>Awaiting Core</T></div>
           <div className="value">{stats?.awaitingCore ?? '—'}</div>
-          <div className="hint">queued or Core down</div>
+          <div className="hint"><T>queued or Core down</T></div>
         </div>
         <div className="kpi">
-          <div className="label">Last submit</div>
+          <div className="label"><T>Last submit</T></div>
           <div className="value" style={{ fontSize: '0.95rem', fontWeight: 600 }}>
             {stats?.lastSubmittedAt
               ? new Date(stats.lastSubmittedAt).toLocaleString()
               : '—'}
           </div>
-          <div className="hint">Newest process on edge</div>
+          <div className="hint"><T>Newest process on edge</T></div>
         </div>
       </div>
 
@@ -165,10 +168,10 @@ export default function DashboardPage() {
             marginBottom: '0.75rem',
           }}
         >
-          <h2 style={{ margin: 0 }}>Processes</h2>
+          <h2 style={{ margin: 0 }}><T>Processes</T></h2>
           <div style={{ minWidth: 200 }}>
             <label htmlFor="filter" style={{ marginBottom: 0.2 }}>
-              Filter by status
+              <T>Filter by status</T>
             </label>
             <select
               id="filter"
@@ -176,7 +179,7 @@ export default function DashboardPage() {
               onChange={(e) => setFilter(e.target.value)}
               style={{ marginBottom: 0 }}
             >
-              <option value="">All</option>
+              <option value="">{tx('All')}</option>
               <option value="awaiting_core">awaiting_core</option>
               <option value="submitted_to_core">submitted_to_core</option>
               <option value="documents_pending">documents_pending</option>
@@ -186,16 +189,16 @@ export default function DashboardPage() {
         </div>
 
         {error && <p className="err">{error}</p>}
-        {loading && <p className="muted">Loading…</p>}
+        {loading && <p className="muted"><T>Loading…</T></p>}
 
         {!loading && rows.length === 0 ? (
           <div className="empty">
-            <strong>No processes yet</strong>
-            Start a primary tokenization package for this institution.
+            <strong><T>No processes yet</T></strong>
+            <T>Start a primary tokenization package for this institution.</T>
             <div className="actions" style={{ justifyContent: 'center', marginTop: '1rem' }}>
               <Link href="/tokenization">
                 <button type="button" className="primary">
-                  Create first process
+                  <T>Create first process</T>
                 </button>
               </Link>
             </div>
@@ -206,12 +209,12 @@ export default function DashboardPage() {
               <table className="table">
                 <thead>
                   <tr>
-                    <th>Process</th>
-                    <th>Status</th>
-                    <th>Type</th>
-                    <th>Valuation</th>
-                    <th>Holder</th>
-                    <th>Updated</th>
+                    <th><T>Process</T></th>
+                    <th><T>Status</T></th>
+                    <th><T>Type</T></th>
+                    <th><T>Valuation</T></th>
+                    <th><T>Holder</T></th>
+                    <th><T>Updated</T></th>
                   </tr>
                 </thead>
                 <tbody>

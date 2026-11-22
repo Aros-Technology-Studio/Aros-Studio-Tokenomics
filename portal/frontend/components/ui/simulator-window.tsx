@@ -1,6 +1,7 @@
 'use client';
 
 import { useCallback, useEffect, useRef, useState } from 'react';
+import { useI18n } from '../../lib/i18n/context';
 
 /**
  * Settlement Simulator embedded in a site page. The frame is transparent: the
@@ -11,6 +12,7 @@ import { useCallback, useEffect, useRef, useState } from 'react';
 export function SimulatorWindow({ src, title }: { src: string; title: string }) {
   const frame = useRef<HTMLIFrameElement>(null);
   const [height, setHeight] = useState(900);
+  const { locale, tx } = useI18n();
 
   // Same-origin read on load: the simulator may post its height before this page hydrates.
   const measure = useCallback(() => {
@@ -39,10 +41,12 @@ export function SimulatorWindow({ src, title }: { src: string; title: string }) 
     <div className="sim-embed">
       <div className="sim-embed__bar">
         <a className="sim-embed__open" href={src} target="_blank" rel="noopener noreferrer">
-          Open full screen ↗
+          {tx('Open full screen ↗')}
         </a>
       </div>
       <iframe
+        // remount on language switch: the simulator reads the locale cookie at load
+        key={locale}
         ref={frame}
         className="sim-embed__frame"
         src={`${src}?embed=1`}

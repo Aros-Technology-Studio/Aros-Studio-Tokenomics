@@ -10,6 +10,7 @@ import {
   type ReactNode,
 } from 'react';
 import { translate } from './messages';
+import { KA_TEXT } from './ka-text';
 import {
   DEFAULT_LOCALE,
   LOCALE_STORAGE_KEY,
@@ -20,6 +21,8 @@ type I18nContextValue = {
   locale: Locale;
   setLocale: (locale: Locale) => void;
   t: (key: string) => string;
+  /** English source text → Georgian when ka is active (falls back to English). */
+  tx: (text: string) => string;
 };
 
 const I18nContext = createContext<I18nContextValue | null>(null);
@@ -57,10 +60,14 @@ export function I18nProvider({ children }: { children: ReactNode }) {
   }, []);
 
   const t = useCallback((key: string) => translate(locale, key), [locale]);
+  const tx = useCallback(
+    (text: string) => (locale === 'ka' ? KA_TEXT[text.replace(/\s+/g, ' ').trim()] ?? text : text),
+    [locale],
+  );
 
   const value = useMemo(
-    () => ({ locale, setLocale, t }),
-    [locale, setLocale, t],
+    () => ({ locale, setLocale, t, tx }),
+    [locale, setLocale, t, tx],
   );
 
   return <I18nContext.Provider value={value}>{children}</I18nContext.Provider>;
