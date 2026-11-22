@@ -1,6 +1,7 @@
 import type { Metadata } from 'next';
 import { PackPage } from '../../components/ui/pack-page';
 import { loadContentPack } from '../../lib/content-pack';
+import { getLocale } from '../../lib/i18n/server';
 
 export const metadata: Metadata = {
   title: 'Investment',
@@ -9,6 +10,6 @@ export const metadata: Metadata = {
 };
 
 /** Copy lives in content-packs/investment.en.md — edit the pack, not this file. */
-export default function InvestmentPage() {
-  return <PackPage pack={loadContentPack('investment', 'en')} />;
+export default async function InvestmentPage() {
+  return <PackPage pack={loadContentPack('investment', await getLocale())} />;
 }

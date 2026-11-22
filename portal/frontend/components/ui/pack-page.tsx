@@ -2,6 +2,7 @@ import Link from 'next/link';
 import type { ReactNode } from 'react';
 import type { ContentPack, PackCard, PackSection } from '../../lib/content-pack';
 import { Inline } from './rich-text';
+import { OrbitArt } from './orbit-art';
 
 function CtaLink({ href, label, primary }: { href: string; label: string; primary?: boolean }) {
   const cls = primary ? 'btn-primary' : 'btn-ghost';
@@ -19,9 +20,10 @@ function CtaLink({ href, label, primary }: { href: string; label: string; primar
   );
 }
 
-function Card({ card }: { card: PackCard }) {
+function Card({ card, index }: { card: PackCard; index: number }) {
   return (
     <article className="pack-card glass">
+      <OrbitArt index={index} />
       {card.tag ? <span className="pack-card__tag">{card.tag}</span> : null}
       {card.title ? <h3>{card.title}</h3> : null}
       {card.body ? (
@@ -112,8 +114,8 @@ export function PackPage({ pack, children }: { pack: ContentPack; children?: Rea
           {pack.blocks.map((b, i) =>
             b.kind === 'cards' ? (
               <div key={i} className="pack-grid" data-count={Math.min(b.cards.length, 6)}>
-                {b.cards.map((c) => (
-                  <Card key={c.id} card={c} />
+                {b.cards.map((c, j) => (
+                  <Card key={c.id} card={c} index={j} />
                 ))}
               </div>
             ) : (

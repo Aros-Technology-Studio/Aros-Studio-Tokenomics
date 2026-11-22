@@ -25,14 +25,12 @@ type I18nContextValue = {
 const I18nContext = createContext<I18nContextValue | null>(null);
 
 /**
- * English only for now: the public content packs are English-only markdown
- * (content-pack.ts has no ru/ka files to fall back to), so letting the
- * cabinet UI auto-switch to the browser's language produced a mixed-language
- * site. Locale detection/switching is disabled until real ru/ka copy exists;
- * the LOCALES/translate machinery stays in place to re-enable later.
+ * Locale comes from the `ast.locale` cookie written by LangSwitch, so client
+ * UI and server-rendered content packs agree. Only en/ka are offered.
  */
 function readStoredLocale(): Locale {
-  return DEFAULT_LOCALE;
+  const m = document.cookie.match(new RegExp(`(?:^|; )${LOCALE_STORAGE_KEY.replace('.', '\\.')}=(en|ka)`));
+  return (m?.[1] as Locale | undefined) ?? DEFAULT_LOCALE;
 }
 
 export function I18nProvider({ children }: { children: ReactNode }) {

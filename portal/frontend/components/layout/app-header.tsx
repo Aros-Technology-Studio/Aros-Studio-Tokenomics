@@ -3,6 +3,7 @@
 import Link from 'next/link';
 import { useEffect, useState } from 'react';
 import { usePathname } from 'next/navigation';
+import { LangSwitch } from './lang-switch';
 
 /**
  * Single shared navigation — transparent, fixed to the top of every page.
@@ -76,6 +77,7 @@ export function AppHeader() {
             </Link>
           );
         })}
+        <LangSwitch />
       </nav>
 
       {/* reserved, empty on purpose — room for a future action (e.g. Sign up)
