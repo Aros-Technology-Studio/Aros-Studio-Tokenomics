@@ -1,6 +1,6 @@
 import type { Metadata } from 'next';
 import type { ReactNode } from 'react';
-import { Sora, IBM_Plex_Mono } from 'next/font/google';
+import { Sora, IBM_Plex_Mono, League_Spartan } from 'next/font/google';
 import '../styles/globals.css';
 import '../styles/theme.css';
 import { AppHeader } from '../components/layout/app-header';
@@ -13,6 +13,13 @@ const sora = Sora({
   weight: ['300', '400', '500', '600', '700', '800'],
   display: 'swap',
   variable: '--font-sora',
+});
+
+const leagueSpartan = League_Spartan({
+  subsets: ['latin'],
+  weight: ['300', '400', '500', '700'],
+  display: 'swap',
+  variable: '--font-spartan',
 });
 
 const ibmMono = IBM_Plex_Mono({
@@ -40,7 +47,7 @@ export const metadata: Metadata = {
 
 export default function RootLayout({ children }: { children: ReactNode }) {
   return (
-    <html lang="en" className={`${sora.variable} ${ibmMono.variable}`} suppressHydrationWarning>
+    <html lang="en" className={`${sora.variable} ${ibmMono.variable} ${leagueSpartan.variable}`} suppressHydrationWarning>
       <body>
         <GlobalBackground />
         <Providers>

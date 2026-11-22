@@ -424,8 +424,17 @@ a {
 }
 /* Landing positioning statement: a paragraph block + list, so it needs a
    wider measure than the one-line lead used on /technologic. */
+/* Landing typography (owner direction 2026-11-22): League Spartan, tighter
+   tracking, statement justified across the full column width. */
+.home-hero--landing .home-hero__title,
 .home-hero--landing .home-hero__lead {
-  max-width: 46ch;
+  font-family: var(--font-spartan), var(--t-font);
+  letter-spacing: -0.035em;
+}
+.home-hero--landing .home-hero__lead {
+  max-width: none;
+  text-align: justify;
+  hyphens: auto;
 }
 .home-hero--landing .home-hero__lead p {
   margin: 0 0 14px;
