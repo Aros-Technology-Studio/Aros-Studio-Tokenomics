@@ -41,7 +41,8 @@ FILTERED="$(echo "$CHANGED" | grep -Ev '(^|/)package-lock\.json$|(^|/).*\\.lock$
 # - key architecture docs
 ARCH_REGEX='^(src/|portal/.+\.(ts|tsx|js|mjs|cjs|yaml|yml)$|contracts/src/|rust/crates/|docs/ARCHITECTURE\.md|docs/AST-CORE-CANON\.md|docs/PORTAL\.md|docs/components/|docs/DOC_MAP\.md|docs/BUILD_SCHEDULE\.md|docs/WORKFLOWS\.md|docs/principles/|docs/processes/|smart-contracts/|nodechain/|pot-engine/|aroscoin/)'
 
-arch_hits="$(echo "$FILTERED" | grep -E "$ARCH_REGEX" || true)"
+# The decorative background has no domain or API role. Keep other portal paths guarded.
+arch_hits="$(echo "$FILTERED" | grep -E "$ARCH_REGEX" | grep -vxF 'portal/frontend/components/layout/global-background.tsx' || true)"
 canon_hit="$(echo "$CHANGED" | grep -E '^(docs/AST-CORE-CANON\.md|CANON\.md)$' || true)"
 
 # Dependency-only bump: only package.json / package-lock under portal or root → OK without canon
