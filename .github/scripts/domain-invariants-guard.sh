@@ -10,7 +10,7 @@ SCAN=(src docs)
 # 1) CANON operational defaults section
 for needle in \
   "## XII. Operational defaults" \
-  "15 minutes" \
+  "| PoT confirmation timeout | 20 seconds |" \
   "70%" \
   "decimal.js" \
   "RocksDB" \
