@@ -995,40 +995,36 @@ function fcToday(T, K){
 function fcAfc(T, K){
   const nA = T.cfg.v.org || 'Sending bank', nW = T.cfg.v.wallet || 'Recipient wallet';
   const {from, amount} = T.cfg, amt = money(amount, from), crypto = T.cfg.v.crypto || 'BTC';
-  const space = afcSpace(T, 'AFC · PROCESS SPACE', [
-    ['fromAnchor', `Anchor · ${from}`, 'Accepts'],
-    ['chain', 'NodeChain', 'AST · PoT'],
-    ['cryptoAnchor', 'Crypto anchor', 'Converts']
+  const space = afcSpace(T, 'AFC · ARCHITECTURE VIEW', [
+    ['fiat', 'Fiat anchor', from],
+    ['ast', 'AST', 'NodeChain · PoT'],
+    ['crypto', 'Crypto anchor', 'Instruction'],
+    ['wallet', 'Conversion wallet', 'Exchange']
   ]);
   const I = space.inside;
   const [xA, xW] = planeXs(2);
   const A = makeNode(T, {x:xA, y:INST_Y, label:nA, sub:'Institutional client'});
-  const W = makeNode(T, {x:xW, y:INST_Y, label:nW, sub:`Crypto · ${crypto}`});
-  space.connect([A, W]);
-  const cash = makeCoins(T.layers.tokens, from, 4, A.x, A.y + 16);
-  const aro = makeCoins(T.layers.tokens, 'ARO', 4, I.chain.x, I.chain.y + 16, 0);
-  const spark = space.sig();
+  const W = makeNode(T, {x:xW, y:INST_Y, label:nW, sub:crypto});
+  space.connect([A]);
+  const token = makeCoins(T.layers.tokens, 'ARO', 4, I.ast.x, I.ast.y + 16, 0);
+  const signal = (source, target, caption) =>
+    K.travel(source, target, space.sig(), caption, .5, {burn:false});
 
-  // 1 of 5 · the request arrives; AFC routes it to the fiat anchor
-  K.api(A, space, `1 of 5 · Request. The confirmed ${amt} transaction arrives. AFC routes it to the ${from} anchor.`);
-  // 2 of 5 · the fiat anchor accepts the funds
-  K.coins(cash, A, I.fromAnchor, `2 of 5 · Accept. The ${from} anchor accepts the funds on its reserve account.`, 1.5, {fadeOut:true});
-  // 3 of 5 · after acceptance AFC instructs AST; the proof is recorded; ArosCoin is issued 1 = 1
-  K.add({dur:1500, sim:1.5, cap:'3 of 5 · Issue. After acceptance, AFC instructs AST. The proof is recorded and ArosCoin is issued 1 = 1.',
-    start:() => { T.m.pot++; },
-    run:p => {
-      const [x, y] = quad(I.fromAnchor.x, I.fromAnchor.y, (I.fromAnchor.x + I.chain.x)/2, I.fromAnchor.y - 60, I.chain.x, I.chain.y, ease(seg(p, 0, .7)));
-      spark.set(x, y, fade(p, .05, .65));
-      aro.set(I.chain.x, I.chain.y + 16, seg(p, .6, 1));
-    }});
-  // 4 of 5 · the crypto anchor accepts ArosCoin and converts it into the requested crypto
-  K.coins(aro, I.chain, I.cryptoAnchor, `4 of 5 · Accept and convert. The crypto anchor accepts ArosCoin and converts it into ${crypto}.`, 1.2, {arrive:() => aro.recur(crypto)});
-  // 5 of 5 · output
-  K.coins(aro, I.cryptoAnchor, W, `5 of 5 · Output. The crypto anchor issues ${crypto} to ${nW}. The process ends here.`, 1.2);
+  K.api(A, space, `${nA} submits the ${amt} fiat-to-${crypto} request to AFC.`);
+  signal(space.gate, I.fiat, 'AFC routes the request to the fiat anchor.');
+  K.stamp(I.fiat, ['Credit', amt], `${amt} is credited to the fiat anchor’s account.`);
+  signal(I.fiat, space.gate, 'The account credit is confirmed to AFC.');
+  signal(space.gate, I.ast, 'On that confirmation, AFC starts AST with the transaction amount, data and terms.');
+  K.add({dur:1500, sim:1.5, cap:'AST records proof in NodeChain and issues ArosCoin under those terms.',
+    run:p => token.set(I.ast.x, I.ast.y + 16, p), end:() => { T.m.pot++; }});
+  signal(I.ast, space.gate, 'AST signals completion to AFC.');
+  signal(space.gate, I.crypto, 'AFC sends the instruction to the crypto anchor.');
+  K.coins(token, I.ast, I.wallet, `ArosCoin reaches the designated conversion wallet and is exchanged for ${crypto} at the applicable rate.`, 1.2, {arrive:() => token.recur(crypto)});
+  K.coins(token, I.wallet, W, `${crypto} is credited to ${nW}.`, 1.2);
 
-  T.rows = () => [['Steps', '5', false], ['Proof of transaction', T.m.pot ? '1' : '0', false], ['Token before acceptance', '0', false], ['API calls', String(T.m.api), false]];
+  T.rows = () => [['Steps', String(T.steps.length), false], ['Proof of transaction', String(T.m.pot), false], ['API calls', String(T.m.api), false]];
   T.extraSummary = () => [];
-  T.doneText = `Done. Five steps: request, accept, issue, accept and convert, output. ${crypto} reached the named wallet.`;
+  T.doneText = `The fiat credit was confirmed to AFC. AST completed issuance and signalled AFC. Following the crypto-anchor instruction and wallet conversion, ${crypto} was credited to ${nW}.`;
 }
 
 /* ---------- scenario registry ---------- */
@@ -1048,9 +1044,9 @@ const SCENARIOS = [
   {key:'fc', no:'01', group:'Commercial', name:'Fiat to a crypto wallet', sub:'Any bank, any wallet, one request', to:false, amountLabel:'Amount',
    inputs:[{id:'org', label:'Sending bank', type:'text', def:'Sending bank'}, {id:'wallet', label:'Recipient wallet', type:'text', def:'Recipient wallet'}, {id:'from', label:'Send in', type:'currency', def:'USD'}, {id:'crypto', label:'Crypto asset', type:'text', def:'BTC'}, {id:'amount', label:'Amount', type:'amount', def:1000000}],
    lede:'A bank sends a fiat amount to one crypto wallet, delivered in the asset the request names. Today it passes through an exchange with holds at every hop. With AFC, one process delivers it.',
-   note:'Illustrative model. AFC holds no funds; the anchors hold their own reserves. The crypto anchor converts only because the request names a crypto asset. Timings are examples, not quotes.',
+   note:'Architecture illustration only. The requesting institution interacts only with AFC. No participant sees the full internal sequence. AFC holds no funds; the anchors hold their own reserves. The crypto anchor converts only because the request names a crypto asset. Timings are examples, not quotes.',
    today:{tag:'Today', title:'Bank, exchange, blockchain', vbH:480, unit:'h', build:fcToday},
-   next:{tag:'With AFC', title:'One request, one wallet', vbH:420, unit:'s', band:'Seconds to minutes', build:fcAfc}},
+   next:{tag:'With AFC', title:'One request, one wallet', why:'The fiat credit triggers AST through AFC. AST completion returns to AFC before the crypto anchor is instructed.', vbH:420, unit:'s', band:'Seconds to minutes', build:fcAfc}},
   {key:'fx2', no:'02', hidden:true, group:'Commercial', name:'Two currencies, no USD', sub:'GEL → KZT through the AFC process', to:true, amountLabel:'Amount',
    inputs:[{id:'org', label:'Sender', type:'text', def:'Sender'}, {id:'bene', label:'Beneficiary', type:'text', def:'Beneficiary'}, {id:'from', label:'Send in', type:'currency', def:'GEL'}, {id:'to', label:'Paid out in', type:'currency', def:'KZT'}, {id:'amount', label:'Amount', type:'amount', def:1000000}],
    lede:'Two different currencies, no dollar on the route. Today the payment passes through correspondents. With AFC, one process settles it in seconds.',
