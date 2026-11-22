@@ -1,6 +1,6 @@
 # Settlement Simulator — specification
 
-**Status:** Spec v0.5 — one framed window: topic cards → own data → Today or With AFC → one animation at a time → translucent result window; commercial scenarios 01–03 plus government scenarios G01–G12 (§12). Presentation only.
+**Status:** Spec v0.5 — one framed window: topic cards → own data → Today or With AFC → one animation at a time → translucent result window; commercial scenarios 01–03 plus government scenarios G02–G12 (§12). Presentation only.
 **Date:** 2026-10-09 · updated 2026-10-14
 **Owner decisions captured:** 2026-10-09 (chat with product owner).
 **Surface:** Public showcase (`docs/portal/PUBLIC-SHOWCASE-SITE.md`). UI language: English (other packs later).
@@ -211,115 +211,27 @@ Follow-up for ops: turn `/opt/ast` into a git checkout (or deploy images from CI
 
 Check cards are level diagram callouts (no tilt), with a hairline under the issuer, check badges, a pointer toward their node, and a neon-green glow once the check has passed; failed checks glow red. The landing-page hero shift was scoped to the home page and capped so content never leaves the screen (it had pushed `/technologic` and narrow screens off the left edge).
 
-## 12. Government scenarios (G01–G12) — Rebuilt on the current model, 2026-10-16
+## 12. Government scenarios (G02–G12) — Rebuilt on the current model, 2026-10-16
 
 Source: owner's research in Notion, "04 — Государственный пакет AFC/AST" (12 state scenarios with buyer, effect and main risk; reference procurement flow) and "03 — Сегменты аудитории и сквозные финансовые процессы" (sections E and F). Each scenario follows §4.3 and §6 plus these state-specific rules: the state keeps law, money and decisions; eligibility, assessment, clearance and inspections are done by the responsible authority on its own data; nobody is denied automatically (human review / appeal path); evidence that releases money is signed by an independent verifier; disputes put the process on hold; after external finality only compensation, never erasure; CBDC stays a central-bank liability and bond title stays with the registry/CSD; AFC never claims cross-system atomicity, sanctions circumvention or replacement of national infrastructure.
 
 | No | Scenario | Buyer | Effect | Main risk |
 |----|----------|-------|--------|-----------|
-| G01 | Targeted benefits | Ministry of Finance / social protection | Less leakage | Eligibility errors, discrimination |
-| G02 | Government procurement | Treasury | Milestone-linked payment | Oracle quality, corruption |
+| G02 | Cross-border public contract payment | Treasury | Milestone-linked payment | Oracle quality, corruption |
 | G03 | Taxes and refunds | Tax authority / treasury | Fast reconciliation | Erroneous automation |
 | G04 | Customs | Customs / banks | Duty and payment in sync | Trade-data secrecy |
 | G05 | Intergovernmental transfers | Ministry of Finance / regions | Traceability | Politicised conditions |
 | G06 | Disaster relief | Government / donors | Fast targeted payouts | Identity exclusion |
 | G07 | Aid and grants | IFIs / ministries | Impact evidence | Privacy, local capacity |
 | G08 | CBDC ↔ deposits | Central bank / banks | Interoperability | Monetary and legal finality |
-| G09 | Tokenised sovereign bonds | Debt office / CSD | DvP coordination and reporting | Securities law |
+| G09 | Government bond lifecycle | Debt office / CSD | DvP coordination and reporting | Securities law |
 | G10 | Carbon / energy subsidy | Ministries | Evidence-linked finance | Data / oracle quality |
 | G11 | State-owned enterprise treasury | Holdings / banks | Liquidity visibility | Concentration |
 | G12 | Cross-border trade corridor | Central banks / customs / banks | Faster compliant settlement | Sanctions, geopolitics |
 
-### 12.1 G01 — Targeted benefits
+### 12.2 G02 — Cross-border public contract payment
 
-*Steps*
-
-| # | Today (38 steps, hours) | With AFC (5 steps, hours) |
-|---|-------------------------|----------------------------|
-| 1 | The ministry opens this month’s support run: budget, people covered, people shown | Request. Each institution has checked its own data; two records are flagged for review. The signed list and payment come through the gateway; AFC routes them to the source anchor |
-| 2 | The ministry sends the treasury a signed paper spending request | Accept. The treasury’s funds for the cleared payments only are accepted on the source anchor’s reserve |
-| 3 | The treasury checks the appropriation, the budget line and the monthly ceiling | Issue. After acceptance, AFC instructs NodeChain. The proof of transaction is recorded and ArosCoin is issued 1 = 1 |
-| 4 | The treasury signs a release order (sometimes wet-ink; several working days, illustrative) | Accept. The payout anchor accepts ArosCoin; AFC checks that its reserve covers the same amount |
-| 5 | The cash manager confirms the cash at the central bank for the transfer | Output. The bank credits each cleared person on its own books; notices leave through the gateway; the process ends |
-| 6 | In this example the whole budget is pre-funded to the bank’s programme account (one pattern, not the only one) | |
-| 7 | The money waits at the bank as a float: it has left the treasury, but no one has been paid from it (real hold) | |
-| 8 | The bank posts the float to its programme account | |
-| 9 | Caseworkers check each file on the registry: income, household size, address; some files are retyped from paper | |
-| 10 | In this example, two spreadsheets are merged by hand; the same person is listed twice | |
-| 11 | A second clerk checks the list against the sign-off sheet, page by page (four-eyes rule) | |
-| 12 | The ministry signs off the list; the bank has not seen it yet | |
-| 13 | The list goes to the bank as a file export, uploaded by a clerk; the duplicate goes with it | |
-| 14 | The bank matches every name and ID to an account in an overnight batch | |
-| 15 | Branch staff print the exceptions and re-key corrections by hand; the file is run again the next business day | |
-| 16 | One name does not match its account and is rejected; the duplicate passes both times | |
-| 17 | The rejected record goes back to the ministry by e-mail; that person is left out of this run | |
-| 18 | The rejected person calls the helpline; the call is logged on a paper form | |
-| 19 | The bank pays the amount to every matched record, the duplicate included | |
-| 20 | The bank nets the day’s payments in its batch; some payments take a day to show | |
-| 21 | The bank sends a payment advice to the ministry: a PDF with totals, not names | |
-| 22 | The ministry’s finance office checks the totals by hand and enters them in the ledger | |
-| 23 | The monthly review meeting discusses rejected records; in this example the duplicate is not on the agenda | |
-| 24 | Month end: the bank reconciles the float; the unused part returns to the treasury weeks later (the float hold ends) | |
-| 25 | The treasury matches the returned amount to the bank statement by hand; differences are chased for days | |
-| 26 | The bank loads the permitted-use list from a ministry spreadsheet; shop codes are keyed in by hand | |
-| 27 | A beneficiary buys food at the shop; the cashier checks by hand that the purchase counts | |
-| 28 | The shop has made the sale and waits for the bank to settle it (real wait, drawn as a hold on the shop) | |
-| 29 | The shop sends its sales report; the bank checks each sale against the permitted-use list in a batch | |
-| 30 | The bank settles the shop from the programme float, days after the sale | |
-| 31 | The person who was left out queues at the ministry office to appeal; the payment is on hold until a decision (real hold for that person) | |
-| 32 | The appeals officer collects ID, proof of address and bank details, then decides; typically weeks (illustrative) | |
-| 33 | The corrected name goes back to the bank as a new paper-based file, re-keyed by a clerk | |
-| 34 | A supplementary run pays the corrected record; the person has waited in full | |
-| 35 | Outside this clock: the auditor collects lists, bank advice and sales reports from the ministry | |
-| 36 | The bank sends its payment files to the auditor as CSV files by e-mail; often produced by hand, weeks later | |
-| 37 | The audit finds the duplicate record; it was paid, and recovery starts months after the money left | |
-| 38 | Recovery starts months later: a letter goes to the person who got the duplicate; many rules need a further process (varies by country) | |
-
-### 12.2 G02 — Government procurement with milestone payments
-
-*With AFC track: 5 steps, about 1 d 2 h 15 min on the illustrative clock. Each row is one animation step; the checks, API calls and coins inside a step play back to back within it, so the step counter matches the captions.*
-
-| # | Today (39 steps) | With AFC (5 steps) |
-|---|---|---|
-| 1 | The contract is signed on paper: Northline Builders builds for the procuring agency, $12,000,000 in 3 milestones. State Treasury pays. | 1 of 5 · Request. The site visit, the signed evidence and the own-record checks are done. The confirmed payment reaches AFC through the gateway. |
-| 2 | State Treasury registers the commitment in its budget system and reserves the limit. A book entry: no money has moved. | 2 of 5 · Accept. AFC checks the signature, contract state and policy version. The treasury anchor accepts the funds on its reserve. |
-| 3 | The agency sends a paper copy of the signed contract and the milestone schedule to the treasury by internal mail. | 3 of 5 · Issue. The funds are confirmed. Where the law allows, NodeChain records the proof of transaction, and AST issues ArosCoin 1 = 1. |
-| 4 | Northline Builders finishes milestone 1 on site. $4,000,000 is now due under the contract. | 4 of 5 · Accept and convert. The output anchor on the supplier’s bank leg accepts ArosCoin and converts it 1 = 1 into USD. |
-| 5 | State Treasury keeps $4,000,000 reserved on its own books. The reservation is real, though the money has not moved. | 5 of 5 · Output. The supplier’s bank credits $4,000,000 on its own books. Notices and a reconciliation record leave through the gateway. The process ends. |
-| 6 | The supplier asks the procuring agency, by letter, to commission an acceptance inspection. | |
-| 7 | The agency’s registry logs the letter, checks the contract and milestone numbers, and files the request. | |
-| 8 | The agency commissions the independent inspector by letter. The request joins the inspector’s queue. | |
-| 9 | The request waits in the inspector’s queue. This is a queue, not a hold. Illustrative: about five days here. | |
-| 10 | The inspector visits the site and measures the work against the drawings. This physical visit takes the same time in both routes. | |
-| 11 | The inspector checks quantities against the bill of quantities. The inspector measures; the agency decides what is accepted. | |
-| 12 | The inspector writes a paper measurement report in three copies: one for the agency, one for the supplier, one for the file. | |
-| 13 | The signed paper act goes to the procuring agency by courier. Courier delivery typically takes a day or more. | |
-| 14 | The agency’s registry logs the act and the courier receipt in a paper register. | |
-| 15 | The legal desk checks the act against the contract terms and the milestone schedule. A lawyer reads the file by hand. | |
-| 16 | The supplier sends its invoice separately, on paper, by post. Nobody tracks it between the supplier and the agency. | |
-| 17 | The finance desk compares the invoice with the act and finds that the quantities do not match. A finance officer decides. | |
-| 18 | The finance officer returns the invoice to the supplier by letter. A person decides; nothing is rejected automatically. | |
-| 19 | The supplier phones the agency to ask about the payment. The call is not recorded in any file. | |
-| 20 | The supplier corrects the invoice and reconciles it with the inspector’s report. Illustrative: about three days, at the supplier’s pace. | |
-| 21 | The corrected invoice arrives by post. The review starts again at the first desk, so the act is checked a second time. | |
-| 22 | The legal desk checks the corrected invoice against the act and the contract again. Each desk works from its own paper file. | |
-| 23 | The finance desk confirms that the quantities now match the act and the measurement report. | |
-| 24 | The budget desk confirms that the budget line still covers this milestone under the commitment. | |
-| 25 | Three desks sign off one after another. The agency head then signs the payment approval. | |
-| 26 | The agency sends a paper payment order to the treasury by internal mail. | |
-| 27 | The treasury checks the order against the commitment, the budget limit and the signatures on file. A clerk compares them by hand. | |
-| 28 | Dual control: one officer prepares the payment file, a second officer approves it. Both sign on paper before release. | |
-| 29 | The payment waits for the next treasury payment run, set by the treasury. This is a queue, not a hold. Illustrative: about four days. | |
-| 30 | The treasury releases milestone 1 for payment. The reservation ends and the payment file goes to the bank. | |
-| 31 | The treasury sends a payment file to its bank. The bank takes it in the next clearing window; a late file waits for the next one. | |
-| 32 | The bank checks the beneficiary account and the file format. Each clearing window has a cut-off time that varies by bank. | |
-| 33 | The payment of $4,000,000 from State Treasury settles on the bank’s books. Typically a day or more after the file; varies by country. | |
-| 34 | The supplier’s bank credits the account of Northline Builders. The money reaches the supplier weeks after the work was done. | |
-| 35 | The treasury posts a paper remittance advice to the supplier. The supplier matches it to its ledger by hand. | |
-| 36 | The supplier’s accounts team matches the payment to the invoice by hand and closes the file. | |
-| 37 | Month end: the agency and the treasury reconcile their paper records by hand. A difference is cleared by memo. Illustrative: about two days. | |
-| 38 | The monthly total goes to the state ledger on paper. Both paper files are closed and archived. | |
-| 39 | Milestones 2–3 follow the same route. Each later milestone repeats the paper route. | |
+See [scenario specification](simulator-source/gov/g02-gov-procurement.md).
 
 ### 12.3 G03 — Taxes and refunds
 
@@ -580,51 +492,9 @@ Source: owner's research in Notion, "04 — Государственный па�
 | 4 of 5 | 4 of 5 · Accept and convert. At 09:00 the central bank checks permission, limit and availability. The CBDC anchor accepts ArosCoin and converts it 1 = 1. | 4 of 5 · Accept and convert. The deposit anchor accepts ArosCoin and converts it 1 = 1. The bank checks its own deposit account and limit. |
 | 5 of 5 | 5 of 5 · Output. Each ledger books its own leg: the bank is debited, the central bank issues CBDC. Notices go out. The process ends. | 5 of 5 · Output. Each ledger books its own leg: the central bank redeems CBDC, the bank is credited. Notices go out. The process ends. |
 
-### 12.9 G09 — Tokenised sovereign bonds
+### 12.9 G09 — Government bond lifecycle
 
-*Steps*
-
-| # | Today (39 steps, hours) | With AFC (5 steps, hours) |
-|---|-------------------------|---------------------------|
-| 1 | The investor orders the bonds; money and bond travel on two separate routes | 1 of 5 · Request. Each owner checks its own records: the custodian and the registry check the account, eligibility and availability; the debt office checks the order; the investor's bank screens and confirms the payment. The investor's bank sends the confirmed payment and its funds through the gateway. AFC routes them to the investor-currency anchor |
-| 2 | The debt office checks the order against the allotment and the bond series, on its own books | 2 of 5 · Accept. The cash-leg anchor accepts the funds on its reserve account, held for AFC. AFC checks them against the request and the transaction is confirmed |
-| 3 | The debt office allots the bonds to the investor in its own system | 3 of 5 · Issue. After acceptance, the proof of transaction goes to NodeChain and AST issues ArosCoin 1 = 1. AFC routes the title instruction to the registry through the gateway. The registry checks, records the title on its own register and confirms through the gateway |
-| 4 | The investor instructs its bank to pay the debt office; the order is a message | 4 of 5 · Accept and convert. The bond-currency anchor accepts ArosCoin and converts it at its own illustrative rate. No conversion is needed when the currencies are equal; it then pays out 1 = 1 |
-| 5 | The investor's bank screens the payer and beneficiary for sanctions and AML and checks its FX line, on its own systems | 5 of 5 · Output. The bond-currency amount is credited to the debt office on its own books (settlement between books, no money crosses the frame). NodeChain links the cash proof to the registry's confirmation. Notices leave through the gateway to the four institutions. The process ends |
-| 6 | The bank blocks the amount on the client's account while the payment is queued (a real hold) | |
-| 7 | The payment misses the same-day cut-off and waits overnight for the next settlement window (illustrative, about 14 hours) | |
-| 8 | At the morning window the payment message goes to the settlement bank; each bank keeps its own ledger | |
-| 9 | The settlement bank checks liquidity, sanctions on the debt office's account and the payout route | |
-| 10 | The settlement bank earmarks liquidity for the payout (a real earmark, not available to its other clients) | |
-| 11 | The settlement bank's FX desk executes the conversion at its own rate, within its own limits | |
-| 12 | The funds move to the settlement bank, which converts and takes its fee and the FX spread | |
-| 13 | The settlement bank credits the debt office's treasury account; the credit posts in the settlement cycle | |
-| 14 | A payment advice goes to the debt office by message; it carries the payment reference, not the bond | |
-| 15 | The settlement bank confirms the payment to the investor's bank by message; only this confirmation lets it release its block | |
-| 16 | The investor's bank releases its block and posts the debit on the client's account | |
-| 17 | The settlement bank releases its earmark once the payout is booked | |
-| 18 | Cash is booked on day 1; the bond has not moved; nothing links the payment to the registry (banner: PAID · BOND NOT DELIVERED) | |
-| 19 | The debt office sends the allotment to the registry as a file package in the afternoon batch | |
-| 20 | The registry checks the investor's account and eligibility in its own queue; the queue runs in batches and this one waits for the next (illustrative, about 14 hours). This is a queue, not a hold on money | |
-| 21 | The registry cannot match the investor to a securities account and queries the custodian; a person at the registry reviews the case | |
-| 22 | The query goes to the custodian as a document by secure e-mail; there is no system-to-system call | |
-| 23 | The custodian checks the account details against its own records and prepares an answer under its own cut-off | |
-| 24 | The answer returns as a document; the registry keys the account number into its register by hand | |
-| 25 | The registry checks the keyed account number a second time; nothing is posted automatically | |
-| 26 | The registry registers the investor as holder through the custodian; bond title stays in the register | |
-| 27 | The bond is credited on the registry's books; the debt office has not been told (banner: BOND CREDITED · NOT MATCHED) | |
-| 28 | The custodian tells the investor on paper that the bond is credited | |
-| 29 | After the next batch, a registry notice goes to the debt office as a document; it carries no payment reference | |
-| 30 | The settlement bank's end-of-day statement reaches the debt office as a file the next morning | |
-| 31 | Treasury staff load the statement, the payment advice and the registry notice into a spreadsheet and match them by hand | |
-| 32 | One line does not match: the value dates differ; the line becomes an exception for a person to decide | |
-| 33 | Staff e-mail the settlement bank's operations desk with the line and both value dates | |
-| 34 | The next day the settlement bank replies by e-mail; its ledger used the value date it booked that day | |
-| 35 | The value dates are agreed by e-mail; the entries are matched by hand against both statements | |
-| 36 | The break is cleared in the spreadsheet; people did the matching, not a system | |
-| 37 | Finance posts the entry as a manual journal; the controller signs and a printout goes into the audit file. Practice varies by country | |
-| 38 | Next morning the registry and the custodian reconcile their holdings by file, in batch; neither file contains the payment | |
-| 39 | The bond and the cash are matched by hand, days after the payment (banner: MATCHED BY HAND) | |
+See [scenario specification](simulator-source/gov/g09-gov-bonds.md).
 
 ### 12.10 G10 — Carbon / energy subsidy
 
