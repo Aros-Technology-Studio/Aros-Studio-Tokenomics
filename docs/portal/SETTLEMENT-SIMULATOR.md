@@ -165,7 +165,7 @@ Payroll batch of three payments to Banks X, Y, Z; Bank Z's account is closed in 
 
 ## 8. Backlog
 
-1. **Align the AFC tracks with the owner's portal text:** fiat → process-bound ArosCoin (AST mint) → fiat at a second anchor → external bank payout → AST burn; KYC/AML at the initiating institution before AFC; API Gateway + protocol validation inside AFC; 5–15 min shown as a target, not an SLA. Blocked on owner decisions: (a) naming — the canon gate forbids the terms used in the Notion text; (b) ArosCoin in the conversion route vs. the legal-review position.
+1. **AFC track baseline:** the initiating bank performs its own KYC/AML and approves the client mandate before submitting it through the API gateway. AFC accepts the approved request, routes it to the relevant anchor, starts AST only after the anchor confirms the required credit or asset, and returns the completion signal before the payout-side anchor is instructed. AFC holds no funds, does not issue the underlying asset, and does not expose its internal route to the initiating institution or other participants. Timings remain illustrative unless a specific corridor has measured data.
 2. **Scenarios from the owner's portal text:** last mile, digital-assets bridge, Nostro capital unlocking (liquidity on demand), new roads (tokenized bond via a neutral corridor), sovereign bond purchase; platform integrations shown only as proposed models, never as live partnerships.
 3. Scenarios 03–04 (letter of credit, bulk payouts) are removed from the simulator (2026-10-16); decide whether to rework them later.
 
