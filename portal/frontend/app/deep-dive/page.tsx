@@ -1,6 +1,5 @@
 import type { Metadata } from 'next';
-import { PackPage } from '../../components/ui/pack-page';
-import { loadContentPack } from '../../lib/content-pack';
+import { DocumentRequest } from '../../components/ui/document-request';
 
 export const metadata: Metadata = {
   title: 'Deep dive',
@@ -8,7 +7,7 @@ export const metadata: Metadata = {
     'Technical deep dive: AST core modules, process lifecycle, PoT, NodeChain, security and operational defaults.',
 };
 
-/** Copy lives in content-packs/deep-dive.en.md — edit the pack, not this file. */
+/** Not published: sent on request to a verified institutional address (owner direction 2026-11-22). The pack stays in content-packs/. */
 export default function DeepDivePage() {
-  return <PackPage pack={loadContentPack('deep-dive', 'en')} />;
+  return <DocumentRequest title="Technical deep dive" />;
 }

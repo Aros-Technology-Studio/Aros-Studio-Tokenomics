@@ -2,6 +2,7 @@ import Link from 'next/link';
 import type { Metadata } from 'next';
 import { PackPage } from '../../../components/ui/pack-page';
 import { loadContentPack } from '../../../lib/content-pack';
+import { getLocale } from '../../../lib/i18n/server';
 import { formatDate, listPosts } from '../../../lib/blog';
 
 export const metadata: Metadata = {
@@ -10,10 +11,10 @@ export const metadata: Metadata = {
 };
 
 /** Index copy lives in content-packs/blog.en.md; posts in content-packs/blog/<slug>.en.md. */
-export default function BlogPage() {
+export default async function BlogPage() {
   const posts = listPosts('en');
   return (
-    <PackPage pack={loadContentPack('blog', 'en')}>
+    <PackPage pack={loadContentPack('blog', await getLocale())}>
       <div className="blog-list">
         {posts.map((p) => (
           <Link key={p.slug} href={`/resources/blog/${p.slug}`} className="blog-item glass">

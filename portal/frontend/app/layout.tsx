@@ -1,11 +1,11 @@
 import type { Metadata } from 'next';
 import type { ReactNode } from 'react';
-import { Sora, IBM_Plex_Mono } from 'next/font/google';
+import { Sora, IBM_Plex_Mono, Inter, Noto_Sans_Georgian } from 'next/font/google';
 import '../styles/globals.css';
 import '../styles/theme.css';
+import '../styles/starks.css';
 import { AppHeader } from '../components/layout/app-header';
 import { AppFooter } from '../components/layout/app-footer';
-import { GlobalBackground } from '../components/layout/global-background';
 import { Providers } from '../components/providers';
 
 const sora = Sora({
@@ -13,6 +13,19 @@ const sora = Sora({
   weight: ['300', '400', '500', '600', '700', '800'],
   display: 'swap',
   variable: '--font-sora',
+});
+
+const inter = Inter({
+  subsets: ['latin'],
+  display: 'swap',
+  variable: '--font-inter',
+});
+
+const georgian = Noto_Sans_Georgian({
+  subsets: ['georgian'],
+  weight: ['400', '500', '600'],
+  display: 'swap',
+  variable: '--font-georgian',
 });
 
 const ibmMono = IBM_Plex_Mono({
@@ -40,9 +53,8 @@ export const metadata: Metadata = {
 
 export default function RootLayout({ children }: { children: ReactNode }) {
   return (
-    <html lang="en" className={`${sora.variable} ${ibmMono.variable}`} suppressHydrationWarning>
+    <html lang="en" className={`${sora.variable} ${ibmMono.variable} ${inter.variable} ${georgian.variable}`} suppressHydrationWarning>
       <body>
-        <GlobalBackground />
         <Providers>
           <div className="shell">
             <AppHeader />

@@ -10,6 +10,7 @@ import {
   type ReactNode,
 } from 'react';
 import { translate } from './messages';
+import { KA_TEXT } from './ka-text';
 import {
   DEFAULT_LOCALE,
   LOCALE_STORAGE_KEY,
@@ -20,19 +21,19 @@ type I18nContextValue = {
   locale: Locale;
   setLocale: (locale: Locale) => void;
   t: (key: string) => string;
+  /** English source text → Georgian when ka is active (falls back to English). */
+  tx: (text: string) => string;
 };
 
 const I18nContext = createContext<I18nContextValue | null>(null);
 
 /**
- * English only for now: the public content packs are English-only markdown
- * (content-pack.ts has no ru/ka files to fall back to), so letting the
- * cabinet UI auto-switch to the browser's language produced a mixed-language
- * site. Locale detection/switching is disabled until real ru/ka copy exists;
- * the LOCALES/translate machinery stays in place to re-enable later.
+ * Locale comes from the `ast.locale` cookie written by LangSwitch, so client
+ * UI and server-rendered content packs agree. Only en/ka are offered.
  */
 function readStoredLocale(): Locale {
-  return DEFAULT_LOCALE;
+  const m = document.cookie.match(new RegExp(`(?:^|; )${LOCALE_STORAGE_KEY.replace('.', '\\.')}=(en|ka)`));
+  return (m?.[1] as Locale | undefined) ?? DEFAULT_LOCALE;
 }
 
 export function I18nProvider({ children }: { children: ReactNode }) {
@@ -59,10 +60,14 @@ export function I18nProvider({ children }: { children: ReactNode }) {
   }, []);
 
   const t = useCallback((key: string) => translate(locale, key), [locale]);
+  const tx = useCallback(
+    (text: string) => (locale === 'ka' ? KA_TEXT[text.replace(/\s+/g, ' ').trim()] ?? text : text),
+    [locale],
+  );
 
   const value = useMemo(
-    () => ({ locale, setLocale, t }),
-    [locale, setLocale, t],
+    () => ({ locale, setLocale, t, tx }),
+    [locale, setLocale, t, tx],
   );
 
   return <I18nContext.Provider value={value}>{children}</I18nContext.Provider>;

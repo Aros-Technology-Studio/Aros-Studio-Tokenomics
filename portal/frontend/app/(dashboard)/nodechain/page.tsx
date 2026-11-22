@@ -13,6 +13,7 @@ import {
   type EventKind,
 } from '../../../lib/journal-labels';
 import { useI18n } from '../../../lib/i18n/context';
+import { T } from '../../../components/ui/t';
 
 type StatusBody = {
   tip?: { height: number; tipHash: string } | null;
@@ -70,7 +71,7 @@ async function fetchJson(path: string): Promise<{ ok: boolean; status: number; b
  * Not blockchain blocks. Read-only. No mint / write from portal.
  */
 function NodechainPageInner() {
-  const { t } = useI18n();
+  const { t, tx } = useI18n();
   const search = useSearchParams();
   const [status, setStatus] = useState<StatusBody | null>(null);
   const [nodes, setNodes] = useState<ChainNode[]>([]);
@@ -242,7 +243,7 @@ function NodechainPageInner() {
           <div className="kpi">
             <div className="label">{t('nc.tip')}</div>
             <div className="value mono">#{tipH ?? '—'}</div>
-            <div className="hint">height</div>
+            <div className="hint"><T>height</T></div>
           </div>
           <div className="kpi">
             <div className="label">{t('nc.integrity')}</div>
@@ -344,11 +345,11 @@ function NodechainPageInner() {
                     <div>
                       <div className="nc-chain-title">
                         <span className="mono">#{rec.height}</span>
-                        <strong>{lab.title}</strong>
+                        <strong>{tx(lab.title)}</strong>
                         <span className="muted">{when.relative}</span>
                       </div>
                       <p className="nc-chain-desc">
-                        {summarizePayload(rec.recordType, rec.payload) ?? lab.description}
+                        {summarizePayload(rec.recordType, rec.payload) ?? tx(lab.description)}
                       </p>
                     </div>
                   </div>
@@ -405,7 +406,7 @@ function NodechainPageInner() {
               {filtered.map((n) => {
                 const lab = labelForType(n.type);
                 const when = formatWhen(n.timestamp);
-                const summary = summarizePayload(n.type, n.payload) ?? lab.description;
+                const summary = summarizePayload(n.type, n.payload) ?? tx(lab.description);
                 return (
                   <tr
                     key={n.recordId || n.height}
@@ -426,7 +427,7 @@ function NodechainPageInner() {
                     </td>
                     <td>
                       <span className="nc-kind" data-kind={lab.kind}>
-                        {lab.title}
+                        {tx(lab.title)}
                       </span>
                     </td>
                     <td className="nc-sense">{summary}</td>
@@ -456,10 +457,10 @@ function NodechainPageInner() {
             <div>
               <p className="eyebrow">{t('nc.detail.eyebrow')}</p>
               <h2 style={{ margin: '0.2rem 0' }}>
-                #{selected.height} · {labelForType(selected.type).title}
+                #{selected.height} · {tx(labelForType(selected.type).title)}
               </h2>
               <p className="muted" style={{ margin: 0 }}>
-                {labelForType(selected.type).description}
+                {tx(labelForType(selected.type).description)}
               </p>
             </div>
             <button type="button" className="ghost" onClick={() => setSelected(null)}>
@@ -486,7 +487,7 @@ function NodechainPageInner() {
               <span className="label">{t('nc.detail.summary')}</span>
               <span>
                 {summarizePayload(selected.type, selected.payload) ??
-                  labelForType(selected.type).description}
+                  tx(labelForType(selected.type).description)}
               </span>
             </div>
           </div>
@@ -577,7 +578,7 @@ export default function NodechainPage() {
     <Suspense
       fallback={
         <section className="card">
-          <p className="muted">Loading NodeChain…</p>
+          <p className="muted"><T>Loading NodeChain…</T></p>
         </section>
       }
     >

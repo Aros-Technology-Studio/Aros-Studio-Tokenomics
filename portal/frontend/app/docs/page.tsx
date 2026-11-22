@@ -1,10 +1,9 @@
 import type { Metadata } from 'next';
-import { PackPage } from '../../components/ui/pack-page';
-import { loadContentPack } from '../../lib/content-pack';
+import { DocumentRequest } from '../../components/ui/document-request';
 
-export const metadata: Metadata = { title: 'Docs' };
+export const metadata: Metadata = { title: 'Documentation' };
 
-/** Copy lives in content-packs/docs.en.md — edit the pack, not this file. */
+/** Not published: sent on request to a verified institutional address (owner direction 2026-11-22). The pack stays in content-packs/. */
 export default function DocsPage() {
-  return <PackPage pack={loadContentPack('docs', 'en')} />;
+  return <DocumentRequest title="Documentation" />;
 }

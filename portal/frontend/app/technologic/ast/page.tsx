@@ -1,6 +1,7 @@
 import type { Metadata } from 'next';
 import { PackPage } from '../../../components/ui/pack-page';
 import { loadContentPack } from '../../../lib/content-pack';
+import { getLocale } from '../../../lib/i18n/server';
 
 export const metadata: Metadata = {
   title: 'Aros Studio Tokenomics (AST)',
@@ -9,6 +10,6 @@ export const metadata: Metadata = {
 };
 
 /** Copy lives in content-packs/technologic-ast.en.md — edit the pack, not this file. */
-export default function TechnologicAstPage() {
-  return <PackPage pack={loadContentPack('technologic-ast', 'en')} />;
+export default async function TechnologicAstPage() {
+  return <PackPage pack={loadContentPack('technologic-ast', await getLocale())} minimal />;
 }

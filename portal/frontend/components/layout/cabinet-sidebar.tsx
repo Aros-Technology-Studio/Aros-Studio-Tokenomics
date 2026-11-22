@@ -4,6 +4,8 @@ import Link from 'next/link';
 import { useEffect, useState } from 'react';
 import { usePathname, useRouter } from 'next/navigation';
 import { clearSession, loadSession, portalFetch } from '../../lib/auth';
+import { T } from '../ui/t';
+import { useI18n } from '../../lib/i18n/context';
 
 /**
  * AST Portal cabinet navigation — left sidebar for the authenticated area,
@@ -27,6 +29,7 @@ const ITEMS: { label: string; href: string }[] = [
 ];
 
 export function CabinetSidebar() {
+  const { tx } = useI18n();
   const pathname = usePathname();
   const router = useRouter();
   const [open, setOpen] = useState(false);
@@ -49,7 +52,7 @@ export function CabinetSidebar() {
       <button
         type="button"
         className="cabinet-sidebar__toggle"
-        aria-label="Toggle cabinet menu"
+        aria-label={tx('Toggle cabinet menu')}
         aria-expanded={open}
         onClick={() => setOpen((v) => !v)}
       >
@@ -71,7 +74,7 @@ export function CabinetSidebar() {
           );
         })}
         <button type="button" className="cabinet-sidebar__logout" onClick={logout}>
-          Log out
+          <T>Log out</T>
         </button>
       </nav>
     </>

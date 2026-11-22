@@ -1,6 +1,5 @@
 import type { Metadata } from 'next';
-import { PackPage } from '../../components/ui/pack-page';
-import { loadContentPack } from '../../lib/content-pack';
+import { DocumentRequest } from '../../components/ui/document-request';
 
 export const metadata: Metadata = {
   title: 'White paper',
@@ -8,7 +7,7 @@ export const metadata: Metadata = {
     'AST and AFC white paper: first principles, formal model, formulas and boundaries.',
 };
 
-/** Copy lives in content-packs/whitepaper.en.md — edit the pack, not this file. */
+/** Not published: sent on request to a verified institutional address (owner direction 2026-11-22). The pack stays in content-packs/. */
 export default function WhitepaperPage() {
-  return <PackPage pack={loadContentPack('whitepaper', 'en')} />;
+  return <DocumentRequest title="White paper" />;
 }

@@ -6,6 +6,7 @@ import { useRouter } from 'next/navigation';
 import { loadSession, portalFetch } from '../../../lib/auth';
 import { StatusBadge } from '../../../components/ui/status-badge';
 import type { ProcessRow } from '../../../types/process';
+import { T } from '../../../components/ui/t';
 
 export default function HistoryPage() {
   const router = useRouter();
@@ -31,21 +32,20 @@ export default function HistoryPage() {
     <div className="card">
       <h1>History</h1>
       <p className="lead">
-        Institution-scoped edge submission history. For Core / NodeChain truth, open process status
-        (source: core when hand-off succeeded).
+        <T>Institution-scoped edge submission history. For Core / NodeChain truth, open process status (source: core when hand-off succeeded).</T>
       </p>
       {error && <p className="err">{error}</p>}
       {rows.length === 0 ? (
-        <p className="muted">No history yet.</p>
+        <p className="muted"><T>No history yet.</T></p>
       ) : (
         <div className="table-wrap">
           <table className="table">
             <thead>
               <tr>
-                <th>When</th>
-                <th>Process</th>
-                <th>Status</th>
-                <th>Valuation</th>
+                <th><T>When</T></th>
+                <th><T>Process</T></th>
+                <th><T>Status</T></th>
+                <th><T>Valuation</T></th>
               </tr>
             </thead>
             <tbody>

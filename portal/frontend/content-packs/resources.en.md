@@ -75,8 +75,3 @@ title: Is there a token I can buy?
 id: faq-2
 title: Can I use AST or AFC as an individual?
 - Not directly. Both are built for institutions. Individuals benefit through the banks, treasuries and licensed firms that integrate them. Anyone can look up a process on the public explorer.
-
-## Block: section
-id: faq-3
-title: Is the code open?
-- The AST repository — canon, layer specifications, automated guards and the institutional portal — is public on [GitHub](https://github.com/Aros-Technology-Studio/Aros-Studio-Tokenomics). Detailed AFC integration material is shared with institutional partners.

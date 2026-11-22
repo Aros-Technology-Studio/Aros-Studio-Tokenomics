@@ -6,6 +6,7 @@ import { useRouter } from 'next/navigation';
 import { loadSession, portalFetch } from '../../../lib/auth';
 import { StatusBadge } from '../../../components/ui/status-badge';
 import type { AssetClaim } from '../../../types/asset';
+import { T } from '../../../components/ui/t';
 
 export default function AssetsPage() {
   const router = useRouter();
@@ -33,19 +34,18 @@ export default function AssetsPage() {
     <div className="card">
       <h1>Assets / claims</h1>
       <p className="lead">
-        Read-only view of packages submitted by your institution. This is not a wallet and not
-        NodeChain SoT — claims map to edge-tracked processes.
+        <T>Read-only view of packages submitted by your institution. This is not a wallet and not NodeChain SoT — claims map to edge-tracked processes.</T>
       </p>
-      {loading && <p className="muted">Loading…</p>}
+      {loading && <p className="muted"><T>Loading…</T></p>}
       {error && <p className="err">{error}</p>}
       {!loading && claims.length === 0 && (
         <div className="empty">
-          <strong>No claims yet</strong>
-          Submit a primary tokenization package first.
+          <strong><T>No claims yet</T></strong>
+          <T>Submit a primary tokenization package first.</T>
           <div className="actions" style={{ justifyContent: 'center', marginTop: '1rem' }}>
             <Link href="/tokenization">
               <button type="button" className="primary">
-                New tokenization
+                <T>New tokenization</T>
               </button>
             </Link>
           </div>
@@ -56,11 +56,11 @@ export default function AssetsPage() {
           <table className="table">
             <thead>
               <tr>
-                <th>Claim</th>
-                <th>Status</th>
-                <th>Valuation</th>
-                <th>Holder</th>
-                <th>Updated</th>
+                <th><T>Claim</T></th>
+                <th><T>Status</T></th>
+                <th><T>Valuation</T></th>
+                <th><T>Holder</T></th>
+                <th><T>Updated</T></th>
               </tr>
             </thead>
             <tbody>

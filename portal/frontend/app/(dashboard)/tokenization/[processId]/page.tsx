@@ -13,11 +13,14 @@ import {
   type ProgressStep,
 } from '../../../../lib/status';
 import { buildVerifyUrl, certificatePrintHtml } from '../../../../lib/certificate-print';
+import { T, L } from '../../../../components/ui/t';
+import { useI18n } from '../../../../lib/i18n/context';
 
 const POLL_MS = 3000;
 const POLL_MAX = 60;
 
 function ProcessStatusPageInner() {
+  const { tx } = useI18n();
   const params = useParams();
   const search = useSearchParams();
   const processId = decodeURIComponent(String(params.processId ?? ''));
@@ -281,7 +284,7 @@ function ProcessStatusPageInner() {
 
       {wantCert && (
         <div className="banner ok" style={{ marginBottom: '1rem' }}>
-          Process started. Watch the live pipeline below — it updates automatically.
+          <T>Process started. Watch the live pipeline below — it updates automatically.</T>
         </div>
       )}
 
@@ -296,14 +299,13 @@ function ProcessStatusPageInner() {
       >
         <div>
           <p className="eyebrow" style={{ margin: 0 }}>
-            Live process · unique code
+            <T>Live process · unique code</T>
           </p>
           <h1 style={{ wordBreak: 'break-all', marginTop: '0.25rem' }}>
             <code style={{ fontSize: '0.9em' }}>{processId}</code>
           </h1>
           <p className="muted" style={{ margin: '0.35rem 0 0', fontSize: '0.88rem' }}>
-            This code is unique for this process (not your login salt). Copy it for NodeChain /
-            public lookup.
+            <T>This code is unique for this process (not your login salt). Copy it for NodeChain / public lookup.</T>
           </p>
         </div>
         <div className="actions">
@@ -318,7 +320,7 @@ function ProcessStatusPageInner() {
         </div>
       </div>
 
-      {initialLoading && !data && <p className="muted">Loading process…</p>}
+      {initialLoading && !data && <p className="muted"><T>Loading process…</T></p>}
       {error && <p className="err">{error}</p>}
 
       {data && (
@@ -336,24 +338,24 @@ function ProcessStatusPageInner() {
             >
               <StatusBadge status={status} />
               <span className={`badge ${source === 'core' || submitted ? 'ok' : 'warn'}`}>
-                {source === 'core' || submitted ? 'Core path' : 'Edge only'}
+                {tx(source === 'core' || submitted ? 'Core path' : 'Edge only')}
               </span>
-              {refreshing && <span className="badge info">refreshing…</span>}
+              {refreshing && <span className="badge info"><T>refreshing…</T></span>}
               {!finished && (
                 <span className="muted" style={{ fontSize: '0.85rem' }}>
-                  Auto-update in {secondsToNext}s
+                  <L en={<>Auto-update in {secondsToNext}s</>} ka={<>ავტოგანახლება {secondsToNext} წმ-ში</>} />
                 </span>
               )}
               {lastRefreshAt && (
                 <span className="muted" style={{ fontSize: '0.8rem' }}>
-                  Last update {new Date(lastRefreshAt).toLocaleTimeString()}
+                  <T>Last update</T> {new Date(lastRefreshAt).toLocaleTimeString()}
                 </span>
               )}
             </div>
 
-            <p style={{ margin: '0 0 0.5rem', fontWeight: 650 }}>{liveMessage}</p>
+            <p style={{ margin: '0 0 0.5rem', fontWeight: 650 }}>{tx(liveMessage)}</p>
             <p className="muted" style={{ margin: '0 0 0.75rem', fontSize: '0.9rem' }}>
-              Status: <strong>{statusLabel(status)}</strong>
+              <T>Status:</T> <strong>{tx(statusLabel(status))}</strong>
               {progress?.currentTitle ? (
                 <>
                   {' '}
@@ -366,7 +368,7 @@ function ProcessStatusPageInner() {
               <div className="progress-fill" style={{ width: `${percent}%` }} />
             </div>
             <p className="muted" style={{ margin: '0.4rem 0 0', fontSize: '0.85rem' }}>
-              Progress <strong>{percent}%</strong>
+              <T>Progress</T> <strong>{percent}%</strong>
               {mintAmountLive != null ? (
                 <>
                   {' '}
@@ -378,8 +380,8 @@ function ProcessStatusPageInner() {
 
           {!submitted && (
             <div className="banner warn">
-              <strong>Core hand-off not finished yet.</strong> PoT and mint cannot start until Core
-              accepts the process.
+              <strong><T>Core hand-off not finished yet.</T></strong>{' '}
+              <L en="PoT and mint cannot start until Core accepts the process." ka="PoT და მინტი ვერ დაიწყება, სანამ Core პროცესს არ მიიღებს." />
               {progress?.coreErrorCode ? (
                 <>
                   <br />
@@ -393,9 +395,10 @@ function ProcessStatusPageInner() {
               ) : null}
               <br />
               <span className="muted" style={{ fontSize: '0.88rem' }}>
-                Fix: ensure Core knows login <code>pilot</code> / salt <code>pilot</code>, journal
-                is healthy, then Retry. Or run <code>bash scripts/home-up.sh</code> and start a{' '}
-                <strong>new</strong> process.
+                <L
+                  en={<>Fix: ensure Core knows login <code>pilot</code> / salt <code>pilot</code>, journal is healthy, then Retry. Or run <code>bash scripts/home-up.sh</code> and start a <strong>new</strong> process.</>}
+                  ka={<>გამოსწორება: დარწმუნდით, რომ Core-მა იცის ლოგინი <code>pilot</code> / salt <code>pilot</code> და ჟურნალი გამართულია, შემდეგ სცადეთ ხელახლა. ან გაუშვით <code>bash scripts/home-up.sh</code> და დაიწყეთ <strong>ახალი</strong> პროცესი.</>}
+                />
               </span>
               <div className="actions" style={{ marginTop: '0.5rem' }}>
                 <button
@@ -412,8 +415,10 @@ function ProcessStatusPageInner() {
 
           {submitted && !potDone && (
             <div className="banner warn">
-              <strong>On Core, waiting for PoT.</strong> If this stays here, the pipeline was
-              interrupted — click <strong>Continue on Core</strong> to finish PoT → mint.
+              <L
+                en={<><strong>On Core, waiting for PoT.</strong> If this stays here, the pipeline was interrupted — click <strong>Continue on Core</strong> to finish PoT → mint.</>}
+                ka={<><strong>Core-ზეა, PoT-ის მოლოდინში.</strong> თუ აქ შეჩერდა, კონვეიერი შეწყდა — დააჭირეთ <strong>Core-ზე გაგრძელება</strong>, რათა დასრულდეს PoT → მინტი.</>}
+              />
               <div className="actions" style={{ marginTop: '0.5rem' }}>
                 <button
                   type="button"
@@ -429,7 +434,7 @@ function ProcessStatusPageInner() {
 
           {potDone && !mintDone && (
             <div className="banner warn">
-              <strong>PoT done, mint pending.</strong> Continue to complete economic settle.
+              <strong><T>PoT done, mint pending.</T></strong> <T>Continue to complete economic settle.</T>
               <div className="actions" style={{ marginTop: '0.5rem' }}>
                 <button
                   type="button"
@@ -445,7 +450,7 @@ function ProcessStatusPageInner() {
 
           {mintDone && (
             <div className="banner ok">
-              <strong>Done.</strong> Mint recorded
+              <strong><T>Done.</T></strong> <T>Mint recorded</T>
               {mintAmountLive != null ? (
                 <>
                   : <span className="mono">{String(mintAmountLive)}</span> ARO
@@ -455,19 +460,19 @@ function ProcessStatusPageInner() {
             </div>
           )}
 
-          <h2>Pipeline</h2>
+          <h2><T>Pipeline</T></h2>
           <div className="timeline pipeline-live">
             {steps.map((s) => (
               <div key={s.id} className={`item ${s.state}`.trim()}>
                 <div className="t">
                   {s.state === 'done' && '✓ '}
                   {s.state === 'active' && '→ '}
-                  {s.title}
+                  {tx(s.title)}
                   <span className={`step-pill ${s.state}`}>
-                    {s.state === 'done' ? 'done' : s.state === 'active' ? 'in progress' : 'waiting'}
+                    {tx(s.state === 'done' ? 'done' : s.state === 'active' ? 'in progress' : 'waiting')}
                   </span>
                 </div>
-                <div className="d">{s.detail ?? ''}</div>
+                <div className="d">{tx(s.detail ?? '')}</div>
               </div>
             ))}
           </div>
@@ -489,7 +494,7 @@ function ProcessStatusPageInner() {
             )}
             <Link href={`/nodechain?processId=${encodeURIComponent(processId)}`}>
               <button type="button" className="secondary">
-                Open NodeChain history
+                <T>Open NodeChain history</T>
               </button>
             </Link>
           </div>
@@ -500,12 +505,12 @@ function ProcessStatusPageInner() {
         <section className="card flat nc-node-detail cert-preview" style={{ marginTop: '1.25rem' }}>
           <div className="nc-node-detail-head">
             <div>
-              <p className="eyebrow">Exit document</p>
+              <p className="eyebrow"><T>Exit document</T></p>
               <h2 style={{ margin: '0.2rem 0' }}>
                 {String(cert.title ?? 'Digitization certificate')}
               </h2>
               <p className="muted" style={{ margin: 0 }}>
-                Technical certificate with QR for public verification (print / Save as PDF).
+                <T>Technical certificate with QR for public verification (print / Save as PDF).</T>
               </p>
             </div>
             {qrDataUrl && (
@@ -513,20 +518,20 @@ function ProcessStatusPageInner() {
                 {/* eslint-disable-next-line @next/next/no-img-element */}
                 <img src={qrDataUrl} alt="Certificate verification QR" width={112} height={112} />
                 <span className="muted" style={{ fontSize: '0.72rem' }}>
-                  Scan to verify
+                  <T>Scan to verify</T>
                 </span>
               </div>
             )}
           </div>
           <div className="grid2" style={{ marginBottom: '0.75rem' }}>
             <div>
-              <div className="muted">Valuation</div>
+              <div className="muted"><T>Valuation</T></div>
               <div className="mono" style={{ fontWeight: 700 }}>
                 {String(cert.institutionalValuation ?? data?.valuation ?? '—')}
               </div>
             </div>
             <div>
-              <div className="muted">Mint (Core)</div>
+              <div className="muted"><T>Mint (Core)</T></div>
               <div className="mono" style={{ fontWeight: 700 }}>
                 {mintAmountLive != null
                   ? String(mintAmountLive)
@@ -537,12 +542,12 @@ function ProcessStatusPageInner() {
             </div>
           </div>
           <p className="muted" style={{ fontSize: '0.88rem' }}>
-            Serial:{' '}
+            <T>Serial:</T>{' '}
             <code className="mono">{String(cert.certificateSerial ?? `AST-CERT-${processId}`)}</code>
             <br />
             QR → <code className="mono" style={{ fontSize: '0.75rem' }}>{verifyUrl}</code>
             <br />
-            PoT: {potDone ? 'verified' : 'pending'} · Hand-off: {submitted ? 'yes' : 'no'}
+            PoT: {tx(potDone ? 'verified' : 'pending')} · {tx('Hand-off:')} {tx(submitted ? 'yes' : 'no')}
           </p>
           <div className="actions">
             <button
@@ -550,26 +555,24 @@ function ProcessStatusPageInner() {
               className="primary"
               onClick={() => void printCertificate()}
             >
-              Print / PDF certificate (with QR)
+              <T>Print / PDF certificate (with QR)</T>
             </button>
             <button type="button" className="secondary" onClick={downloadCertificateJson}>
-              Download JSON
+              <T>Download JSON</T>
             </button>
             {(cert.walletCompat as { erc721Metadata?: unknown } | undefined)?.erc721Metadata ? (
               <button type="button" className="secondary" onClick={downloadWalletMetadata}>
-                Wallet metadata (ERC-721 style)
+                <T>Wallet metadata (ERC-721 style)</T>
               </button>
             ) : null}
             <Link href={cert.publicLookupPath ? String(cert.publicLookupPath) : `/explore`}>
               <button type="button" className="ghost">
-                Open public lookup
+                <T>Open public lookup</T>
               </button>
             </Link>
           </div>
           <p className="muted" style={{ fontSize: '0.82rem', marginTop: '0.75rem', marginBottom: 0 }}>
-            <strong>Wallet-compatible:</strong> QR + JSON use standards wallets/dApps understand
-            (HTTPS verify, optional EIP-681 wallet bind, ERC-721 metadata). On-chain ERC-20/721 mint
-            is a representation adapter — NodeChain remains SoT.
+            <strong><T>Wallet-compatible:</T></strong> <T>QR + JSON use standards wallets/dApps understand (HTTPS verify, optional EIP-681 wallet bind, ERC-721 metadata). On-chain ERC-20/721 mint is a representation adapter — NodeChain remains SoT.</T>
           </p>
         </section>
       )}
@@ -577,7 +580,7 @@ function ProcessStatusPageInner() {
       {data && (
         <details style={{ marginTop: '1rem' }}>
           <summary className="muted" style={{ cursor: 'pointer' }}>
-            Technical status (JSON)
+            <T>Technical status (JSON)</T>
           </summary>
           <pre className="result">{JSON.stringify(data, null, 2)}</pre>
         </details>
@@ -588,7 +591,7 @@ function ProcessStatusPageInner() {
 
 export default function ProcessStatusPage() {
   return (
-    <Suspense fallback={<div className="card"><p className="muted">Loading process…</p></div>}>
+    <Suspense fallback={<div className="card"><p className="muted"><T>Loading process…</T></p></div>}>
       <ProcessStatusPageInner />
     </Suspense>
   );
