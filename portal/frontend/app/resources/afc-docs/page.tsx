@@ -1,7 +1,5 @@
 import type { Metadata } from 'next';
-import { PackPage } from '../../../components/ui/pack-page';
-import { loadContentPack } from '../../../lib/content-pack';
-import { getLocale } from '../../../lib/i18n/server';
+import { DocumentRequest } from '../../../components/ui/document-request';
 
 export const metadata: Metadata = {
   title: 'AFC Docs',
@@ -9,7 +7,7 @@ export const metadata: Metadata = {
     'Documentation map for Aros Financial Core: architecture, API contract, security model, governance and lifecycle.',
 };
 
-/** Copy lives in content-packs/afc-docs.en.md — edit the pack, not this file. */
-export default async function AfcDocsPage() {
-  return <PackPage pack={loadContentPack('afc-docs', await getLocale())} />;
+/** Not published: sent on request to a verified institutional address (owner direction 2026-11-22). The pack stays in content-packs/. */
+export default function AfcDocsPage() {
+  return <DocumentRequest title="AFC documentation" />;
 }

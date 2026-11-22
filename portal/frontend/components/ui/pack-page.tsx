@@ -87,7 +87,16 @@ function Section({ section }: { section: PackSection }) {
  * Public page rendered from a content pack, in the shared dark "glass" style.
  * `children` renders after the pack blocks (e.g. a blog index).
  */
-export function PackPage({ pack, children }: { pack: ContentPack; children?: ReactNode }) {
+export function PackPage({
+  pack,
+  children,
+  minimal = false,
+}: {
+  pack: ContentPack;
+  children?: ReactNode;
+  /** Hero + animated card grids only; text sections and doors stay in the pack, unrendered. */
+  minimal?: boolean;
+}) {
   const h = pack.hero;
   return (
     <section className="page">
@@ -112,7 +121,7 @@ export function PackPage({ pack, children }: { pack: ContentPack; children?: Rea
 
         <div className="pack-body">
           {pack.blocks.map((b, i) =>
-            b.kind === 'cards' ? (
+            minimal && b.kind !== 'cards' ? null : b.kind === 'cards' ? (
               <div key={i} className="pack-grid" data-count={Math.min(b.cards.length, 6)}>
                 {b.cards.map((c, j) => (
                   <Card key={c.id} card={c} index={j} />
@@ -125,7 +134,7 @@ export function PackPage({ pack, children }: { pack: ContentPack; children?: Rea
 
           {children}
 
-          {pack.doors.length ? (
+          {pack.doors.length && !minimal ? (
             <div className="pack-doors">
               {pack.doors.map((d) => (
                 <div key={d.id} className="pack-door glass">

@@ -11,5 +11,5 @@ export const metadata: Metadata = {
 
 /** Copy lives in content-packs/technologic-ast.en.md — edit the pack, not this file. */
 export default async function TechnologicAstPage() {
-  return <PackPage pack={loadContentPack('technologic-ast', await getLocale())} />;
+  return <PackPage pack={loadContentPack('technologic-ast', await getLocale())} minimal />;
 }
