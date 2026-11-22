@@ -496,7 +496,14 @@ function afcLayer(T, o={}){
 /* ---------- step kit ---------- */
 function kit(T){
   const steps = T.steps = [];
-  const add = s => (steps.push(s), s);
+  // Keep the operational clock in `sim`, but compress visual transitions so
+  // the demonstration does not make visitors wait through every hand-off.
+  const VISUAL_DURATION_FACTOR = .55;
+  const add = s => {
+    s.dur = Math.max(320, Math.round((s.dur ?? 900) * VISUAL_DURATION_FACTOR));
+    steps.push(s);
+    return s;
+  };
   const K = {
     add,
     pulse(n, cap, sim=0){ add({dur:1500, sim, cap, run:p => { n.bump = 1 + .07*Math.sin(p*Math.PI*3)*(1-p); }}); },
@@ -547,10 +554,26 @@ function kit(T){
 }
 
 /* ---------- track (one animated run of one side of a scenario) ---------- */
+const REALISTIC_WINDOWS = {
+  'Correspondent chain (SWIFT)': '30–90 min',
+  'Same institutions, one AFC layer': 'seconds–minutes after confirmations',
+  'Notary, escrow and registry': '1–5 business days',
+  'Signed package, PoT, NodeChain': 'seconds–minutes for AST record; registry timing varies',
+  'Bank, exchange, blockchain': 'hours–2 business days',
+  'One request, one wallet': 'seconds–minutes after fiat credit confirmation',
+  'Correspondent chain': '30–90 min',
+  'One process, one pass': 'seconds–minutes after confirmations',
+  'Cross-border public contract payment · Today': '1–3 business days',
+  'Cross-border public contract payment · With AFC': 'same day–1 business day',
+  'Government bond lifecycle · Today': 'stage dates vary; coupon/redemption at maturity',
+  'Government bond lifecycle · With AST': 'stage dates vary; AST records confirmed events'
+};
+
 let uid = 0;
 class Track {
   constructor(side, def, host, cfg){
     this.side = side; this.def = def; this.cfg = cfg; this.id = 'trk' + (++uid); this.unit = def.unit;
+    this.window = REALISTIC_WINDOWS[def.title] || def.band || null;
     this.nodes = []; this.idx = 0; this.t = 0; this.started = false; this.done = false; this.stopAfterStep = false; this.simBase = 0;
     this.m = {holds:0, peakHolds:0, holdTime:0, msgs:0, docs:0, api:0, pot:0, fees:0, feeKnown:true, protoFee:false, sim:0, paid:0, returned:0, flagged:0};
     this.holdAmount = cfg.amount;
@@ -561,7 +584,7 @@ class Track {
   buildDom(host){
     const sec = document.createElement('section'); sec.className = 'panel ' + this.side;
     sec.innerHTML = `<div class="panel-head"><span class="tag ${this.side}">${this.def.tag}</span><h2>${this.def.title}</h2>
-      <div class="clock"><span class="cv">T+0</span><small>${['Stage sequence', 'Event sequence'].includes(this.def.band) ? 'timing unmeasured' : this.def.band ? 'target · PoT ≤ 15 min' : 'illustrative'}</small></div></div>
+      <div class="clock"><span class="cv">T+0</span><small>${this.window ? 'realistic operating window · ' + this.window : 'illustrative'}</small></div></div>
       <div class="stage-scroll"><svg class="stage" viewBox="0 0 1000 ${this.def.vbH}" role="img" aria-label="${this.def.tag}: ${this.def.title}"></svg></div>
       <div class="rail"><span class="sc"></span><div class="bar"><i></i></div></div>
       <p class="caption" aria-live="polite"></p><dl class="metrics"></dl>`;
@@ -626,7 +649,7 @@ class Track {
   }
   summary(){
     const rows = [
-      ['Elapsed (illustrative)', this.def.band ? this.def.band.toLowerCase() + ' (PoT ≤ 15 min)' : fmtDur(this.m.sim, this.unit)],
+      ['Elapsed (illustrative)', this.window || fmtDur(this.m.sim, this.unit)],
       ['Peak amount on hold', money(this.holdAmount*this.m.peakHolds, this.cfg.from)],
       ['Time with funds on hold', this.m.holdTime > 0 ? fmtDur(this.m.holdTime, this.unit) : 'none'],
       ['Messages & paper documents', String(this.m.msgs + this.m.docs)],
