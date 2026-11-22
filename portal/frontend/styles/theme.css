@@ -431,10 +431,26 @@ a {
   font-family: var(--font-spartan), var(--t-font);
   letter-spacing: -0.035em;
 }
+/* Copy block shrinks to the tagline's width; the statement is then forced to
+   exactly that width (width:0 + min-width:100%) so both edges line up. */
+.home-hero__copy {
+  display: inline-block;
+  max-width: 100%;
+}
 .home-hero--landing .home-hero__lead {
+  width: 0;
+  min-width: 100%;
   max-width: none;
+  font-weight: 400;
+  color: rgba(255, 255, 255, 0.94);
+  text-shadow: 0 1px 14px rgba(0, 0, 0, 0.35);
+  font-size: clamp(16px, 1.4vw, 21px);
   text-align: justify;
-  hyphens: auto;
+  text-wrap: pretty;
+}
+/* Bullets are one-liners; justifying a wrapped bullet opens huge gaps. */
+.home-hero--landing .home-hero__lead li {
+  text-align: left;
 }
 .home-hero--landing .home-hero__lead p {
   margin: 0 0 14px;
